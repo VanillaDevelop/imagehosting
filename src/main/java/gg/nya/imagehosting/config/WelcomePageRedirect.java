@@ -1,4 +1,4 @@
-package gg.nya.imagehosting;
+package gg.nya.imagehosting.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;

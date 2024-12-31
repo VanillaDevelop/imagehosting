@@ -20,6 +20,9 @@
         >
           <f:ajax execute="@form" render="greetingOutput" />
         </h:commandButton>
+
+        <h:commandButton value="Login" action="#{greetingBean.login}">
+        </h:commandButton>
       </h:panelGrid>
 
       <h:outputText id="greetingOutput" value="#{greetingBean.greeting}" />
