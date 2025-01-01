@@ -20,12 +20,24 @@
         >
           <f:ajax execute="@form" render="greetingOutput" />
         </h:commandButton>
-
-        <h:commandButton value="Login" action="#{greetingBean.login}">
-        </h:commandButton>
       </h:panelGrid>
 
       <h:outputText id="greetingOutput" value="#{greetingBean.greeting}" />
+    </h:form>
+
+    <h:form>
+      <h:outputLabel for="usernameInput" value="Username:" />
+      <h:inputText id="usernameInput" value="#{loginBean.username}" />
+      <h:outputLabel for="passwordInput" value="Password:" />
+      <h:inputText id="passwordInput" value="#{loginBean.password}" />
+      <h:commandButton
+        value="Sign Up"
+        action="#{loginBean.signUp}"
+      ></h:commandButton>
+      <h:commandButton
+        value="Login"
+        action="#{loginBean.login}"
+      ></h:commandButton>
     </h:form>
   </h:body>
 </html>

@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserSession implements Serializable {
 
-    private String userId;
+    private Long userId;
     private String username;
     private boolean authenticated;
 
-    public void login(String userId, String username) {
+    public void login(Long userId, String username) {
         this.userId = userId;
         this.username = username;
         this.authenticated = true;
@@ -31,11 +31,11 @@ public class UserSession implements Serializable {
         SecurityContextHolder.clearContext();
     }
 
-    public String getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 

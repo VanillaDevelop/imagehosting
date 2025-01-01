@@ -1,1 +1,18 @@
-<p>This page can only be accessed by authenticated users.</p>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+>
+  <body>
+    <p>This page can only be accessed by authenticated users.</p>
+
+    <h:form>
+      <h:commandButton
+        value="Logout"
+        action="#{loginBean.logout}"
+      ></h:commandButton>
+    </h:form>
+  </body>
+</html>
