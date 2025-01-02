@@ -17,12 +17,12 @@ public class AuthenticationService {
     }
 
     public Optional<User> authenticate(String username, String password) {
-        var user = userRepository.findByUsername(username);
+        var user = userRepository.findByUsername(username.toLowerCase());
         if (user.isEmpty()) {
             return Optional.empty();
         }
 
-        if (!user.get().getPassword().equals(hashPassword(password))) {
+        if (!comparePassword(password, user.get().getPassword())) {
             return Optional.empty();
         }
 
@@ -30,7 +30,7 @@ public class AuthenticationService {
     }
 
     public Optional<User> signUp(String username, String password) {
-        if (userRepository.findByUsername(username).isPresent()) {
+        if (userRepository.findByUsername(username.toLowerCase()).isPresent()) {
             return Optional.empty();
         }
 
@@ -42,5 +42,10 @@ public class AuthenticationService {
     private String hashPassword(String password) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         return encoder.encode(password);
+    }
+
+    private boolean comparePassword(String password, String hashedPassword) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        return encoder.matches(password, hashedPassword);
     }
 }

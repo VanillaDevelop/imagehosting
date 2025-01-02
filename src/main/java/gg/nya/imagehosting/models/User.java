@@ -21,11 +21,20 @@ public class User {
     private String username;
 
     @NotNull
+    @Size(min = 2, max = 50)
+    private String displayName;
+
+    @NotNull
     @Size(min = 8, max = 100)
     private String password;
 
+    protected User() {
+
+    }
+
     public User(String username, String password) {
-        this.username = username;
+        this.username = username.toLowerCase();
+        this.displayName = username;
         this.password = password;
     }
 
@@ -47,6 +56,10 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 
 }
