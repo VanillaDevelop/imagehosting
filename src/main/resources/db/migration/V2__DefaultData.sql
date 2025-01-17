@@ -1,0 +1,2 @@
+INSERT INTO roles (role) VALUES ('IMAGE_HOSTING');
+INSERT INTO roles (role) VALUES ('ADMIN');

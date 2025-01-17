@@ -2,6 +2,7 @@ package gg.nya.imagehosting.beans;
 
 import org.springframework.stereotype.Component;
 
+import gg.nya.imagehosting.models.Role;
 import gg.nya.imagehosting.security.UserSession;
 import gg.nya.imagehosting.services.AuthenticationService;
 
@@ -21,7 +22,8 @@ public class LoginBean {
     public String login() {
         var user = authenticationService.authenticate(username, password);
         if (user.isPresent()) {
-            userSession.login(user.get().getId(), user.get().getUsername());
+            userSession.login(user.get().getId(), user.get().getUsername(),
+                    user.get().getRoles().stream().map(Role::getRole).toList());
             return "logintest.xhtml?faces-redirect=true";
         }
         this.username = "";
@@ -32,7 +34,8 @@ public class LoginBean {
     public String signUp() {
         var user = authenticationService.signUp(username, password);
         if (user.isPresent()) {
-            userSession.login(user.get().getId(), user.get().getUsername());
+            userSession.login(user.get().getId(), user.get().getUsername(),
+                    user.get().getRoles().stream().map(Role::getRole).toList());
             return "logintest.xhtml?faces-redirect=true";
         }
         this.username = "";
