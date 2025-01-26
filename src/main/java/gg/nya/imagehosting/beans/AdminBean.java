@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +26,8 @@ public class AdminBean {
 
     private final UserService userService;
     private final RoleService roleService;
+
+    private static final Logger log = LoggerFactory.getLogger(AdminBean.class);
 
     public AdminBean(UserService userService, RoleService roleService) {
         this.userService = userService;
@@ -51,6 +55,7 @@ public class AdminBean {
     }
 
     public void loadMoreUsers() {
+        log.debug("loadMoreUsers, user requested more users, loading page: {}", page);
         users = userService.getUsers(page, 10);
         page++;
     }
@@ -73,12 +78,10 @@ public class AdminBean {
     }
 
     public void addRole(User user) {
-        // TODO: Add role to user
-        System.out.println("Adding role " + selectedRoles.get(user) + " to user " + user.getUsername());
+        log.debug("addRole, adding role {} to user {}", selectedRoles.get(user), user.getUsername());
     }
 
     public void removeRole(User user, Role role) {
-        // TODO: Remove role from user
-        System.out.println("Removing role " + role.getRole() + " from user " + user.getUsername());
+        log.debug("removeRole, removing role {} from user {}", role.getRole(), user.getUsername());
     }
 }
