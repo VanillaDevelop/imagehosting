@@ -1,5 +1,6 @@
 package gg.nya.imagehosting.security;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -11,6 +12,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserSession implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private Long userId;
     private String username;

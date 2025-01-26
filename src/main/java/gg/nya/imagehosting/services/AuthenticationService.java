@@ -6,18 +6,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import gg.nya.imagehosting.models.User;
-import gg.nya.imagehosting.repositories.UserRepository;
 
 @Service
 public class AuthenticationService {
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    public AuthenticationService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public AuthenticationService(UserService userService) {
+        this.userService = userService;
     }
 
     public Optional<User> authenticate(String username, String password) {
-        var user = userRepository.findByUsername(username.toLowerCase());
+        var user = userService.getUserByUsername(username.toLowerCase());
         if (user.isEmpty()) {
             return Optional.empty();
         }
@@ -30,12 +29,12 @@ public class AuthenticationService {
     }
 
     public Optional<User> signUp(String username, String password) {
-        if (userRepository.findByUsername(username.toLowerCase()).isPresent()) {
+        if (userService.getUserByUsername(username.toLowerCase()).isPresent()) {
             return Optional.empty();
         }
 
         var user = new User(username, hashPassword(password));
-        userRepository.save(user);
+        userService.createUser(user);
         return Optional.of(user);
     }
 

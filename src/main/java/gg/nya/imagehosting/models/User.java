@@ -1,5 +1,6 @@
 package gg.nya.imagehosting.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -46,6 +47,7 @@ public class User {
         this.username = username.toLowerCase();
         this.displayName = username;
         this.password = password;
+        this.roles = new ArrayList<>();
     }
 
     public Long getId() {

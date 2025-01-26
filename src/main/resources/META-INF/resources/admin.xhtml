@@ -3,8 +3,46 @@
   xmlns="http://www.w3.org/1999/xhtml"
   xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
   xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
 >
   <p>Super secret admin page</p>
+
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Username</th>
+      <th>Roles</th>
+      <th>Add Role</th>
+    </tr>
+    <ui:repeat value="#{adminBean.users}" var="user">
+      <tr>
+        <td>#{user.id}</td>
+        <td>#{user.username}</td>
+        <td>
+          <h:form rendered="#{not empty user.roles}">
+            <ui:repeat value="#{user.roles}" var="role" >
+              <h:outputText value="#{role.role}" />
+              <h:commandButton value="Remove Role" action="#{adminBean.removeRole(user, role)}"/>
+            </ui:repeat>
+          </h:form>
+          <h:outputText value="User has no roles" rendered="#{empty user.roles}" />
+        </td>
+        <td>
+          <h:form rendered="#{user.roles.size() != adminBean.roles.size()}">
+          <h:selectOneMenu value="#{adminBean.selectedRoles[user]}">
+            <f:selectItems value="#{adminBean.getAvailableRoles(user)}" />
+          </h:selectOneMenu>
+          <h:commandButton
+                  value="Add Role"
+                  action="#{adminBean.addRole(user)}"
+          />
+          </h:form>
+          <h:outputText value="User has all roles" rendered="#{user.roles.size() == adminBean.roles.size()}"/>
+        </td>
+
+      </tr>
+    </ui:repeat>
+  </table>
 
   <h:link outcome="/logintest.xhtml" value="Go to Login Test Page" />
 </html>
