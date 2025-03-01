@@ -1,5 +1,7 @@
 package gg.nya.imagehosting.beans;
 
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.FacesContext;
 import org.springframework.stereotype.Component;
 
 import gg.nya.imagehosting.models.Role;
@@ -28,6 +30,11 @@ public class LoginBean {
         }
         this.username = "";
         this.password = "";
+        userSession.logout();
+
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                "Invalid credentials!", null));
+
         return "index.xhtml?faces-redirect=true";
     }
 

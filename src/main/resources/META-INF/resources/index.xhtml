@@ -25,19 +25,21 @@
         <h:outputText id="greetingOutput" value="#{greetingBean.greeting}" />
       </h:form>
 
-      <h:form>
+      <h:messages globalOnly="true" styleClass="error" />
+
+      <h:form id="loginForm">
+        <input type="hidden" name="_csrf" value="#{request.getSession().getAttribute('_csrf').token}" />
+
         <h:outputLabel for="usernameInput" value="Username:" />
         <h:inputText id="usernameInput" value="#{loginBean.username}" />
         <h:outputLabel for="passwordInput" value="Password:" />
-        <h:inputText id="passwordInput" value="#{loginBean.password}" />
+        <h:inputSecret id="passwordInput" value="#{loginBean.password}" />
         <h:commandButton
           value="Sign Up"
-          action="#{loginBean.signUp}"
-        ></h:commandButton>
+          action="#{loginBean.signUp}" />
         <h:commandButton
           value="Login"
-          action="#{loginBean.login}"
-        ></h:commandButton>
+          action="#{loginBean.login}" />
       </h:form>
     </ui:define>
   </ui:composition>
