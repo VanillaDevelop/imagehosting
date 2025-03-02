@@ -3,6 +3,7 @@
   xmlns="http://www.w3.org/1999/xhtml"
   xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
   xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:p="http://primefaces.org/ui"
 >
   <ui:composition template="/templates/template.xhtml">
     <ui:define name="title">Login Test</ui:define>
@@ -12,14 +13,15 @@
 
       <p>Your roles: ${userSession.roles}</p>
 
-      <h:link outcome="/imagehosting.xhtml" value="Go to Image Hosting Page" />
-      <h:link outcome="/admin.xhtml" value="Go to Admin Page" />
+      <p:link outcome="/imagehosting.xhtml" value="Go to Image Hosting Page" />
+      <p:link outcome="/admin.xhtml" value="Go to Admin Page" />
 
       <h:form>
+        <input type="hidden" name="_csrf" value="#{request.getSession().getAttribute('_csrf').token}" />
         <h:commandButton
           value="Logout"
           action="#{loginBean.logout}"
-        ></h:commandButton>
+        />
       </h:form>
     </ui:define>
   </ui:composition>

@@ -37,10 +37,10 @@ flyway {
     password = dbProps.getProperty('db.password')
     driver = 'org.postgresql.Driver'
 
-    cleanDisabled = env == 'local' ? false : true
+    cleanDisabled = env != 'local'
 }
 
-configurations.all {
+configurations.configureEach {
 	exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
 }
 
@@ -60,6 +60,7 @@ dependencies {
 	implementation 'org.postgresql:postgresql'
     implementation platform('org.joinfaces:joinfaces-platform:5.3.4')
     implementation 'org.joinfaces:faces-spring-boot-starter'
+	implementation 'org.joinfaces:primefaces-spring-boot-starter'
     testImplementation "org.springframework.boot:spring-boot-starter-test"
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

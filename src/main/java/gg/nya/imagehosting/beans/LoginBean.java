@@ -1,5 +1,6 @@
 package gg.nya.imagehosting.beans;
 
+import gg.nya.imagehosting.models.User;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import org.springframework.stereotype.Component;
@@ -7,6 +8,8 @@ import org.springframework.stereotype.Component;
 import gg.nya.imagehosting.models.Role;
 import gg.nya.imagehosting.security.UserSession;
 import gg.nya.imagehosting.services.AuthenticationService;
+
+import java.util.Optional;
 
 @Component("loginBean")
 public class LoginBean {
@@ -23,39 +26,20 @@ public class LoginBean {
 
     public String login() {
         var user = authenticationService.authenticate(username, password);
-        if (user.isPresent()) {
-            userSession.login(user.get().getId(), user.get().getUsername(),
-                    user.get().getRoles().stream().map(Role::getRole).toList());
-            return "logintest.xhtml?faces-redirect=true";
-        }
-        this.username = "";
-        this.password = "";
-        userSession.logout();
-
-        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                "Invalid credentials!", null));
-
-        return "index.xhtml?faces-redirect=true";
+        return handleLoginAttemptInternal(user);
     }
+
 
     public String signUp() {
         var user = authenticationService.signUp(username, password);
-        if (user.isPresent()) {
-            userSession.login(user.get().getId(), user.get().getUsername(),
-                    user.get().getRoles().stream().map(Role::getRole).toList());
-            return "logintest.xhtml?faces-redirect=true";
-        }
-        this.username = "";
-        this.password = "";
-        return "index.xhtml?faces-redirect=true";
+        return handleLoginAttemptInternal(user);
     }
 
     public String logout() {
         if (userSession.isAuthenticated()) {
             userSession.logout();
-            return "index.xhtml?faces-redirect=true";
         }
-        return null;
+        return "index.xhtml?faces-redirect=true";
     }
 
     public String getUsername() {
@@ -74,4 +58,24 @@ public class LoginBean {
         this.password = password;
     }
 
+    private String handleLoginAttemptInternal(Optional<User> user) {
+        if(user.isEmpty()) {
+            return handleUnsuccessfulLoginAttemptInternal();
+        }
+
+        userSession.login(user.get().getId(), user.get().getUsername(),
+                user.get().getRoles().stream().map(Role::getRole).toList());
+        return "logintest.xhtml?faces-redirect=true";
+    }
+
+    private String handleUnsuccessfulLoginAttemptInternal() {
+        this.username = "";
+        this.password = "";
+        userSession.logout();
+
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                "Invalid credentials!", null));
+
+        return "index.xhtml?faces-redirect=true";
+    }
 }
