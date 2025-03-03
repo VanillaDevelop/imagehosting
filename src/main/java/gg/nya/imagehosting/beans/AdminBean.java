@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,14 +20,17 @@ import java.util.stream.Collectors;
 
 @Component("adminBean")
 @Scope("view")
-public class AdminBean {
-    private final List<User> users;
-    private int page = 0;
-    private List<Role> roles;
-    private Map<User, String> selectedRoles;
+public class AdminBean implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    private final UserService userService;
-    private final RoleService roleService;
+    private final transient List<User> users;
+    private int page = 0;
+    private transient List<Role> roles;
+    private transient Map<User, String> selectedRoles;
+
+    private final transient UserService userService;
+    private final transient RoleService roleService;
 
     private static final Logger log = LoggerFactory.getLogger(AdminBean.class);
 
