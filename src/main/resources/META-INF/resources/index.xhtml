@@ -1,29 +1,30 @@
 <!DOCTYPE html>
 <html
-  xmlns="http://www.w3.org/1999/xhtml"
-  xmlns:h="http://xmlns.jcp.org/jsf/html"
-  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:h="http://xmlns.jcp.org/jsf/html"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui"
 >
-  <ui:composition template="/templates/template.xhtml">
+<ui:composition template="/templates/template.xhtml">
     <ui:define name="title">Nya.GG - Home</ui:define>
 
     <ui:define name="content">
-      <h:messages globalOnly="true" styleClass="error" />
+        <p:messages globalOnly="true"/>
 
-      <h:form id="loginForm">
-        <input type="hidden" name="_csrf" value="#{request.getSession().getAttribute('_csrf').token}" />
+        <h:form id="loginForm">
+            <input type="hidden" name="_csrf" value="#{request.getSession().getAttribute('_csrf').token}"/>
 
-        <h:outputLabel for="usernameInput" value="Username:" />
-        <h:inputText id="usernameInput" value="#{loginBean.username}" />
-        <h:outputLabel for="passwordInput" value="Password:" />
-        <h:inputSecret id="passwordInput" value="#{loginBean.password}" />
-        <h:commandButton
-          value="Sign Up"
-          action="#{loginBean.signUp}" />
-        <h:commandButton
-          value="Login"
-          action="#{loginBean.login}" />
-      </h:form>
+            <p:outputLabel for="usernameInput" value="Username:"/>
+            <p:inputText id="usernameInput" value="#{loginBean.username}"/>
+            <p:outputLabel for="passwordInput" value="Password:"/>
+            <p:password id="passwordInput" value="#{loginBean.password}"/>
+            <p:commandButton
+                    value="Sign Up"
+                    action="#{loginBean.signUp}"/>
+            <p:commandButton
+                    value="Login"
+                    action="#{loginBean.login}"/>
+        </h:form>
     </ui:define>
-  </ui:composition>
+</ui:composition>
 </html>

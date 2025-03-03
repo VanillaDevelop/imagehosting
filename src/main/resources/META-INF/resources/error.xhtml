@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+>
+  <ui:composition template="/templates/template.xhtml">
+    <ui:define name="title">Error</ui:define>
+
+    <ui:define name="content">
+      <div class="error-page">
+        <h1>Oops! Something went wrong</h1>
+        <p:messages showDetail="true" closable="true" />
+
+        <div class="error-actions">
+          <p:link outcome="/index.xhtml" value="Back to Home" />
+        </div>
+      </div>
+    </ui:define>
+  </ui:composition>
+</html>

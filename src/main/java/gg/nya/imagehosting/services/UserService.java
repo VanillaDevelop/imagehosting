@@ -33,4 +33,8 @@ public class UserService {
         PageRequest request = PageRequest.of(page, size);
         return userRepository.findAll(request).getContent();
     }
+
+    public long getUserCount() {
+        return userRepository.count();
+    }
 }

@@ -1,13 +1,14 @@
 package gg.nya.imagehosting.beans;
 
-import gg.nya.imagehosting.models.User;
-import jakarta.faces.application.FacesMessage;
-import jakarta.faces.context.FacesContext;
-import org.springframework.stereotype.Component;
-
 import gg.nya.imagehosting.models.Role;
+import gg.nya.imagehosting.models.User;
 import gg.nya.imagehosting.security.UserSession;
 import gg.nya.imagehosting.services.AuthenticationService;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.FacesContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
@@ -15,6 +16,8 @@ import java.util.Optional;
 public class LoginBean {
     private String username;
     private String password;
+
+    private static final Logger log = LoggerFactory.getLogger(LoginBean.class);
 
     private final AuthenticationService authenticationService;
     private final UserSession userSession;
@@ -59,16 +62,17 @@ public class LoginBean {
     }
 
     private String handleLoginAttemptInternal(Optional<User> user) {
-        if(user.isEmpty()) {
+        if (user.isEmpty()) {
             return handleUnsuccessfulLoginAttemptInternal();
         }
-
+        log.info("handleLoginAttemptInternal, login successful for user: {}", user.get().getUsername());
         userSession.login(user.get().getId(), user.get().getUsername(),
                 user.get().getRoles().stream().map(Role::getRole).toList());
         return "logintest.xhtml?faces-redirect=true";
     }
 
     private String handleUnsuccessfulLoginAttemptInternal() {
+        log.info("handleUnsuccessfulLoginAttemptInternal, login unsuccessful for user: {}", username);
         this.username = "";
         this.password = "";
         userSession.logout();

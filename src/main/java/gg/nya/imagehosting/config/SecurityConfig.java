@@ -1,18 +1,16 @@
 package gg.nya.imagehosting.config;
 
-import java.util.function.Supplier;
-
+import gg.nya.imagehosting.security.CustomAuthenticationToken;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.SecurityFilterChain;
-
-import gg.nya.imagehosting.security.CustomAuthenticationToken;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+
+import java.util.function.Supplier;
 
 @Configuration
 public class SecurityConfig {
@@ -37,9 +35,8 @@ public class SecurityConfig {
     }
 
     private boolean hasAdminRole(Supplier<Authentication> authentication) {
-        if (!(authentication.get() instanceof CustomAuthenticationToken))
+        if (!(authentication.get() instanceof CustomAuthenticationToken customAuthenticationToken))
             return false;
-        CustomAuthenticationToken customAuthenticationToken = (CustomAuthenticationToken) authentication.get();
         return customAuthenticationToken.getRoles().contains("ADMIN");
     }
 }

@@ -1,25 +1,25 @@
 package gg.nya.imagehosting.beans;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
 import gg.nya.imagehosting.models.Role;
 import gg.nya.imagehosting.models.User;
 import gg.nya.imagehosting.services.RoleService;
 import gg.nya.imagehosting.services.UserService;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component("adminBean")
 @Scope("view")
 public class AdminBean {
-    private List<User> users;
+    private final List<User> users;
     private int page = 0;
     private List<Role> roles;
     private Map<User, String> selectedRoles;
@@ -32,19 +32,24 @@ public class AdminBean {
     public AdminBean(UserService userService, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
+        this.users = new ArrayList<>();
+        this.roles = new ArrayList<>();
     }
 
     @PostConstruct
     public void init() {
-        this.loadMoreUsers();
         this.roles = roleService.getRoles();
+        this.loadMoreUsers();
         this.setUpSelectedRoles();
     }
 
     private void setUpSelectedRoles() {
         this.selectedRoles = new HashMap<>();
-        for(User user : users) {
-            if(!this.getAvailableRoles(user).isEmpty()) {
+        for (User user : users) {
+            if (this.selectedRoles.containsKey(user)) {
+                continue;
+            }
+            if (!this.getAvailableRoles(user).isEmpty()) {
                 this.selectedRoles.put(user, getAvailableRoles(user).getFirst());
             }
         }
@@ -55,8 +60,14 @@ public class AdminBean {
     }
 
     public void loadMoreUsers() {
+        if (users.size() >= getTotalUserCount()) {
+            log.warn("loadMoreUsers, user requested more users, but there are no more users to load");
+            return;
+        }
         log.debug("loadMoreUsers, user requested more users, loading page: {}", page);
-        users = userService.getUsers(page, 10);
+        List<User> newUsers = userService.getUsers(page, 10);
+        users.addAll(newUsers);
+        setUpSelectedRoles();
         page++;
     }
 
@@ -83,5 +94,13 @@ public class AdminBean {
 
     public void removeRole(User user, Role role) {
         log.debug("removeRole, removing role {} from user {}", role.getRole(), user.getUsername());
+    }
+
+    public long getTotalUserCount() {
+        return userService.getUserCount();
+    }
+
+    public boolean getHasMoreUsers() {
+        return users.size() < getTotalUserCount();
     }
 }
