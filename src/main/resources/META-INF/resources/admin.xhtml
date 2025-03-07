@@ -6,69 +6,83 @@
         xmlns:f="http://java.sun.com/jsf/core"
         xmlns:p="http://primefaces.org/ui"
 >
-<p>Super secret nyadmin page</p>
 
-<p:panel id="usersPanel">
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Roles</th>
-            <th>Add Role</th>
-        </tr>
-        <ui:repeat value="#{adminBean.users}" var="user">
-            <tr>
-                <td>#{user.id}</td>
-                <td>#{user.username}</td>
-                <td>
-                    <h:form id="roleRemovalForm" rendered="#{not empty user.roles}">
+<ui:composition template="/templates/template.xhtml">
+    <ui:define name="title">Nya.GG - Admin Panel</ui:define>
+
+    <ui:define name="content">
+        <p:panel id="usersPanel" header="User Management">
+            <p:dataTable value="#{adminBean.users}" var="user" styleClass="mt-3">
+                <p:column headerText="ID" width="10%">
+                    <h:outputText value="#{user.id}"/>
+                </p:column>
+
+                <p:column headerText="Username" width="20%">
+                    <h:outputText value="#{user.username}"/>
+                </p:column>
+
+                <p:column headerText="Current Roles">
+                    <h:form id="roleRemovalForm_#{user.id}" rendered="#{not empty user.roles}">
                         <input type="hidden" name="_csrf" value="#{_csrf.token}"/>
-                        <ui:repeat value="#{user.roles}" var="role">
-                            <h:outputText value="#{role.role}"/>
-                            <h:commandButton
-                                    value="Remove Role"
-                                    action="#{adminBean.removeRole(user, role)}"
+                        <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank ui-fluid">
+                            <p:selectOneMenu value="#{adminBean.selectedRolesToAdd[user]}" styleClass="w-full">
+                                <f:selectItems value="#{adminBean.getCurrentUserRoles(user)}"/>
+                            </p:selectOneMenu>
+                            <p:commandButton
+                                    value="Add"
+                                    action="#{adminBean.removeRole(user)}"
+                                    update="usersPanel"
+                                    styleClass="ui-button-success"
                             />
-                        </ui:repeat>
+                        </p:panelGrid>
                     </h:form>
                     <h:outputText
                             value="User has no roles"
                             rendered="#{empty user.roles}"
+                            styleClass="text-muted"
                     />
-                </td>
-                <td>
-                    <h:form
-                            id="roleAddForm"
-                            rendered="#{user.roles.size() != adminBean.roles.size()}"
-                    >
+                </p:column>
+
+                <p:column headerText="Add Role">
+                    <h:form id="roleAddForm_#{user.id}" rendered="#{user.roles.size() != adminBean.roles.size()}">
                         <input type="hidden" name="_csrf" value="#{_csrf.token}"/>
-                        <h:selectOneMenu value="#{adminBean.selectedRoles[user]}">
-                            <f:selectItems value="#{adminBean.getAvailableRoles(user)}"/>
-                        </h:selectOneMenu>
-                        <h:commandButton
-                                value="Add Role"
-                                action="#{adminBean.addRole(user)}"
-                        />
+                        <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank ui-fluid">
+                            <p:selectOneMenu value="#{adminBean.selectedRolesToAdd[user]}" styleClass="w-full">
+                                <f:selectItems value="#{adminBean.getAvailableUserRoles(user)}"/>
+                            </p:selectOneMenu>
+                            <p:commandButton
+                                    value="Add"
+                                    action="#{adminBean.addRole(user)}"
+                                    update="usersPanel"
+                                    styleClass="ui-button-success"
+                            />
+                        </p:panelGrid>
                     </h:form>
                     <h:outputText
                             value="User has all roles"
                             rendered="#{user.roles.size() == adminBean.roles.size()}"
+                            styleClass="text-muted"
                     />
-                </td>
-            </tr>
-        </ui:repeat>
-    </table>
-</p:panel>
+                </p:column>
+            </p:dataTable>
 
-<h:form>
-    <input type="hidden" name="_csrf" value="#{_csrf.token}"/>
-    <p:commandButton
-            value="Load More Users"
-            action="#{adminBean.loadMoreUsers}"
-            update="usersPanel"
-            rendered="#{adminBean.hasMoreUsers}"
-    />
-</h:form>
+            <div class="text-center mt-3">
+                <h:form>
+                    <input type="hidden" name="_csrf" value="#{_csrf.token}"/>
+                    <p:commandButton
+                            value="Load More Users"
+                            action="#{adminBean.loadMoreUsers}"
+                            update="usersPanel"
+                            rendered="#{adminBean.hasMoreUsers}"
+                            styleClass="ui-button-secondary"
+                    />
+                </h:form>
+            </div>
+        </p:panel>
 
-<p:link outcome="/home.xhtml" value="Go to Login Test Page"/>
+        <div class="mt-3">
+            <p:link outcome="/home.xhtml" value="Back to Home" styleClass="ui-button ui-button-secondary"/>
+        </div>
+    </ui:define>
+</ui:composition>
 </html>
