@@ -4,17 +4,22 @@
         xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
         xmlns:h="http://java.sun.com/jsf/html"
         xmlns:p="http://primefaces.org/ui"
+        xmlns:nya="http://xmlns.jcp.org/jsf/composite/components"
 >
 <ui:composition template="/templates/template.xhtml">
-    <ui:define name="title">Login Test</ui:define>
+    <ui:define name="title">Home</ui:define>
 
     <ui:define name="content">
         <p>This page can only be accessed by authenticated users....</p>
 
         <p>Your roles: ${userSession.roles}</p>
 
-        <p:link outcome="/imagehosting.xhtml" value="Go to Image Hosting Page"/>
-        <p:link outcome="/admin.xhtml" value="Go to Admin Page"/>
+        <p:panelGrid columns="2" layout="grid" styleClass="ui-noborder">
+            <nya:clickableCard title="Image Hosting" subtitle="Upload and manage your images"
+                               outcome="/imagehosting.xhtml"/>
+            <nya:clickableCard title="Admin" subtitle="Manage users and roles"
+                               outcome="/admin.xhtml"/>
+        </p:panelGrid>
 
         <h:form>
             <input type="hidden" name="_csrf" value="#{_csrf.token}"/>

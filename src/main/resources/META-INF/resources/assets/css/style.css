@@ -25,6 +25,35 @@ html, body {
     padding: 2em;
 }
 
+.clickable-card {
+    border-radius: 8px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.clickable-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card-title {
+    color: #333;
+    margin: 0 0 0.5rem 0;
+    text-align: center;
+}
+
+.card-subtitle {
+    color: #666;
+    margin: 0;
+    text-align: center;
+}
+
 /** PRIMEFACES STYLING **/
 /* Form styling */
 .ui-password {
@@ -70,4 +99,6 @@ html, body {
 .ui-panelgrid-cell {
     padding: 0.5em !important;
 }
+
+
 

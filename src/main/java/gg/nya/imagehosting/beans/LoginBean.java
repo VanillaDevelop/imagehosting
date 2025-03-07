@@ -64,7 +64,7 @@ public class LoginBean {
 
     public void redirectIfAuthenticated() throws IOException {
         if (userSession.isAuthenticated()) {
-            FacesContext.getCurrentInstance().getExternalContext().redirect("logintest.xhtml?faces-redirect=true");
+            FacesContext.getCurrentInstance().getExternalContext().redirect("home.xhtml?faces-redirect=true");
         }
     }
 
@@ -75,7 +75,7 @@ public class LoginBean {
         log.info("handleSignUpAttemptInternal, sign up successful for user: {}", user.get().getUsername());
         userSession.login(user.get().getId(), user.get().getUsername(),
                 user.get().getRoles().stream().map(Role::getRole).toList());
-        return "logintest.xhtml?faces-redirect=true";
+        return "home.xhtml?faces-redirect=true";
     }
 
     private String handleLoginAttemptInternal(Optional<User> user) {
@@ -85,7 +85,7 @@ public class LoginBean {
         log.info("handleLoginAttemptInternal, login successful for user: {}", user.get().getUsername());
         userSession.login(user.get().getId(), user.get().getUsername(),
                 user.get().getRoles().stream().map(Role::getRole).toList());
-        return "logintest.xhtml?faces-redirect=true";
+        return "home.xhtml?faces-redirect=true";
     }
 
     private String handleUnsuccessfulLoginAttemptInternal() {

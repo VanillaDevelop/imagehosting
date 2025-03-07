@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:composite="http://xmlns.jcp.org/jsf/composite"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<composite:interface>
+    <composite:attribute name="title" required="true" type="String"/>
+    <composite:attribute name="subtitle" required="false" type="String"/>
+    <composite:attribute name="outcome" required="true" type="String"/>
+</composite:interface>
+
+<composite:implementation>
+    <p:link outcome="#{cc.attrs.outcome}">
+        <p:card styleClass="clickable-card">
+            <f:facet name="title">
+                <h3>#{cc.attrs.title}</h3>
+            </f:facet>
+            <f:facet name="subtitle" rendered="#{not empty cc.attrs.subtitle}">
+                #{cc.attrs.subtitle}
+            </f:facet>
+        </p:card>
+    </p:link>
+</composite:implementation>
+</html>
