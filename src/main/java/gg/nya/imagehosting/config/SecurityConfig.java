@@ -28,6 +28,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/javax.faces.resource/**",
                                 "/jakarta.faces.resource/**",
+                                "/assets/**",
                                 "/index.xhtml",
                                 "/",
                                 "/error",

@@ -1,0 +1,73 @@
+/* Basic styling */
+html, body {
+    background-color: #B7D3F2;
+}
+
+.logo {
+    display: block;
+    width: 40%;
+    margin: 0 auto 2em auto;
+}
+
+/* Utility classes */
+.text-center {
+    text-align: center;
+}
+
+.w-full {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2em;
+}
+
+/** PRIMEFACES STYLING **/
+/* Form styling */
+.ui-password {
+    width: 100%;
+}
+
+/* Panel styling */
+.ui-panel-titlebar {
+    background-color: #A3C2ED !important;
+    color: white !important;
+    border: none !important;
+}
+
+
+/* Input styling */
+.ui-inputtext, .ui-inputfield {
+    border: 1px solid #95B8E7 !important;
+}
+
+.ui-inputtext:focus, .ui-inputfield:focus {
+    border-color: #6B9BE0 !important;
+    box-shadow: 0 0 3px #A3C2ED !important;
+}
+
+/* Button styling */
+.ui-button {
+    border: none !important;
+    background-color: #8AB1E9 !important;
+    color: #FFFFFF !important;
+    transition: background-color 0.2s !important;
+}
+
+.ui-button:hover {
+    background-color: #6B9BE0 !important;
+}
+
+/* Label styling */
+.ui-outputlabel {
+    color: #1A4FA3 !important;
+}
+
+/* Panel styling */
+.ui-panelgrid-cell {
+    padding: 0.5em !important;
+}
+

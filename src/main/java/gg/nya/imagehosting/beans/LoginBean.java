@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Component("loginBean")
@@ -35,7 +36,7 @@ public class LoginBean {
 
     public String signUp() {
         var user = authenticationService.signUp(username, password);
-        return handleLoginAttemptInternal(user);
+        return handleSignUpAttemptInternal(user);
     }
 
     public String logout() {
@@ -61,6 +62,22 @@ public class LoginBean {
         this.password = password;
     }
 
+    public void redirectIfAuthenticated() throws IOException {
+        if (userSession.isAuthenticated()) {
+            FacesContext.getCurrentInstance().getExternalContext().redirect("logintest.xhtml?faces-redirect=true");
+        }
+    }
+
+    private String handleSignUpAttemptInternal(Optional<User> user) {
+        if (user.isEmpty()) {
+            return handleUnsuccessfulSignUpAttemptInternal();
+        }
+        log.info("handleSignUpAttemptInternal, sign up successful for user: {}", user.get().getUsername());
+        userSession.login(user.get().getId(), user.get().getUsername(),
+                user.get().getRoles().stream().map(Role::getRole).toList());
+        return "logintest.xhtml?faces-redirect=true";
+    }
+
     private String handleLoginAttemptInternal(Optional<User> user) {
         if (user.isEmpty()) {
             return handleUnsuccessfulLoginAttemptInternal();
@@ -80,6 +97,18 @@ public class LoginBean {
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
                 "Invalid credentials!", null));
 
-        return "index.xhtml?faces-redirect=true";
+        return null;
+    }
+
+    private String handleUnsuccessfulSignUpAttemptInternal() {
+        log.info("handleUnsuccessfulSignUpAttemptInternal, sign up unsuccessful for user: {}", username);
+        this.username = "";
+        this.password = "";
+        userSession.logout();
+
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                "Username already exists!", null));
+
+        return null;
     }
 }

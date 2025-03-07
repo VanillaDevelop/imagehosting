@@ -4,33 +4,53 @@
         xmlns:h="http://xmlns.jcp.org/jsf/html"
         xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
         xmlns:p="http://primefaces.org/ui"
+        xmlns:f="http://xmlns.jcp.org/jsf/core"
 >
+
+<f:metadata>
+    <f:viewAction action="#{loginBean.redirectIfAuthenticated}"/>
+</f:metadata>
+
 <ui:composition template="/templates/template.xhtml">
     <ui:define name="title">Nya.GG - Home</ui:define>
 
     <ui:define name="content">
-        <p:panel header="Login">
-            <p:messages globalOnly="true"/>
+        <div class="text-center">
+            <p:graphicImage value="/assets/images/logo.png" styleClass="logo"/>
+        </div>
+
+        <p:panel id="loginPanel" header="Login">
+            <p:messages globalOnly="true" rendered="#{facesContext.messageList.size() > 0}"
+                        autoUpdate="true"/>
 
             <h:form id="loginForm">
                 <input type="hidden" name="_csrf" value="#{_csrf.token}"/>
 
                 <p:panelGrid columns="2" layout="grid">
-                    <p:outputLabel for="usernameInput" value="Username:"/>
+                    <p:outputLabel for="usernameInput" value="Username"/>
                     <p:inputText id="usernameInput"
                                  value="#{loginBean.username}"
-                                 autocomplete="username"/>
+                                 autocomplete="username"
+                                 styleClass="w-full"/>
 
-                    <p:outputLabel for="passwordInput" value="Password:"/>
+                    <p:outputLabel for="passwordInput" value="Password"/>
                     <p:password id="passwordInput"
                                 value="#{loginBean.password}"
                                 toggleMask="true"
-                                autocomplete="current-password"/>
+                                autocomplete="current-password"
+                                styleClass="w-full"/>
 
-                    <p:commandButton value="Sign Up"
-                                     action="#{loginBean.signUp}"/>
-                    <p:commandButton value="Login"
-                                     action="#{loginBean.login}"/>
+                    <p:spacer/>
+                    <p:panelGrid columns="2" layout="grid" styleClass="ui-noborder w-full">
+                        <p:commandButton value="Sign Up"
+                                         action="#{loginBean.signUp}"
+                                         styleClass="w-full"
+                                         update="loginPanel"/>
+                        <p:commandButton value="Login"
+                                         action="#{loginBean.login}"
+                                         styleClass="w-full"
+                                         update="loginPanel"/>
+                    </p:panelGrid>
                 </p:panelGrid>
             </h:form>
         </p:panel>
