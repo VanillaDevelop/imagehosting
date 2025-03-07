@@ -25,14 +25,14 @@
                     <h:form id="roleRemovalForm_#{user.id}" rendered="#{not empty user.roles}">
                         <input type="hidden" name="_csrf" value="#{_csrf.token}"/>
                         <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank ui-fluid">
-                            <p:selectOneMenu value="#{adminBean.selectedRolesToAdd[user]}" styleClass="w-full">
+                            <p:selectOneMenu value="#{adminBean.selectedRolesToRemove[user]}" styleClass="w-full">
                                 <f:selectItems value="#{adminBean.getCurrentUserRoles(user)}"/>
                             </p:selectOneMenu>
                             <p:commandButton
-                                    value="Add"
+                                    value="Remove"
                                     action="#{adminBean.removeRole(user)}"
-                                    update="usersPanel"
-                                    styleClass="ui-button-success"
+                                    update=":usersPanel"
+                                    styleClass="ui-button-danger"
                             />
                         </p:panelGrid>
                     </h:form>
@@ -53,7 +53,7 @@
                             <p:commandButton
                                     value="Add"
                                     action="#{adminBean.addRole(user)}"
-                                    update="usersPanel"
+                                    update=":usersPanel"
                                     styleClass="ui-button-success"
                             />
                         </p:panelGrid>
