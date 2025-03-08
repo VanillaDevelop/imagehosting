@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import java.io.Serial;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component("adminBean")
-@Scope("view")
+@Scope(value = "view", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class AdminBean implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -31,13 +32,13 @@ public class AdminBean implements Serializable {
     private Map<User, String> selectedRolesToAdd;
     private Map<User, String> selectedRolesToRemove;
 
-    private final transient UserService userService;
-    private final transient RoleService roleService;
+    private final UserService userService;
+    private final RoleService roleService;
 
     private static final Logger log = LoggerFactory.getLogger(AdminBean.class);
 
-    private final transient long totalUserCount;
-    private transient int page = 0;
+    private long totalUserCount;
+    private int page = 0;
 
     @Autowired
     public AdminBean(UserService userService, RoleService roleService) {
@@ -45,7 +46,6 @@ public class AdminBean implements Serializable {
         this.roleService = roleService;
         this.users = new ArrayList<>();
         this.roles = new ArrayList<>();
-        this.totalUserCount = userService.getUserCount();
         this.selectedRolesToAdd = new HashMap<>();
         this.selectedRolesToRemove = new HashMap<>();
         this.currentUserRoles = new HashMap<>();
@@ -53,6 +53,7 @@ public class AdminBean implements Serializable {
 
     @PostConstruct
     public void init() {
+        this.totalUserCount = userService.getUserCount();
         this.roles.addAll(roleService.getRoles());
         this.loadMoreUsers();
     }

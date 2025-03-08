@@ -4,11 +4,37 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
+        <File name="File" fileName="logs/imagehosting.log" append="true">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </File>
     </Appenders>
     <Loggers>
-        <Logger name="gg.nya.imagehosting" level="trace" additivity="false">
+        <Logger name="gg.nya.imagehosting" level="TRACE" additivity="false">
             <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
         </Logger>
-        <Root level="OFF"/>
+        <Logger name="javax.faces" level="DEBUG" additivity="false">
+            <AppenderRef ref="File"/>
+            <AppenderRef ref="Console" level="WARN"/>
+        </Logger>
+        <Logger name="org.springframework" level="DEBUG" additivity="false">
+            <AppenderRef ref="File"/>
+            <AppenderRef ref="Console" level="WARN"/>
+        </Logger>
+        <Logger name="org.primefaces" level="DEBUG" additivity="false">
+            <AppenderRef ref="File"/>
+            <AppenderRef ref="Console" level="WARN"/>
+        </Logger>
+        <Logger name="javax.faces.lifecycle" level="DEBUG" additivity="false">
+            <AppenderRef ref="File"/>
+            <AppenderRef ref="Console" level="WARN"/>
+        </Logger>
+        <Logger name="javax.faces.component" level="DEBUG" additivity="false">
+            <AppenderRef ref="File"/>
+            <AppenderRef ref="Console" level="WARN"/>
+        </Logger>
+        <Root level="WARN">
+            <AppenderRef ref="Console"/>
+        </Root>
     </Loggers>
 </Configuration>
