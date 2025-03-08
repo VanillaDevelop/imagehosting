@@ -1,5 +1,6 @@
 package gg.nya.imagehosting.beans;
 
+import gg.nya.imagehosting.config.ApplicationContextProvider;
 import gg.nya.imagehosting.models.Role;
 import gg.nya.imagehosting.models.User;
 import gg.nya.imagehosting.services.RoleService;
@@ -8,10 +9,12 @@ import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component("adminBean")
-@Scope(value = "view", proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope("view")
 public class AdminBean implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -32,8 +35,8 @@ public class AdminBean implements Serializable {
     private Map<User, String> selectedRolesToAdd;
     private Map<User, String> selectedRolesToRemove;
 
-    private final UserService userService;
-    private final RoleService roleService;
+    private transient UserService userService;
+    private transient RoleService roleService;
 
     private static final Logger log = LoggerFactory.getLogger(AdminBean.class);
 
@@ -42,13 +45,13 @@ public class AdminBean implements Serializable {
 
     @Autowired
     public AdminBean(UserService userService, RoleService roleService) {
-        this.userService = userService;
-        this.roleService = roleService;
         this.users = new ArrayList<>();
         this.roles = new ArrayList<>();
         this.selectedRolesToAdd = new HashMap<>();
         this.selectedRolesToRemove = new HashMap<>();
         this.currentUserRoles = new HashMap<>();
+        this.userService = userService;
+        this.roleService = roleService;
     }
 
     @PostConstruct
@@ -62,7 +65,7 @@ public class AdminBean implements Serializable {
      * Load a batch of up to 10 users from the database, if there are any left.
      */
     public void loadMoreUsers() {
-        if (users.size() >= getTotalUserCount()) {
+        if (users.size() >= totalUserCount) {
             log.warn("loadMoreUsers, user requested more users, but there are no more users to load");
             return;
         }
@@ -134,10 +137,19 @@ public class AdminBean implements Serializable {
     }
 
     public long getTotalUserCount() {
-        return userService.getUserCount();
+        return totalUserCount;
     }
 
     public boolean getHasMoreUsers() {
         return users.size() < getTotalUserCount();
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        // Retrieve the Spring application context (using a helper or static context holder)
+        ApplicationContext ctx = ApplicationContextProvider.getApplicationContext();
+        this.userService = ctx.getBean(UserService.class);
+        this.roleService = ctx.getBean(RoleService.class);
     }
 }
