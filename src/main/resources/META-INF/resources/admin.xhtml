@@ -33,7 +33,7 @@
                     </p:column>
 
                     <p:column headerText="Current Roles" width="35%">
-                        <p:outputPanel rendered="#{not empty user.roles}">
+                        <p:outputPanel rendered="#{not empty adminBean.getCurrentUserRoles(user)}">
                             <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank ui-fluid">
                                 <p:selectOneMenu value="#{adminBean.selectedRolesToRemove[user]}"
                                                  styleClass="w-full">
@@ -49,13 +49,14 @@
                         </p:outputPanel>
                         <h:outputText
                                 value="User has no roles"
-                                rendered="#{empty user.roles}"
+                                rendered="#{empty adminBean.getCurrentUserRoles(user)}"
                                 styleClass="text-muted"
                         />
                     </p:column>
 
                     <p:column headerText="Add Role" width="35%">
-                        <p:outputPanel rendered="#{user.roles.size() != adminBean.roles.size()}">
+                        <p:outputPanel
+                                rendered="#{adminBean.getCurrentUserRoles(user).size() != adminBean.roles.size()}">
                             <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank ui-fluid">
                                 <p:selectOneMenu value="#{adminBean.selectedRolesToAdd[user]}" styleClass="w-full">
                                     <f:selectItems value="#{adminBean.getAvailableUserRoles(user)}"/>
@@ -70,7 +71,7 @@
                         </p:outputPanel>
                         <h:outputText
                                 value="User has all roles"
-                                rendered="#{user.roles.size() == adminBean.roles.size()}"
+                                rendered="#{adminBean.getCurrentUserRoles(user).size() == adminBean.roles.size()}"
                                 styleClass="text-muted"
                         />
                     </p:column>

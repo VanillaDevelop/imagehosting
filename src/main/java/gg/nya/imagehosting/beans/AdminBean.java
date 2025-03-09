@@ -6,6 +6,8 @@ import gg.nya.imagehosting.models.User;
 import gg.nya.imagehosting.services.RoleService;
 import gg.nya.imagehosting.services.UserService;
 import jakarta.annotation.PostConstruct;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.FacesContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +19,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component("adminBean")
 @Scope("view")
@@ -84,14 +83,20 @@ public class AdminBean implements Serializable {
             if (this.currentUserRoles.containsKey(user)) {
                 continue;
             }
-            this.currentUserRoles.put(user, user.getRoles().stream().map(Role::getRole).toList());
+            this.currentUserRoles.put(user, new ArrayList<>(user.getRoles().stream().map(Role::getRole).toList()));
+            this.resetUserSelectedRole(user);
+        }
+    }
 
-            for (Role role : this.roles) {
-                if (this.currentUserRoles.get(user).contains(role.getRole())) {
-                    this.selectedRolesToRemove.put(user, role.getRole());
-                } else {
-                    this.selectedRolesToAdd.put(user, role.getRole());
-                }
+    private void resetUserSelectedRole(User user) {
+        this.selectedRolesToAdd.remove(user);
+        this.selectedRolesToRemove.remove(user);
+
+        for (Role role : this.roles) {
+            if (this.currentUserRoles.get(user).contains(role.getRole())) {
+                this.selectedRolesToRemove.put(user, role.getRole());
+            } else {
+                this.selectedRolesToAdd.put(user, role.getRole());
             }
         }
     }
@@ -130,10 +135,26 @@ public class AdminBean implements Serializable {
 
     public void addRole(User user) {
         log.debug("addRole, adding role {} to user {}", selectedRolesToAdd.get(user), user.getUsername());
+        Optional<String> error = userService.addRoleToUser(user, selectedRolesToAdd.get(user));
+        if (error.isPresent()) {
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    error.get(), null));
+        } else {
+            this.currentUserRoles.get(user).add(selectedRolesToAdd.get(user));
+            this.resetUserSelectedRole(user);
+        }
     }
 
     public void removeRole(User user) {
         log.debug("removeRole, removing role {} from user {}", selectedRolesToRemove.get(user), user.getUsername());
+        Optional<String> error = userService.removeRoleFromUser(user, selectedRolesToRemove.get(user));
+        if (error.isPresent()) {
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    error.get(), null));
+        } else {
+            this.currentUserRoles.get(user).remove(selectedRolesToRemove.get(user));
+            this.resetUserSelectedRole(user);
+        }
     }
 
     public long getTotalUserCount() {
