@@ -19,6 +19,10 @@ html, body {
     box-sizing: border-box;
 }
 
+.mt-3 {
+    margin-top: 1rem;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -81,12 +85,15 @@ html, body {
 /* Button styling */
 .ui-button {
     border: none !important;
-    background-color: #8AB1E9 !important;
     color: #FFFFFF !important;
     transition: background-color 0.2s !important;
 }
 
-.ui-button:hover {
+.ui-button-primary {
+    background-color: #8AB1E9 !important;
+}
+
+.ui-button-primary:hover {
     background-color: #6B9BE0 !important;
 }
 

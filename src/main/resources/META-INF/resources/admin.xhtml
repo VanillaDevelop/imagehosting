@@ -14,7 +14,8 @@
         <p:panel id="usersPanel" header="User Management">
             <h:form id="userManagementForm">
                 <input type="hidden" name="_csrf" value="#{_csrf.token}"/>
-                <p:dataTable value="#{adminBean.users}" var="user" styleClass="mt-3">
+                <p:dataTable value="#{adminBean.users}" var="user" styleClass="mt-3" scrollable="true"
+                             scrollHeight="65vh">
                     <p:column headerText="ID" width="10%">
                         <h:outputText value="#{user.id}"/>
                     </p:column>
@@ -23,10 +24,11 @@
                         <h:outputText value="#{user.username}"/>
                     </p:column>
 
-                    <p:column headerText="Current Roles">
+                    <p:column headerText="Current Roles" width="35%">
                         <p:outputPanel rendered="#{not empty user.roles}">
                             <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank ui-fluid">
-                                <p:selectOneMenu value="#{adminBean.selectedRolesToRemove[user]}" styleClass="w-full">
+                                <p:selectOneMenu value="#{adminBean.selectedRolesToRemove[user]}"
+                                                 styleClass="w-full">
                                     <f:selectItems value="#{adminBean.getCurrentUserRoles(user)}"/>
                                 </p:selectOneMenu>
                                 <p:commandButton
@@ -44,7 +46,7 @@
                         />
                     </p:column>
 
-                    <p:column headerText="Add Role">
+                    <p:column headerText="Add Role" width="35%">
                         <p:outputPanel rendered="#{user.roles.size() != adminBean.roles.size()}">
                             <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank ui-fluid">
                                 <p:selectOneMenu value="#{adminBean.selectedRolesToAdd[user]}" styleClass="w-full">
@@ -54,7 +56,7 @@
                                         value="Add"
                                         action="#{adminBean.addRole(user)}"
                                         update="@form"
-                                        styleClass="ui-button-success"
+                                        styleClass="ui-button-primary"
                                 />
                             </p:panelGrid>
                         </p:outputPanel>
@@ -66,18 +68,20 @@
                     </p:column>
                 </p:dataTable>
 
-                <p:commandButton
-                        value="Load More Users"
-                        action="#{adminBean.loadMoreUsers}"
-                        update="@form"
-                        rendered="#{adminBean.hasMoreUsers}"
-                        styleClass="ui-button-secondary"
-                />
+                <div class="mt-3">
+                    <p:commandButton
+                            value="Load More Users"
+                            action="#{adminBean.loadMoreUsers}"
+                            update="@form"
+                            rendered="#{adminBean.hasMoreUsers}"
+                            styleClass="ui-button-secondary"
+                    />
+                </div>
             </h:form>
         </p:panel>
 
         <div class="mt-3">
-            <p:link outcome="/home.xhtml" value="Back to Home" styleClass="ui-button ui-button-secondary"/>
+            <p:linkButton outcome="/home.xhtml" value="Back to Home" styleClass="ui-button ui-button-secondary"/>
         </div>
     </ui:define>
 </ui:composition>

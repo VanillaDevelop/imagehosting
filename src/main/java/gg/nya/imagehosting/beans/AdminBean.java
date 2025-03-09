@@ -141,7 +141,7 @@ public class AdminBean implements Serializable {
     }
 
     public boolean getHasMoreUsers() {
-        return users.size() < getTotalUserCount();
+        return users.size() < totalUserCount;
     }
 
     @Serial
