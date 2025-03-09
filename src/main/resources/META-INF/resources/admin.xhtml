@@ -11,11 +11,19 @@
     <ui:define name="title">Nya.GG - Admin Panel</ui:define>
 
     <ui:define name="content">
+        <h1 class="m-0">Admin Panel</h1>
+
+        <div class="my-3">
+            <p:linkButton outcome="/home.xhtml" value="Back to Home"
+                          styleClass="ui-button ui-button-secondary no-underline"/>
+        </div>
+
         <p:panel id="usersPanel" header="User Management">
+            <p:outputLabel value="Loaded #{adminBean.users.size()} of #{adminBean.totalUserCount} users"/>
             <h:form id="userManagementForm">
                 <input type="hidden" name="_csrf" value="#{_csrf.token}"/>
-                <p:dataTable value="#{adminBean.users}" var="user" styleClass="mt-3" scrollable="true"
-                             scrollHeight="65vh">
+                <p:dataTable value="#{adminBean.users}" var="user" styleClass="my-3" scrollable="true"
+                             scrollHeight="50vh">
                     <p:column headerText="ID" width="10%">
                         <h:outputText value="#{user.id}"/>
                     </p:column>
@@ -68,21 +76,17 @@
                     </p:column>
                 </p:dataTable>
 
-                <div class="mt-3">
-                    <p:commandButton
-                            value="Load More Users"
-                            action="#{adminBean.loadMoreUsers}"
-                            update="@form"
-                            rendered="#{adminBean.hasMoreUsers}"
-                            styleClass="ui-button-secondary"
-                    />
-                </div>
+                <p:commandButton
+                        value="Load More Users"
+                        action="#{adminBean.loadMoreUsers}"
+                        update=":usersPanel"
+                        disabled="#{!adminBean.hasMoreUsers}"
+                        styleClass="ui-button-secondary"
+                        oncomplete="$('.ui-datatable-scrollable-body').scrollTop(100000);"
+                />
             </h:form>
         </p:panel>
 
-        <div class="mt-3">
-            <p:linkButton outcome="/home.xhtml" value="Back to Home" styleClass="ui-button ui-button-secondary"/>
-        </div>
     </ui:define>
 </ui:composition>
 </html>
