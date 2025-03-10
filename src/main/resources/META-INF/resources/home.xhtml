@@ -7,24 +7,32 @@
         xmlns:nya="http://xmlns.jcp.org/jsf/composite/components"
 >
 <ui:composition template="/templates/template.xhtml">
-    <ui:define name="title">Home</ui:define>
+    <ui:define name="title">Nya.GG - Home</ui:define>
 
     <ui:define name="content">
-        <p>This page can only be accessed by authenticated users....</p>
+        <h1 class="m-0">Welcome back, ${userSession.username}!</h1>
 
-        <p>Your roles: ${userSession.roles}</p>
-
-        <p:panelGrid columns="2" layout="grid" styleClass="ui-noborder">
-            <nya:clickableCard title="Image Hosting" subtitle="Upload and manage your images"
-                               outcome="/imagehosting.xhtml"/>
-            <nya:clickableCard title="Admin" subtitle="Manage users and roles"
-                               outcome="/admin.xhtml"/>
-        </p:panelGrid>
 
         <h:form>
             <input type="hidden" name="_csrf" value="#{_csrf.token}"/>
-            <h:commandButton value="Logout" action="#{loginBean.logout}"/>
+            <div class="my-3">
+                <p:commandButton value="Logout" action="#{loginBean.logout}"
+                                 styleClass="ui-button ui-button-secondary no-underline"/>
+            </div>
         </h:form>
+
+        <h3 class="text-center">Available Features</h3>
+
+        <p:staticMessage severity="info" summary="Available Features" styleClass="w-100"
+                         detail="Nya.GG uses a modular approach to provide a variety of features. Your available features are determined by your roles.
+            If you would like to request access to a feature, please contact an administrator."/>
+
+        <p:panelGrid columns="2" layout="grid" styleClass="my-3">
+            <nya:clickableCard title="Image Hosting" subtitle="Upload and manage your images"
+                               outcome="/imagehosting.xhtml" role="IMAGE_HOSTING"/>
+            <nya:clickableCard title="Admin" subtitle="Manage users and roles"
+                               outcome="/admin.xhtml" role="ADMIN"/>
+        </p:panelGrid>
     </ui:define>
 </ui:composition>
 </html>

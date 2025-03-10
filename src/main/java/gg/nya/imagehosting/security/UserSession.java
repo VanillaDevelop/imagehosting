@@ -1,13 +1,13 @@
 package gg.nya.imagehosting.security;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -36,6 +36,10 @@ public class UserSession implements Serializable {
         this.authenticated = false;
 
         SecurityContextHolder.clearContext();
+    }
+
+    public boolean hasRole(String role) {
+        return roles.contains(role);
     }
 
     public Long getUserId() {

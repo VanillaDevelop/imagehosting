@@ -1,6 +1,7 @@
 /* Basic styling */
 html, body {
     background-color: #B7D3F2;
+    color: #1A4FA3;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
@@ -10,8 +11,12 @@ html, body {
     margin: 0 auto 2em auto;
 }
 
-h1 {
+h1, h2, h3 {
     color: #1A4FA3;
+}
+
+.ui-panelgrid-cell h3 {
+    color: #333 !important;
 }
 
 /* Utility classes */
@@ -33,8 +38,16 @@ h1 {
     margin: 0;
 }
 
-.no-underline a {
+.no-underline a, a.no-underline {
     text-decoration: none !important;
+}
+
+.no-underline a:hover, a.no-underline:hover {
+    text-decoration: none !important;
+}
+
+.error-text {
+    color: red;
 }
 
 .container {
@@ -53,6 +66,7 @@ h1 {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    height: 100%;
 }
 
 .clickable-card:hover {
@@ -119,6 +133,7 @@ h1 {
 /* Panel styling */
 .ui-panelgrid-cell {
     padding: 0.5em !important;
+    background-color: transparent !important;
 }
 
 
