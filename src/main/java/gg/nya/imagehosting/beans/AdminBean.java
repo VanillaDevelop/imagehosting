@@ -140,10 +140,10 @@ public class AdminBean implements Serializable {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
                     error.get(), null));
         } else {
-            this.currentUserRoles.get(user).add(selectedRolesToAdd.get(user));
-            this.resetUserSelectedRole(user);
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
                     "Role " + selectedRolesToAdd.get(user) + " added successfully to " + user.getUsername() + ". It will take effect on the next login.", null));
+            this.currentUserRoles.get(user).add(selectedRolesToAdd.get(user));
+            this.resetUserSelectedRole(user);
         }
     }
 
@@ -154,10 +154,10 @@ public class AdminBean implements Serializable {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
                     error.get(), null));
         } else {
-            this.currentUserRoles.get(user).remove(selectedRolesToRemove.get(user));
-            this.resetUserSelectedRole(user);
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
                     "Role " + selectedRolesToRemove.get(user) + " removed successfully from " + user.getUsername() + ". It will take effect on the next login.", null));
+            this.currentUserRoles.get(user).remove(selectedRolesToRemove.get(user));
+            this.resetUserSelectedRole(user);
         }
     }
 
