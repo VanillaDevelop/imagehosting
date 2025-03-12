@@ -20,11 +20,12 @@
         </div>
 
         <p:panel id="usersPanel" header="User Management">
+            <p:messages id="messages" globalOnly="true" autoUpdate="true"/>
             <p:outputLabel value="Loaded #{adminBean.users.size()} of #{adminBean.totalUserCount} users"/>
             <h:form id="userManagementForm">
                 <input type="hidden" name="_csrf" value="#{_csrf.token}"/>
                 <p:dataTable value="#{adminBean.users}" var="user" styleClass="my-3" scrollable="true"
-                             scrollHeight="50vh">
+                             scrollHeight="#{facesContext.messageList.size() == 0 ? '50vh' : '40vh'}">
                     <p:column headerText="ID" width="10%">
                         <h:outputText value="#{user.id}"/>
                     </p:column>
@@ -43,7 +44,7 @@
                                 <p:commandButton
                                         value="Remove"
                                         action="#{adminBean.removeRole(user)}"
-                                        update="@form"
+                                        update="@form :messages"
                                         styleClass="ui-button-danger"
                                 />
                             </p:panelGrid>
@@ -65,7 +66,7 @@
                                 <p:commandButton
                                         value="Add"
                                         action="#{adminBean.addRole(user)}"
-                                        update="@form"
+                                        update="@form :messages"
                                         styleClass="ui-button-primary"
                                 />
                             </p:panelGrid>
