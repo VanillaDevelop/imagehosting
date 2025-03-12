@@ -56,6 +56,13 @@ h1, h2, h3 {
     padding: 2em;
 }
 
+.flex-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
 .clickable-card {
     border-radius: 8px;
     padding: 1.5rem;

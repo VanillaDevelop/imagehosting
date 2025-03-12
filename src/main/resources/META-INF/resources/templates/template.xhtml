@@ -4,6 +4,7 @@
         xmlns="http://www.w3.org/1999/xhtml"
         xmlns:h="http://xmlns.jcp.org/jsf/html"
         xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui"
 >
 <h:head>
     <title><ui:insert name="title"/></title>
@@ -12,6 +13,16 @@
 </h:head>
 <h:body>
     <div class="container">
+        <ui:insert name="header">
+            <div class="flex-header">
+                <h1 class="m-0"><ui:insert name="heading"/></h1>
+                <h:form>
+                    <input type="hidden" name="_csrf" value="#{_csrf.token}"/>
+                    <p:commandButton value="Logout" action="#{loginBean.logout}"
+                                     styleClass="ui-button ui-button-primary no-underline"/>
+                </h:form>
+            </div>
+        </ui:insert>
         <ui:insert name="content"/>
     </div>
 </h:body>

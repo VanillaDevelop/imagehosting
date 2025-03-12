@@ -9,13 +9,14 @@
 
 <ui:composition template="/templates/template.xhtml">
     <ui:define name="title">Nya.GG - Admin Panel</ui:define>
-
+    <ui:define name="heading">Admin Panel</ui:define>
     <ui:define name="content">
-        <h1 class="m-0">Admin Panel</h1>
 
         <div class="my-3">
-            <p:linkButton outcome="/home.xhtml" value="Back to Home"
-                          styleClass="ui-button ui-button-secondary no-underline"/>
+            <p:linkButton outcome="/home.xhtml"
+                          styleClass="ui-button ui-button-secondary no-underline">
+                <i class="pi pi-arrow-left"/> Back to Home
+            </p:linkButton>
         </div>
 
         <p:panel id="usersPanel" header="User Management">
