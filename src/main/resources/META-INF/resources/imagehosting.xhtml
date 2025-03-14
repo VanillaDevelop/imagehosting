@@ -1,9 +1,28 @@
 <!DOCTYPE html>
 <html
-  xmlns="http://www.w3.org/1999/xhtml"
-  xmlns:h="http://java.sun.com/jsf/html"
->
-  <p>Image Hosting Page</p>
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui"
 
-  <h:link outcome="/logintest.xhtml" value="Go to Login Test Page" />
+>
+<ui:composition template="/templates/template.xhtml">
+    <ui:define name="title">Nya.GG - Image Hosting</ui:define>
+    <ui:define name="heading">Image Hosting</ui:define>
+    <ui:define name="content">
+        <div class="my-3">
+            <p:linkButton outcome="/home.xhtml"
+                          styleClass="ui-button ui-button-secondary no-underline">
+                <i class="pi pi-arrow-left"/> Back to Home
+            </p:linkButton>
+        </div>
+      
+        <p:staticMessage severity="info" summary="Available Features" styleClass="w-100"
+                         detail="Nya.GG uses a modular approach to provide a variety of features. Your available features are determined by your roles.
+            If you would like to request access to a feature, please contact an administrator."/>
+
+        <p:panelGrid columns="2" layout="grid" styleClass="my-3">
+
+        </p:panelGrid>
+    </ui:define>
+</ui:composition>
 </html>

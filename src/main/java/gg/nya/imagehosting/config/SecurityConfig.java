@@ -31,6 +31,7 @@ public class SecurityConfig {
                                 "/assets/**",
                                 "/index.xhtml",
                                 "/",
+                                "/i/**",
                                 "/error",
                                 "/favicon.ico"
                         )
