@@ -1,22 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
-<html
-  xmlns="http://www.w3.org/1999/xhtml"
-  xmlns:h="http://xmlns.jcp.org/jsf/html"
-  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-  xmlns:p="http://primefaces.org/ui"
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
 >
-  <ui:composition template="/templates/template.xhtml">
-    <ui:define name="title">Error</ui:define>
-
+<ui:composition template="/templates/template.xhtml">
+    <ui:define name="title">Nya.GG - Error</ui:define>
+    <ui:define name="header"/>
     <ui:define name="content">
-      <div class="error-page">
-        <h1>Oops! Something went wrong</h1>
-        <p:messages showDetail="true" closable="true" />
-
-        <div class="error-actions">
-          <p:link outcome="/index.xhtml" value="Back to Home" />
+        <div class="text-center">
+            <p:graphicImage value="/assets/images/logo.png" styleClass="logo-small"/>
         </div>
-      </div>
+        <p:panel header="An Error Occurred - Status Code #{requestScope.errorStatus}">
+            <h2 class="m-0"><h:outputText value="#{requestScope.errorMessage}"/></h2>
+            <p>
+                An unexpected error has occurred. Please refer to the message above. <br/>
+                If this error persists and you are unable to resolve it, please contact an administrator.
+            </p>
+            <hr/>
+            <div class="text-center my-3">
+                <p:button value="Return to Home" outcome="/index" icon="pi pi-home"
+                          styleClass="ui-button-primary"/>
+            </div>
+        </p:panel>
     </ui:define>
-  </ui:composition>
+</ui:composition>
 </html>
