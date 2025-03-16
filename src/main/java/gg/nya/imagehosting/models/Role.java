@@ -1,6 +1,7 @@
 package gg.nya.imagehosting.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,6 +17,7 @@ public class Role implements Serializable {
     private Long id;
 
     @Column(name = "role")
+    @NotNull
     private String role;
 
     @ManyToMany(mappedBy = "roles")

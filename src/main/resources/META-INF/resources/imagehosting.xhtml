@@ -15,14 +15,8 @@
                 <i class="pi pi-arrow-left"/> Back to Home
             </p:linkButton>
         </div>
-      
-        <p:staticMessage severity="info" summary="Available Features" styleClass="w-100"
-                         detail="Nya.GG uses a modular approach to provide a variety of features. Your available features are determined by your roles.
-            If you would like to request access to a feature, please contact an administrator."/>
 
-        <p:panelGrid columns="2" layout="grid" styleClass="my-3">
-
-        </p:panelGrid>
+        <p:outputLabel value="Your API Key: #{imageHostingBean.apiKey}"/>
     </ui:define>
 </ui:composition>
 </html>
