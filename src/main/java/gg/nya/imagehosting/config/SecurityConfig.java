@@ -44,8 +44,8 @@ public class SecurityConfig {
                 .securityContext(securityContext -> securityContext.requireExplicitSave(false))
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfTokenRepository)
-                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
-                .securityContext(securityContext -> securityContext.requireExplicitSave(false));
+                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                        .ignoringRequestMatchers("/i/**"));
 
         return http.build();
     }

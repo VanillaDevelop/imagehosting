@@ -2,10 +2,6 @@ package gg.nya.imagehosting.models;
 
 public enum ImageHostingModes {
     /**
-     * Image hosting links will follow a numeric pattern, e.g., 1.png, 2.png, 3.png, etc.
-     */
-    ENUMERATED,
-    /**
      * Image hosting links will be generated with a random UUID, e.g., 123e4567-e89b-12d3-a456-426614174000.png
      */
     UUID,

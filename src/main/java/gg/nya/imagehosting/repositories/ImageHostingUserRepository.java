@@ -10,4 +10,6 @@ import java.util.Optional;
 @Repository
 public interface ImageHostingUserRepository extends CrudRepository<ImageHostingUser, Long> {
     Optional<ImageHostingUser> findImageHostingUserByUser(User user);
+
+    Optional<ImageHostingUser> findImageHostingUserByApiKey(String apiKey);
 }
