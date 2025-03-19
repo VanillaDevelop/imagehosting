@@ -38,6 +38,23 @@ public class ImageHostingService {
     }
 
     /**
+     * Serve an image from the given user.
+     *
+     * @param username The username of the user.
+     * @param filename The filename of the image.
+     * @return The image as an input stream, if it exists. Throws a 404 error if the image does not exist.
+     */
+    public InputStream retrieveImage(String username, String filename) {
+        log.debug("retrieveImage, checking if image for user {} with filename {} exists", username, filename);
+        if (!checkImageExists(username, filename)) {
+            log.error("retrieveImage, image for user {} with filename {} not found", username, filename);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
+        }
+        log.debug("retrieveImage, image for user {} with filename {} found in DB, querying S3", username, filename);
+        return s3Service.getImage(username, filename);
+    }
+
+    /**
      * Finds or creates an image hosting user for the given user.
      *
      * @param userId The user ID to find or create an image hosting user for.
@@ -65,6 +82,7 @@ public class ImageHostingService {
         imageHostingUserRepository.save(imageHostingUser);
         return imageHostingUser;
     }
+
 
     /**
      * Uploads an image for the user associated with the given API key.
@@ -96,6 +114,21 @@ public class ImageHostingService {
         log.debug("uploadImageForUser, uploaded image for user {} with filename {}", user.getUser().getUsername(), fileName);
         return fileName;
     }
+
+    private boolean checkImageExists(String username, String filename) {
+        Optional<ImageHostingUser> imageHostingUserOpt = imageHostingUserRepository.findImageHostingUserByUsername(username);
+        if (imageHostingUserOpt.isEmpty()) {
+            log.error("checkImageExists, image hosting user for user {} not found", username);
+            return false;
+        }
+        //Check if this user has a file with the given filename
+        if (!imageHostingUserFileRepository.existsByImageHostingUserAndFileName(imageHostingUserOpt.get(), filename)) {
+            log.error("checkImageExists, image hosting user for user {} does not have a file with filename {}", username, filename);
+            return false;
+        }
+        return true;
+    }
+
 
     /**
      * Attempts to create a file name for the user's given strategy. Aborts with a 500 error after 100 failed attempts.

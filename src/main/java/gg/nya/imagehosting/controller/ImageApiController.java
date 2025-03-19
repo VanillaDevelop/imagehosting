@@ -1,9 +1,10 @@
 package gg.nya.imagehosting.controller;
 
 import gg.nya.imagehosting.services.ImageHostingService;
-import gg.nya.imagehosting.services.S3Service;
 import gg.nya.imagehosting.utils.Utils;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
@@ -16,12 +17,12 @@ import java.io.InputStream;
 
 @RestController
 public class ImageApiController {
-    private final S3Service s3Service;
     private final ImageHostingService imageHostingService;
 
+    private static final Logger log = LoggerFactory.getLogger(ImageApiController.class);
+
     @Autowired
-    public ImageApiController(S3Service s3Service, ImageHostingService imageHostingService) {
-        this.s3Service = s3Service;
+    public ImageApiController(ImageHostingService imageHostingService) {
         this.imageHostingService = imageHostingService;
     }
 
@@ -29,7 +30,8 @@ public class ImageApiController {
     public ResponseEntity<InputStreamResource> getImage(@PathVariable String filename, HttpServletRequest request) {
         String serverName = request.getServerName();
         String user = Utils.extractUsernameFromServerName(serverName);
-        InputStream imageStream = s3Service.getImage(user, filename);
+        log.info("getImage, image requested for user {}, filename: {}", user, filename);
+        InputStream imageStream = imageHostingService.retrieveImage(user, filename);
         MediaType contentType = Utils.getMediaTypeFromFilename(filename);
 
         return ResponseEntity.ok()
@@ -43,6 +45,7 @@ public class ImageApiController {
             HttpServletRequest request
     ) throws IOException {
         String apiKey = request.getHeader("X-API-Key");
+        log.info("uploadImage, image upload requested for user with API key {}, original file name {}", apiKey, file.getOriginalFilename());
         String filename = imageHostingService.uploadImageForUser(apiKey, file.getInputStream(), file.getOriginalFilename());
         return ResponseEntity.ok(filename);
     }
