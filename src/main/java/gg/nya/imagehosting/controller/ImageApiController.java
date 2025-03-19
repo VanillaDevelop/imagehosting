@@ -1,5 +1,6 @@
 package gg.nya.imagehosting.controller;
 
+import gg.nya.imagehosting.models.ImageApiEntity;
 import gg.nya.imagehosting.services.ImageHostingService;
 import gg.nya.imagehosting.utils.Utils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,13 +41,13 @@ public class ImageApiController {
     }
 
     @PostMapping(value = "/i/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadImage(
+    public ResponseEntity<ImageApiEntity> uploadImage(
             @RequestParam("file") MultipartFile file,
             HttpServletRequest request
     ) throws IOException {
         String apiKey = request.getHeader("X-API-Key");
         log.info("uploadImage, image upload requested for user with API key {}, original file name {}", apiKey, file.getOriginalFilename());
-        String filename = imageHostingService.uploadImageForUser(apiKey, file.getInputStream(), file.getOriginalFilename());
-        return ResponseEntity.ok(filename);
+        ImageApiEntity response = imageHostingService.uploadImageForUser(request, apiKey, file.getInputStream(), file.getOriginalFilename());
+        return ResponseEntity.ok().body(response);
     }
 }

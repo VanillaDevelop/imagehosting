@@ -1,11 +1,14 @@
 package gg.nya.imagehosting.services;
 
+import gg.nya.imagehosting.models.ImageApiEntity;
 import gg.nya.imagehosting.models.ImageHostingUser;
 import gg.nya.imagehosting.models.ImageHostingUserFile;
 import gg.nya.imagehosting.models.User;
 import gg.nya.imagehosting.repositories.ImageHostingUserFileRepository;
 import gg.nya.imagehosting.repositories.ImageHostingUserRepository;
+import gg.nya.imagehosting.utils.RESTUtils;
 import gg.nya.imagehosting.utils.Utils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,13 +90,14 @@ public class ImageHostingService {
     /**
      * Uploads an image for the user associated with the given API key.
      *
+     * @param request          The request when POSTing the image
      * @param apiKey           The API key of the user.
      * @param fileStream       The image to upload.
      * @param originalFileName The original file name.
-     * @return The filename of the uploaded image.
+     * @return The REST entity to retrieve this image.
      * @throws IOException If the image could not be uploaded.
      */
-    public String uploadImageForUser(String apiKey, InputStream fileStream, String originalFileName) throws IOException {
+    public ImageApiEntity uploadImageForUser(HttpServletRequest request, String apiKey, InputStream fileStream, String originalFileName) throws IOException {
         log.debug("uploadImageForUser, attempting to upload image for user with API key {}", apiKey);
         ImageHostingUser user = validateApiKey(apiKey);
         //Just a check to see if we can parse the file type
@@ -111,8 +115,10 @@ public class ImageHostingService {
         imageHostingUserFile.setFileSize((long) fileStream.available());
         imageHostingUserFile.setCreatedAt(LocalDateTime.now());
         imageHostingUserFileRepository.save(imageHostingUserFile);
+        //Generate REST response
+        ImageApiEntity response = RESTUtils.createImageApiEntityResponse(request, user.getUser().getUsername(), fileName);
         log.debug("uploadImageForUser, uploaded image for user {} with filename {}", user.getUser().getUsername(), fileName);
-        return fileName;
+        return response;
     }
 
     private boolean checkImageExists(String username, String filename) {
