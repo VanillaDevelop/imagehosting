@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -47,13 +48,13 @@ public class ImageHostingService {
      * @param filename The filename of the image.
      * @return The image as an input stream, if it exists. Throws a 404 error if the image does not exist.
      */
-    public InputStream retrieveImage(String username, String filename) {
+    public ByteArrayInputStream retrieveImage(String username, String filename) {
         log.debug("retrieveImage, checking if image for user {} with filename {} exists", username, filename);
         if (!checkImageExists(username, filename)) {
             log.error("retrieveImage, image for user {} with filename {} not found", username, filename);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
         }
-        log.debug("retrieveImage, image for user {} with filename {} found in DB, querying S3", username, filename);
+        log.debug("retrieveImage, image for user {} with filename {} found in DB, querying cached S3", username, filename);
         return s3Service.getImage(username, filename);
     }
 

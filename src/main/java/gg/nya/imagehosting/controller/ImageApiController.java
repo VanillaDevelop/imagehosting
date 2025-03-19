@@ -13,8 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 @RestController
 public class ImageApiController {
@@ -32,7 +32,8 @@ public class ImageApiController {
         String serverName = request.getServerName();
         String user = Utils.extractUsernameFromServerName(serverName);
         log.info("getImage, image requested for user {}, filename: {}", user, filename);
-        InputStream imageStream = imageHostingService.retrieveImage(user, filename);
+        ByteArrayInputStream imageStream = imageHostingService.retrieveImage(user, filename);
+        imageStream.reset();
         MediaType contentType = Utils.getMediaTypeFromFilename(filename);
 
         return ResponseEntity.ok()

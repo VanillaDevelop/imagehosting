@@ -3,6 +3,7 @@ package gg.nya.imagehosting.services;
 import gg.nya.imagehosting.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,8 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -33,20 +36,25 @@ public class S3Service {
      * @param fileName  The filename of the image.
      * @return The image as an InputStream.
      */
-    public InputStream getImage(String subdomain, String fileName) {
+    @Cacheable(value = "imageCache", key = "#subdomain + '/' + #fileName")
+    public ByteArrayInputStream getImage(String subdomain, String fileName) {
         String key = String.format("%s/%s", subdomain, fileName);
         try {
-            log.debug("getImage, attempting to retrieve image with key {} from bucket {}", key, bucketName);
-            InputStream stream = s3Client.getObject(GetObjectRequest.builder()
+            log.debug("getImage, cache miss - retrieving image with key {} from bucket {}", key, bucketName);
+            InputStream originalStream = s3Client.getObject(GetObjectRequest.builder()
                     .bucket(bucketName)
                     .key(key)
                     .build());
-            if (stream == null) {
+            if (originalStream == null) {
                 log.error("getImage, image with key {} not found in bucket {}", key, bucketName);
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
             }
-            return stream;
-        } catch (AwsServiceException | SdkClientException e) {
+
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            originalStream.transferTo(buffer);
+            return new ByteArrayInputStream(buffer.toByteArray());
+            
+        } catch (AwsServiceException | SdkClientException | IOException e) {
             log.error("getImage, could not retrieve image with key {} from bucket {}", key, bucketName);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
         }
