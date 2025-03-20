@@ -3,6 +3,7 @@ package gg.nya.imagehosting.services;
 import gg.nya.imagehosting.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,9 @@ public class S3Service {
 
     final private static Logger log = LoggerFactory.getLogger(S3Service.class);
 
+    @Value("${spring.profiles.active:prod}")
+    private String env;
+
     /**
      * Get image from S3 bucket. Throws a 404 error if the image could not be retrieved successfully.
      *
@@ -38,7 +42,7 @@ public class S3Service {
      */
     @Cacheable(value = "imageCache", key = "#subdomain + '/' + #fileName")
     public ByteArrayInputStream getImage(String subdomain, String fileName) {
-        String key = String.format("%s/%s", subdomain, fileName);
+        String key = getKeyName(subdomain, fileName);
         try {
             log.debug("getImage, cache miss - retrieving image with key {} from bucket {}", key, bucketName);
             InputStream originalStream = s3Client.getObject(GetObjectRequest.builder()
@@ -53,7 +57,7 @@ public class S3Service {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             originalStream.transferTo(buffer);
             return new ByteArrayInputStream(buffer.toByteArray());
-            
+
         } catch (AwsServiceException | SdkClientException | IOException e) {
             log.error("getImage, could not retrieve image with key {} from bucket {}", key, bucketName);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
@@ -68,7 +72,7 @@ public class S3Service {
      * @param fileStream The image as an InputStream.
      */
     public void uploadImage(String subdomain, String fileName, InputStream fileStream) {
-        String key = String.format("%s/%s", subdomain, fileName);
+        String key = getKeyName(subdomain, fileName);
         try {
             log.debug("uploadImage, attempting to upload image with key {} to bucket {}", key, bucketName);
             s3Client.putObject(builder -> builder
@@ -80,5 +84,20 @@ public class S3Service {
             log.error("uploadImage, could not upload image with key {} to bucket {}", key, bucketName);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not upload image");
         }
+    }
+
+    /**
+     * Get the environment-specific name of the key in the S3 bucket.
+     *
+     * @param subdomain The subdomain of the image (username).
+     * @param fileName  The filename of the image.
+     * @return The environment-specific name of the key in the S3 bucket.
+     */
+    private String getKeyName(String subdomain, String fileName) {
+        String key = String.format("%s/%s", subdomain, fileName);
+        if (env.equals("dev")) {
+            key = "@dev/" + key;
+        }
+        return key;
     }
 }
