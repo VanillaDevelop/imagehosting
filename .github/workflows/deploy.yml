@@ -1,0 +1,49 @@
+name: Deploy Spring Boot App
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test
+
+      - name: Deploy to Server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PORT: ${{ vars.SSH_PORT }}
+          APP_NAME: "imagehosting"
+        run: |
+          # Set up SSH
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          
+          SSH_CMD="ssh -p $SSH_PORT -o StrictHostKeyChecking=no deploy@vanilla.sh"
+
+          # Stop the current application
+          $SSH_CMD "sudo systemctl stop $APP_NAME"
+
+          # Upload new jar file to server
+          scp -P $SSH_PORT -i ~/.ssh/id_ed25519 build/libs/*.jar deploy@vanilla.sh:/opt/$APP_NAME/$APP_NAME.jar
+
+          # Restart the application
+          $SSH_CMD "sudo systemctl start $APP_NAME"
+
+          # Clean up old builds
+          $SSH_CMD "find /opt/$APP_NAME -type f -name '*.jar' -mtime +30 -delete"
