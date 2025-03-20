@@ -46,20 +46,20 @@ jobs:
 
           # Stop the current application
           $SSH_CMD "systemctl --user stop $APP_NAME"
-
-          # Find the correct JAR name dynamically
-          JAR_FILE=$(ls build/libs/imagehosting-*.jar | grep -v plain | head -n 1)
           
-          # Ensure JAR_FILE is found before copying
-          if [ -f "$JAR_FILE" ]; then
-            scp -P $SSH_PORT -i ~/.ssh/id_ed25519 "$JAR_FILE" deploy@vanilla.sh:/opt/$APP_NAME/$APP_NAME.jar
-          else
-            echo "Error: No valid JAR file found!"
-            exit 1
-          fi
+          JAR_FILE=$(ls build/libs/imagehosting-*.jar | grep -v plain | head -n 1)
+          echo "Deploying: $JAR_FILE"
 
+          if [ -f "$JAR_FILE" ]; then
+          scp -P $SSH_PORT -i ~/.ssh/id_ed25519 "$JAR_FILE" deploy@vanilla.sh:/opt/imagehosting/imagehosting-new.jar
+          ssh -p $SSH_PORT -i ~/.ssh/id_ed25519 deploy@vanilla.sh "mv /opt/imagehosting/imagehosting-new.jar /opt/imagehosting/imagehosting.jar"
+          else
+          echo "ERROR: No valid JAR file found!"
+          exit 1
+          fi
+          
           # Restart the application
           $SSH_CMD "systemctl --user start $APP_NAME"
-
+          
           # Clean up old builds
           $SSH_CMD "find /opt/$APP_NAME -type f -name '*.jar' -mtime +30 -delete"
