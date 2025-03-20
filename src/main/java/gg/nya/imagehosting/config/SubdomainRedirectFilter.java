@@ -29,7 +29,7 @@ public class SubdomainRedirectFilter implements Filter {
             return;
         }
 
-        if (serverName.contains(".")) {
+        if (serverName.contains(".") && !serverName.startsWith("nya.gg")) {
             String protocol = request.isSecure() ? "https" : "http";
             String serverNameWithoutSubdomain = serverName.substring(serverName.indexOf(".") + 1);
             String port = request.getServerPort() == 80 ? "" : ":" + request.getServerPort();
