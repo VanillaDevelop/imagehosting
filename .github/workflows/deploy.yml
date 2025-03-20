@@ -40,13 +40,13 @@ jobs:
           SSH_CMD="ssh -p $SSH_PORT -o StrictHostKeyChecking=no deploy@vanilla.sh"
 
           # Stop the current application
-          $SSH_CMD "sudo systemctl stop $APP_NAME"
+          $SSH_CMD "systemctl --user stop $APP_NAME"
 
           # Upload new jar file to server
           scp -P $SSH_PORT -i ~/.ssh/id_ed25519 build/libs/*.jar deploy@vanilla.sh:/opt/$APP_NAME/$APP_NAME.jar
 
           # Restart the application
-          $SSH_CMD "sudo systemctl start $APP_NAME"
+          $SSH_CMD "systemctl --user start $APP_NAME"
 
           # Clean up old builds
           $SSH_CMD "find /opt/$APP_NAME -type f -name '*.jar' -mtime +30 -delete"
