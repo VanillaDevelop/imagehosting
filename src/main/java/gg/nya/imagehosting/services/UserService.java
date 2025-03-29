@@ -3,11 +3,12 @@ package gg.nya.imagehosting.services;
 import gg.nya.imagehosting.models.Role;
 import gg.nya.imagehosting.models.User;
 import gg.nya.imagehosting.repositories.UserRepository;
-import gg.nya.imagehosting.security.UserSession;
+import gg.nya.imagehosting.security.CustomAuthenticationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,14 +18,12 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final RoleService roleService;
-    private final UserSession userSession;
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
-    public UserService(UserRepository userRepository, UserSession userSession, RoleService roleService) {
+    public UserService(UserRepository userRepository, RoleService roleService) {
         this.userRepository = userRepository;
-        this.userSession = userSession;
         this.roleService = roleService;
     }
 
@@ -72,7 +71,7 @@ public class UserService {
         }
         //Check user is not trying to remove his own admin role
         if (updatedUser.getRoles().stream().map(Role::getRole).toList().contains("ADMIN") && role.equals("ADMIN")
-                && userSession.getUserId().equals(updatedUser.getId())) {
+                && ((CustomAuthenticationToken) SecurityContextHolder.getContext().getAuthentication()).getUserId().equals(updatedUser.getId())) {
             log.warn("removeRoleFromUser, user {} is trying to remove his own admin role", updatedUser.getUsername());
             return Optional.of("You cannot remove your own admin role");
         }

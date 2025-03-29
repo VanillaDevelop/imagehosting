@@ -6,14 +6,21 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 
 public class CustomAuthenticationToken extends AbstractAuthenticationToken {
 
+    private final Long userId;
     private final String username;
     private final List<String> roles;
 
-    public CustomAuthenticationToken(String username, List<String> roles) {
+    public CustomAuthenticationToken(Long userId, String username, List<String> roles) {
         super(null);
+        this.userId = userId;
         this.username = username;
         this.roles = roles;
         setAuthenticated(true);
+    }
+
+    @Override
+    public String getName() {
+        return username;
     }
 
     @Override
@@ -28,5 +35,9 @@ public class CustomAuthenticationToken extends AbstractAuthenticationToken {
 
     public List<String> getRoles() {
         return roles;
+    }
+
+    public Long getUserId() {
+        return userId;
     }
 }

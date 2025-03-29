@@ -7,7 +7,7 @@
 >
 <ui:composition template="/templates/template.xhtml">
     <ui:define name="title">Nya.GG - Home</ui:define>
-    <ui:define name="heading">Welcome back, ${userSession.username}!</ui:define>
+    <ui:define name="heading">Welcome back, ${userDataBean.username}!</ui:define>
     <ui:define name="content">
         <p:staticMessage severity="info" summary="Available Features" styleClass="w-100"
                          detail="Nya.GG uses a modular approach to provide a variety of features. Your available features are determined by your roles.

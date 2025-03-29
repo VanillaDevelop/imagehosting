@@ -51,12 +51,12 @@ h1, h2, h3 {
     margin: 0;
 }
 
-.no-underline a, a.no-underline {
+.no-underline {
     text-decoration: none !important;
 }
 
-.no-underline a:hover, a.no-underline:hover {
-    text-decoration: none !important;
+.ui-state-disabled div {
+    background-color: #DDD;
 }
 
 .error-text {

@@ -2,7 +2,7 @@ package gg.nya.imagehosting.beans;
 
 import gg.nya.imagehosting.config.ApplicationContextProvider;
 import gg.nya.imagehosting.models.ImageHostingUser;
-import gg.nya.imagehosting.security.UserSession;
+import gg.nya.imagehosting.services.AuthenticationService;
 import gg.nya.imagehosting.services.ImageHostingService;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -23,21 +23,21 @@ public class ImageHostingBean implements Serializable {
 
     private ImageHostingUser imageHostingUser;
 
-    private final UserSession userSession;
     private transient ImageHostingService imageHostingService;
+    private transient AuthenticationService authenticationService;
 
     private static final Logger log = LoggerFactory.getLogger(ImageHostingBean.class);
 
     @Autowired
-    public ImageHostingBean(ImageHostingService imageHostingService, UserSession userSession) {
+    public ImageHostingBean(ImageHostingService imageHostingService, AuthenticationService authenticationService) {
         this.imageHostingService = imageHostingService;
-        this.userSession = userSession;
+        this.authenticationService = authenticationService;
     }
 
     @PostConstruct
     public void init() {
-        log.debug("init, fetching image hosting user for user ID {}", userSession.getUserId());
-        this.imageHostingUser = imageHostingService.getOrCreateImageHostingUser(userSession.getUserId());
+        log.debug("init, fetching image hosting user for user ID {}", authenticationService.getCurrentUserId());
+        this.imageHostingUser = imageHostingService.getOrCreateImageHostingUser(authenticationService.getCurrentUserId());
     }
 
     public String getApiKey() {
@@ -49,5 +49,6 @@ public class ImageHostingBean implements Serializable {
         in.defaultReadObject();
         ApplicationContext ctx = ApplicationContextProvider.getApplicationContext();
         this.imageHostingService = ctx.getBean(ImageHostingService.class);
+        this.authenticationService = ctx.getBean(AuthenticationService.class);
     }
 }

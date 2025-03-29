@@ -2,7 +2,6 @@ package gg.nya.imagehosting.beans;
 
 import gg.nya.imagehosting.models.Role;
 import gg.nya.imagehosting.models.User;
-import gg.nya.imagehosting.security.UserSession;
 import gg.nya.imagehosting.services.AuthenticationService;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -21,11 +20,9 @@ public class LoginBean {
     private static final Logger log = LoggerFactory.getLogger(LoginBean.class);
 
     private final AuthenticationService authenticationService;
-    private final UserSession userSession;
 
-    public LoginBean(AuthenticationService authenticationService, UserSession userSession) {
+    public LoginBean(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
-        this.userSession = userSession;
     }
 
     public String login() {
@@ -40,8 +37,8 @@ public class LoginBean {
     }
 
     public String logout() {
-        if (userSession.isAuthenticated()) {
-            userSession.logout();
+        if (authenticationService.isCurrentUserAuthenticated()) {
+            authenticationService.logout();
         }
         return "index.xhtml?faces-redirect=true";
     }
@@ -63,7 +60,7 @@ public class LoginBean {
     }
 
     public void redirectIfAuthenticated() throws IOException {
-        if (userSession.isAuthenticated()) {
+        if (authenticationService.isCurrentUserAuthenticated()) {
             FacesContext.getCurrentInstance().getExternalContext().redirect("home.xhtml?faces-redirect=true");
         }
     }
@@ -73,8 +70,6 @@ public class LoginBean {
             return handleUnsuccessfulSignUpAttemptInternal();
         }
         log.info("handleSignUpAttemptInternal, sign up successful for user: {}", user.get().getUsername());
-        userSession.login(user.get().getId(), user.get().getUsername(),
-                user.get().getRoles().stream().map(Role::getRole).toList());
         return "home.xhtml?faces-redirect=true";
     }
 
@@ -83,8 +78,6 @@ public class LoginBean {
             return handleUnsuccessfulLoginAttemptInternal();
         }
         log.info("handleLoginAttemptInternal, login successful for user: {}", user.get().getUsername());
-        userSession.login(user.get().getId(), user.get().getUsername(),
-                user.get().getRoles().stream().map(Role::getRole).toList());
         return "home.xhtml?faces-redirect=true";
     }
 
@@ -92,7 +85,7 @@ public class LoginBean {
         log.info("handleUnsuccessfulLoginAttemptInternal, login unsuccessful for user: {}", username);
         this.username = "";
         this.password = "";
-        userSession.logout();
+        authenticationService.logout();
 
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
                 "Invalid credentials!", null));
@@ -104,7 +97,7 @@ public class LoginBean {
         log.info("handleUnsuccessfulSignUpAttemptInternal, sign up unsuccessful for user: {}", username);
         this.username = "";
         this.password = "";
-        userSession.logout();
+        authenticationService.logout();
 
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
                 "Username already exists!", null));
