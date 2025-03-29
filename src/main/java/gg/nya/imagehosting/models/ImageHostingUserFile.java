@@ -18,7 +18,7 @@ public class ImageHostingUserFile implements Serializable {
 
     @NotNull
     @JoinColumn(name = "image_hosting_user_id")
-    @OneToOne
+    @ManyToOne
     private ImageHostingUser imageHostingUser;
 
     @NotNull
