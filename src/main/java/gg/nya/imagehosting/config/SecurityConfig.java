@@ -39,6 +39,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/admin.xhtml")
                         .access((authentication, context) -> new AuthorizationDecision(hasAdminRole(authentication)))
+                        .requestMatchers("/imagehosting.xhtml")
+                        .access((authentication, context) -> new AuthorizationDecision(hasImageHostingRole(authentication)))
                         .anyRequest()
                         .authenticated())
                 .securityContext(securityContext -> securityContext.requireExplicitSave(false))
@@ -54,5 +56,11 @@ public class SecurityConfig {
         if (!(authentication.get() instanceof CustomAuthenticationToken customAuthenticationToken))
             return false;
         return customAuthenticationToken.getRoles().contains("ADMIN");
+    }
+
+    private boolean hasImageHostingRole(Supplier<Authentication> authentication) {
+        if (!(authentication.get() instanceof CustomAuthenticationToken customAuthenticationToken))
+            return false;
+        return customAuthenticationToken.getRoles().contains("IMAGE_HOSTING");
     }
 }
