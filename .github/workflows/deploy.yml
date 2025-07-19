@@ -42,7 +42,7 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           
-          SSH_CMD="ssh -p $SSH_PORT -o StrictHostKeyChecking=no deploy@vanilla.sh"
+          SSH_CMD="ssh -p $SSH_PORT -o StrictHostKeyChecking=no deploy@195.201.88.6"
 
           # Stop the current application
           $SSH_CMD "systemctl --user stop $APP_NAME"
@@ -51,8 +51,8 @@ jobs:
           echo "Deploying: $JAR_FILE"
 
           if [ -f "$JAR_FILE" ]; then
-          scp -P $SSH_PORT -i ~/.ssh/id_ed25519 "$JAR_FILE" deploy@vanilla.sh:/opt/imagehosting/imagehosting-new.jar
-          ssh -p $SSH_PORT -i ~/.ssh/id_ed25519 deploy@vanilla.sh "mv /opt/imagehosting/imagehosting-new.jar /opt/imagehosting/imagehosting.jar"
+          scp -P $SSH_PORT -i ~/.ssh/id_ed25519 "$JAR_FILE" deploy@195.201.88.6:/opt/imagehosting/imagehosting-new.jar
+          ssh -p $SSH_PORT -i ~/.ssh/id_ed25519 deploy@195.201.88.6 "mv /opt/imagehosting/imagehosting-new.jar /opt/imagehosting/imagehosting.jar"
           else
           echo "ERROR: No valid JAR file found!"
           exit 1
