@@ -16,6 +16,7 @@ class VideoTrimmer {
         this.setupEventListeners();
         this.createTimelineMarkers();
         this.updateDisplay();
+        this.updatePositionIndicator();
     }
 
     initializeElements() {
@@ -26,8 +27,11 @@ class VideoTrimmer {
         this.rightHandle = document.getElementById('rightHandle');
         //Progress bar element, to show the selected portion of the video
         this.progressBar = document.getElementById('progressBar');
+        //Position indicator element, to show the current position of the video
+        this.positionIndicator = document.getElementById('positionIndicator');
         //Time display elements
         this.startTimeEl = document.getElementById('startTime');
+        this.selectedDurationEl = document.getElementById('selectedDuration');
         this.endTimeEl = document.getElementById('endTime');
         //Video player, to show the video being trimmed
         this.videoPlayer = document.getElementById('videoPlayer');
@@ -98,17 +102,12 @@ class VideoTrimmer {
         const percentage = Math.max(0, Math.min(1, x / rect.width));
         const time = percentage * this.duration;
 
-        // Set the closest handle to the clicked position
-        const leftDistance = Math.abs(time - this.startTime);
-        const rightDistance = Math.abs(time - this.endTime);
-
-        if (leftDistance < rightDistance) {
-            this.startTime = Math.min(time, this.endTime - 0.1);
-        } else {
-            this.endTime = Math.max(time, this.startTime + 0.1);
+        if (time > this.endTime - 0.1 || time < this.startTime + 0.1) {
+            return;
         }
 
-        this.updateDisplay();
+        // Set the current time based on the clicked position
+        this.videoPlayer.currentTime = time;
     }
 
     // Update the display of the trimmer
@@ -127,6 +126,7 @@ class VideoTrimmer {
 
         // Update time displays
         this.startTimeEl.textContent = this.formatTime(this.startTime);
+        this.selectedDurationEl.textContent = this.formatTime(this.endTime - this.startTime);
         this.endTimeEl.textContent = this.formatTime(this.endTime);
 
         // Set player to this position
@@ -159,5 +159,35 @@ class VideoTrimmer {
 
             markersContainer.appendChild(marker);
         }
+    }
+
+    // Periodically update the position indicator
+    updatePositionIndicator() {
+        if (this.videoPlayer) {
+            const currentTime = this.videoPlayer.currentTime;
+            const percentage = (currentTime / this.duration) * 100;
+            this.positionIndicator.style.left = `${percentage}%`;
+        }
+
+        requestAnimationFrame(() => this.updatePositionIndicator());
+    }
+
+    destroy() {
+        // Remove event listeners
+        this.leftHandle.removeEventListener('mousedown', this.startDrag);
+        this.rightHandle.removeEventListener('mousedown', this.startDrag);
+        document.removeEventListener('mousemove', this.drag);
+        document.removeEventListener('mouseup', this.endDrag);
+        this.trimmerBar.removeEventListener('click', this.handleTimelineClick);
+
+        // Clear elements
+        this.trimmerBar = null;
+        this.leftHandle = null;
+        this.rightHandle = null;
+        this.progressBar = null;
+        this.startTimeEl = null;
+        this.selectedDurationEl = null;
+        this.endTimeEl = null;
+        this.videoPlayer = null;
     }
 }
