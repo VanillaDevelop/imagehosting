@@ -1,6 +1,5 @@
 package gg.nya.imagehosting.beans;
 
-import gg.nya.imagehosting.models.Role;
 import gg.nya.imagehosting.models.User;
 import gg.nya.imagehosting.services.AuthenticationService;
 import jakarta.faces.application.FacesMessage;

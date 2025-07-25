@@ -1,0 +1,163 @@
+/**
+ * This script holds data for a video trimmer component that allows users to select a portion of a video
+ * @author Vanilla
+ */
+
+// Video Trimmer Class
+class VideoTrimmer {
+    constructor(videoDurationInSeconds) {
+        this.duration = videoDurationInSeconds;
+        this.startTime = 0;
+        this.endTime = videoDurationInSeconds;
+        this.isDragging = false;
+        this.activeHandle = null;
+
+        this.initializeElements();
+        this.setupEventListeners();
+        this.createTimelineMarkers();
+        this.updateDisplay();
+    }
+
+    initializeElements() {
+        //Main bar element, to click on to set start/end time
+        this.trimmerBar = document.getElementById('trimmerBar');
+        //Handle elements which can be dragged to set start/end time
+        this.leftHandle = document.getElementById('leftHandle');
+        this.rightHandle = document.getElementById('rightHandle');
+        //Progress bar element, to show the selected portion of the video
+        this.progressBar = document.getElementById('progressBar');
+        //Time display elements
+        this.startTimeEl = document.getElementById('startTime');
+        this.endTimeEl = document.getElementById('endTime');
+        //Video player, to show the video being trimmed
+        this.videoPlayer = document.getElementById('videoPlayer');
+    }
+
+    setupEventListeners() {
+        // Start dragging when the handle is clicked
+        this.leftHandle.addEventListener('mousedown', (e) => this.startDrag(e, 'left'));
+        this.rightHandle.addEventListener('mousedown', (e) => this.startDrag(e, 'right'));
+        // Move the handle when dragging
+        document.addEventListener('mousemove', (e) => this.drag(e));
+        // Stop dragging when the mouse is released
+        document.addEventListener('mouseup', () => this.endDrag());
+        // Click on timeline to set position
+        this.trimmerBar.addEventListener('click', (e) => this.handleTimelineClick(e));
+    }
+
+    // Start dragging the handle
+    startDrag(e, handle) {
+        e.preventDefault();
+        this.isDragging = true;
+        this.activeHandle = handle;
+        document.body.style.cursor = 'ew-resize';
+
+        if (handle === 'left') {
+            this.leftHandle.classList.add('active');
+        } else {
+            this.rightHandle.classList.add('active');
+        }
+    }
+
+    // Update position of the handle while dragging
+    drag(e) {
+        if (!this.isDragging) return;
+
+        const rect = this.trimmerBar.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percentage = Math.max(0, Math.min(1, x / rect.width));
+        const time = percentage * this.duration;
+
+        if (this.activeHandle === 'left') {
+            this.startTime = Math.min(time, this.endTime - 0.1);
+        } else {
+            this.endTime = Math.max(time, this.startTime + 0.1);
+        }
+
+        this.updateDisplay();
+    }
+
+    // End dragging the handle
+    endDrag() {
+        if (!this.isDragging) return;
+
+        this.isDragging = false;
+        this.activeHandle = null;
+        document.body.style.cursor = 'default';
+
+        this.leftHandle.classList.remove('active');
+        this.rightHandle.classList.remove('active');
+    }
+
+    // Handle clicks on the timeline to set start/end time
+    handleTimelineClick(e) {
+        if (this.isDragging) return;
+
+        const rect = this.trimmerBar.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percentage = Math.max(0, Math.min(1, x / rect.width));
+        const time = percentage * this.duration;
+
+        // Set the closest handle to the clicked position
+        const leftDistance = Math.abs(time - this.startTime);
+        const rightDistance = Math.abs(time - this.endTime);
+
+        if (leftDistance < rightDistance) {
+            this.startTime = Math.min(time, this.endTime - 0.1);
+        } else {
+            this.endTime = Math.max(time, this.startTime + 0.1);
+        }
+
+        this.updateDisplay();
+    }
+
+    // Update the display of the trimmer
+    updateDisplay() {
+        // Update handle positions
+        const leftPercent = (this.startTime / this.duration) * 100;
+        const rightPercent = (this.endTime / this.duration) * 100;
+
+        this.leftHandle.style.left = `${leftPercent}%`;
+        this.rightHandle.style.left = `${rightPercent}%`;
+        this.rightHandle.style.transform = 'translateX(-100%)';
+
+        // Update progress bar
+        this.progressBar.style.left = `${leftPercent}%`;
+        this.progressBar.style.width = `${rightPercent - leftPercent}%`;
+
+        // Update time displays
+        this.startTimeEl.textContent = this.formatTime(this.startTime);
+        this.endTimeEl.textContent = this.formatTime(this.endTime);
+
+        // Set player to this position
+        if(this.activeHandle !== null) {
+            this.videoPlayer.currentTime = this.activeHandle === 'left' ? this.startTime : this.endTime;
+        }
+        this.videoPlayer.play();
+    }
+
+    // Format time in seconds to MM:SS
+    formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    createTimelineMarkers() {
+        const markersContainer = document.getElementById('timelineMarkers');
+        const markerCount = 10;
+
+        for (let i = 0; i <= markerCount; i++) {
+            const marker = document.createElement('div');
+            marker.className = 'marker';
+            marker.style.left = `${(i / markerCount) * 100}%`;
+
+            const label = document.createElement('div');
+            label.className = 'marker-label';
+            label.textContent = this.formatTime((i / markerCount) * this.duration);
+            marker.appendChild(label);
+
+            markersContainer.appendChild(marker);
+        }
+    }
+}

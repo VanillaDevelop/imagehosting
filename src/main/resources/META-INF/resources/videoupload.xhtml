@@ -3,11 +3,14 @@
         xmlns="http://www.w3.org/1999/xhtml"
         xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
         xmlns:p="http://primefaces.org/ui"
-
+        xmlns:h="http://xmlns.jcp.org/jsf/html"
 >
 <ui:composition template="/templates/template.xhtml">
     <ui:define name="title">Nya.GG - Video Upload</ui:define>
     <ui:define name="heading">Video Upload</ui:define>
+    <ui:define name="head">
+        <h:outputStylesheet name="/assets/css/trimmer.css"/>
+    </ui:define>
     <ui:define name="content">
         <div class="my-3">
             <p:linkButton outcome="/home.xhtml"
@@ -16,9 +19,59 @@
             </p:linkButton>
         </div>
 
-        <div>
+        <!-- File input to select local video -->
+        <h:form>
+            <h:outputLabel for="videoInput" value="Choose a video file:" />
+            <input type="file" id="videoInput" accept="video/*" />
+        </h:form>
 
+        <div class="trimmer-container">
+            <video id="videoPlayer" preload="auto" width="640" height="360">
+                <source id="videoSource" src="" type="" />
+                Your browser does not support the video tag.
+            </video>
+
+            <h2>Video Trimmer</h2>
+
+            <div class="trimmer-bar" id="trimmerBar">
+                <div class="timeline">
+                    <div class="timeline-markers" id="timelineMarkers"></div>
+                </div>
+                <div class="progress-bar" id="progressBar"></div>
+                <div class="trimmer-handle handle-left" id="leftHandle"></div>
+                <div class="trimmer-handle handle-right" id="rightHandle"></div>
+            </div>
+
+            <div class="time-display">
+                <div>Start: <span id="startTime">0:00</span></div>
+                <div>End: <span id="endTime">1:00</span></div>
+            </div>
         </div>
+
+        <!-- Script to handle file input -->
+        <script>
+            document.getElementById('videoInput').addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const video = document.getElementById('videoPlayer');
+                    const source = document.getElementById('videoSource');
+
+                    source.src = URL.createObjectURL(file);
+                    source.type = file.type;
+
+                    videoPlayer.addEventListener('loadedmetadata', function() {
+                        const duration = videoPlayer.duration;
+                        this.trimmer = new VideoTrimmer(duration);
+                    });
+
+                    video.load(); // Load new video source
+                    video.play(); // Optional: autoplay
+                }
+            });
+        </script>
+
+        <h:outputScript name="/assets/js/trimmer.js"/>
     </ui:define>
+
 </ui:composition>
 </html>
