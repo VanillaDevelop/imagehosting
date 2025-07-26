@@ -68,14 +68,15 @@ class VideoTrimmer {
         if (!this.isDragging) return;
 
         const rect = this.trimmerBar.getBoundingClientRect();
+        const handleOffset = this.duration / rect.width * 12;
         const x = e.clientX - rect.left;
         const percentage = Math.max(0, Math.min(1, x / rect.width));
         const time = percentage * this.duration;
 
         if (this.activeHandle === 'left') {
-            this.startTime = Math.min(time, this.endTime - 0.1);
+            this.startTime = Math.min(time, this.endTime - 4 * handleOffset);
         } else {
-            this.endTime = Math.max(time, this.startTime + 0.1);
+            this.endTime = Math.max(time, this.startTime + 4 * handleOffset);
         }
 
         this.updateDisplay();
@@ -99,15 +100,21 @@ class VideoTrimmer {
 
         const rect = this.trimmerBar.getBoundingClientRect();
         const x = e.clientX - rect.left;
-        const percentage = Math.max(0, Math.min(1, x / rect.width));
-        const time = percentage * this.duration;
-
-        if (time > this.endTime - 0.1 || time < this.startTime + 0.1) {
+        
+        // Calculate bounds the same way as updatePositionIndicator
+        const startPx = (this.startTime / this.duration) * rect.width;
+        const endPx = (this.endTime / this.duration) * rect.width - 24;
+        
+        // Only handle clicks within the active trimmed region
+        if (x < startPx + 12 || x > endPx + 12) {
             return;
         }
+        
+        // Calculate position within the trimmed region
+        const relativePosition = (x - startPx - 12) / (endPx - startPx);
 
         // Set the current time based on the clicked position
-        this.videoPlayer.currentTime = time;
+        this.videoPlayer.currentTime = this.startTime + relativePosition * (this.endTime - this.startTime);
     }
 
     // Update the display of the trimmer
@@ -166,8 +173,12 @@ class VideoTrimmer {
     updatePositionIndicator() {
         if (this.videoPlayer) {
             const currentTime = this.videoPlayer.currentTime;
-            const percentage = (currentTime / this.duration) * 100;
-            this.positionIndicator.style.left = `${percentage}%`;
+            const indicatorPosition = (currentTime - this.startTime) / (this.endTime - this.startTime);
+            const bounds = this.trimmerBar.getBoundingClientRect();
+            const startPx = (this.startTime / this.duration) * bounds.width;
+            const endPx = (this.endTime / this.duration) * bounds.width - 24;
+
+            this.positionIndicator.style.left = `${startPx + 12 + indicatorPosition * (endPx - startPx)}px`;
 
             // Loop back around if the video ends
             if (currentTime >= this.endTime) {
