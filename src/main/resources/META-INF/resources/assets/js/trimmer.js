@@ -131,7 +131,8 @@ class VideoTrimmer {
 
         // Set player to this position
         if(this.activeHandle !== null) {
-            this.videoPlayer.currentTime = this.activeHandle === 'left' ? this.startTime : this.endTime;
+            this.videoPlayer.currentTime =
+                this.activeHandle === 'left' ? this.startTime : Math.max(this.endTime - 1, this.startTime);
         }
         this.videoPlayer.play();
     }
@@ -167,6 +168,12 @@ class VideoTrimmer {
             const currentTime = this.videoPlayer.currentTime;
             const percentage = (currentTime / this.duration) * 100;
             this.positionIndicator.style.left = `${percentage}%`;
+
+            // Loop back around if the video ends
+            if (currentTime >= this.endTime) {
+                this.videoPlayer.currentTime = this.startTime;
+                this.videoPlayer.play();
+            }
         }
 
         requestAnimationFrame(() => this.updatePositionIndicator());
