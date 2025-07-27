@@ -20,9 +20,11 @@
         </div>
 
         <!-- File input to select local video -->
-        <h:form>
+        <h:form id="videoForm" action="/v/" method="post" enctype="multipart/form-data">
             <h:outputLabel for="videoInput" value="Choose a video file:" />
-            <input type="file" id="videoInput" accept="video/*" />
+            <input type="file" id="videoInput" name="videoInput" accept="video/*" />
+            <input type="hidden" id="startTimeSeconds" name="startTimeSeconds" />
+            <input type="hidden" id="endTimeSeconds" name="endTimeSeconds" />
         </h:form>
 
         <div class="trimmer-container">
@@ -48,10 +50,14 @@
                 <div><strong>Selected Duration: <span id="selectedDuration">1:00</span></strong></div>
                 <div>End: <span id="endTime">1:00</span></div>
             </div>
+
+            <button id="trimButton" class="btn btn-primary">Trim And Upload</button>
         </div>
 
         <!-- Script to handle file input -->
         <script>
+            let trimmer = null;
+            
             document.getElementById('videoInput').addEventListener('change', function (event) {
                 const file = event.target.files[0];
                 if (file) {
@@ -61,14 +67,31 @@
                     source.src = URL.createObjectURL(file);
                     source.type = file.type;
 
-                    videoPlayer.addEventListener('loadedmetadata', function() {
-                        const duration = videoPlayer.duration;
-                        this.trimmer = new VideoTrimmer(duration);
+                    video.addEventListener('loadedmetadata', function() {
+                        const duration = video.duration;
+                        trimmer = new VideoTrimmer(duration);
                     });
 
                     video.load(); // Load new video source
                     video.play(); // Optional: autoplay
                 }
+            });
+            
+            // Handle trim button click
+            document.getElementById('trimButton').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (!trimmer) {
+                    alert('Please select a video file first.');
+                    return;
+                }
+                
+                // Set the hidden fields with current trimmer values
+                document.getElementById('startTimeSeconds').value = trimmer.startTime;
+                document.getElementById('endTimeSeconds').value = trimmer.endTime;
+                
+                // Submit the form
+                document.getElementById('videoForm').submit();
             });
         </script>
 
