@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class FFmpegService {
@@ -41,10 +42,12 @@ public class FFmpegService {
      * 
      * @param inputStream The input video stream
      * @param originalFilename The original filename for format detection
+     * @param startDurationSeconds Start time in seconds for the video segment
+     * @param endDurationSeconds End time in seconds for the video segment
      * @return InputStream of the converted MP4 file
-     * @throws IOException if conversion fails
      */
-    public InputStream convertToMp4(InputStream inputStream, String originalFilename) throws IOException {
+    public InputStream convertToMp4(InputStream inputStream, String originalFilename,
+                                    double startDurationSeconds, double endDurationSeconds) {
         final Path tempInputFile;
         final Path tempOutputFile;
 
@@ -55,17 +58,22 @@ public class FFmpegService {
             tempOutputFile = Files.createTempFile("output_video_" + tempFileId, ".mp4");
             
             Files.copy(inputStream, tempInputFile, StandardCopyOption.REPLACE_EXISTING);
+
+            final long startTimeMs = (long) (startDurationSeconds * 1000);
+            final long endTimeMs = (long) (endDurationSeconds * 1000);
             
-            log.debug("convertToMp4, converting video from {} to MP4: {} -> {}",
-                fileExtension, tempInputFile, tempOutputFile);
+            log.debug("convertToMp4, converting video from {} to webm and clipping to ({}, {}): {} -> {}",
+                fileExtension, startDurationSeconds, endDurationSeconds, tempInputFile, tempOutputFile);
             
             FFmpegBuilder builder = new FFmpegBuilder()
                 .setInput(tempInputFile.toString())
                 .overrideOutputFiles(true)
                 .addOutput(tempOutputFile.toString())
-                .setFormat("mp4")
-                .setVideoCodec("libx264")
-                .setAudioCodec("aac")
+                .setFormat("webm")
+                .setVideoCodec("libvpx-vp9")
+                .setAudioCodec("libopus")
+                .setStartOffset(startTimeMs, TimeUnit.MILLISECONDS)
+                .setDuration(endTimeMs - startTimeMs, TimeUnit.MILLISECONDS)
                 .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL)
                 .done();
             

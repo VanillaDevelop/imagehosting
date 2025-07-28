@@ -20,12 +20,13 @@
         </div>
 
         <!-- File input to select local video -->
-        <h:form id="videoForm" action="/v/" method="post" enctype="multipart/form-data">
-            <h:outputLabel for="videoInput" value="Choose a video file:" />
+        <form id="videoForm" action="/v/" method="post" enctype="multipart/form-data">
+            <label for="videoInput">Choose a video file:</label>
             <input type="file" id="videoInput" name="videoInput" accept="video/*" />
             <input type="hidden" id="startTimeSeconds" name="startTimeSeconds" />
             <input type="hidden" id="endTimeSeconds" name="endTimeSeconds" />
-        </h:form>
+            <input type="hidden" name="_csrf" value="${_csrf.token}" />
+        </form>
 
         <div class="trimmer-container">
             <video id="videoPlayer" preload="auto" width="640" height="360">
