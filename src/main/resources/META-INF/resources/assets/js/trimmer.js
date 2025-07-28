@@ -14,7 +14,6 @@ class VideoTrimmer {
 
         this.initializeElements();
         this.setupEventListeners();
-        this.createTimelineMarkers();
         this.updateDisplay();
         this.updatePositionIndicator();
     }
@@ -30,9 +29,9 @@ class VideoTrimmer {
         //Position indicator element, to show the current position of the video
         this.positionIndicator = document.getElementById('positionIndicator');
         //Time display elements
-        this.startTimeEl = document.getElementById('startTime');
-        this.selectedDurationEl = document.getElementById('selectedDuration');
-        this.endTimeEl = document.getElementById('endTime');
+        this.startTimeEl = document.getElementById('start-time');
+        this.selectedDurationEl = document.getElementById('selected-duration');
+        this.endTimeEl = document.getElementById('end-time');
         //Video player, to show the video being trimmed
         this.videoPlayer = document.getElementById('video-player');
         //Play/pause overlay elements
@@ -156,23 +155,6 @@ class VideoTrimmer {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
 
-    createTimelineMarkers() {
-        const markersContainer = document.getElementById('timelineMarkers');
-        const markerCount = 10;
-
-        for (let i = 0; i <= markerCount; i++) {
-            const marker = document.createElement('div');
-            marker.className = 'marker';
-            marker.style.left = `${(i / markerCount) * 100}%`;
-
-            const label = document.createElement('div');
-            label.className = 'marker-label';
-            label.textContent = this.formatTime((i / markerCount) * this.duration);
-            marker.appendChild(label);
-
-            markersContainer.appendChild(marker);
-        }
-    }
 
     // Periodically update the position indicator
     updatePositionIndicator() {

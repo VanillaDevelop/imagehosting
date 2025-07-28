@@ -25,7 +25,9 @@
                 <i class="pi pi-cloud-upload upload-icon" />
                 <div class="upload-text">Drop your video here</div>
                 <div class="upload-hint">or click to browse files</div>
-                <button type="button" class="browse-button btn">Choose Video</button>
+                <button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-button-primary no-underline">
+                    <span class="ui-button-text">Choose Video</span>
+                </button>
             </div>
 
             <!-- Hidden form for submitting to the /v/ endpoint -->
@@ -47,22 +49,24 @@
                 </div>
             </div>
 
-            <h2>Video Trimmer</h2>
-
             <div class="trimmer-bar" id="trimmerBar">
                 <div class="timeline">
-                    <div class="timeline-markers" id="timelineMarkers"></div>
+                    <div class="timeline-markers" id="timelineMarkers">
+                        <ui:repeat value="#{[0,1,2,3,4,5,6,7,8,9]}" var="i">
+                            <div class="marker"><!-- --></div>
+                        </ui:repeat>
+                    </div>
                 </div>
-                <div class="progress-bar" id="progressBar"></div>
-                <div class="trimmer-handle handle-left" id="leftHandle"></div>
-                <div class="trimmer-handle handle-right" id="rightHandle"></div>
-                <div class="position-indicator" id="positionIndicator"></div>
+                <div class="progress-bar" id="progressBar"><!-- --></div>
+                <div class="trimmer-handle handle-left" id="leftHandle"><!-- --></div>
+                <div class="trimmer-handle handle-right" id="rightHandle"><!-- --></div>
+                <div class="position-indicator" id="positionIndicator"><!-- --></div>
             </div>
 
             <div class="time-display">
-                <div>Start: <span id="startTime">0:00</span></div>
-                <div><strong>Selected Duration: <span id="selectedDuration">1:00</span></strong></div>
-                <div>End: <span id="endTime">1:00</span></div>
+                <div>Start: <span id="start-time">0:00</span></div>
+                <div><strong>Selected Duration: <span id="selected-duration">1:00</span></strong></div>
+                <div>End: <span id="end-time">1:00</span></div>
             </div>
 
             <form class="video-form">
@@ -72,8 +76,12 @@
                            class="form-input" placeholder="Enter video title" required="required" />
                 </div>
                 <div class="form-actions">
-                    <button id="trimButton" class="btn btn-primary">Trim And Upload</button>
-                    <button id="uploadButton" class="btn btn-secondary">Upload Full Video</button>
+                    <button id="trimButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-button-primary no-underline">
+                        <span class="ui-button-text">Trim And Upload</span>
+                    </button>
+                    <button id="uploadButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-button-primary no-underline">
+                        <span class="ui-button-text">Upload Full Video</span>
+                    </button>
                 </div>
             </form>
         </div>

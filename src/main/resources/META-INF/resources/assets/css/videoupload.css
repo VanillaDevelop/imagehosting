@@ -38,6 +38,70 @@
     margin-bottom: 20px;
 }
 
+/* Video player overlay styling */
+.video-player-wrapper {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+.video-player {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    display: block;
+}
+
+.play-pause-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.play-pause-overlay.show {
+    opacity: 1;
+    animation: flashIcon 0.6s ease-out;
+}
+
+.play-pause-overlay i {
+    font-size: 64px;
+    color: white;
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    box-sizing: border-box;
+}
+
+.play-pause-overlay i.pi-play {
+    padding-left: 44px;
+    padding-right: 36px;
+}
+
+@keyframes flashIcon {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    100% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
 /** Trimmer */
 .trimmer-container {
     max-width: 1200px;
@@ -54,13 +118,22 @@
     border-radius: 6px;
     margin: 20px 0;
     overflow: hidden;
+    background: linear-gradient(90deg, #666 0%, #888 50%, #666 100%);
 }
 
-.timeline {
+.timeline-markers {
     position: absolute;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, #666 0%, #888 50%, #666 100%);
+    pointer-events: none;
+    display: flex;
+    justify-content: space-between;
+}
+
+.marker {
+    width: 1px;
+    height: 100%;
+    background: rgba(255,255,255,0.2);
 }
 
 .progress-bar {
@@ -68,7 +141,6 @@
     height: 100%;
     background: #007bff;
     opacity: 0.3;
-    transition: all 0.1s ease;
 }
 
 .trimmer-handle {
@@ -77,8 +149,6 @@
     height: 100%;
     background: #007bff;
     cursor: ew-resize;
-    border-radius: 2px;
-    box-shadow: 0 0 10px rgba(0,123,255,0.5);
     transition: background-color 0.2s ease;
 }
 
@@ -128,62 +198,7 @@
     display: flex;
     justify-content: space-between;
     margin: 10px 0;
-    font-size: 14px;
     color: #ccc;
-}
-
-.controls {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.btn {
-    padding: 10px 20px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.btn:hover {
-    background: #0056b3;
-}
-
-.btn:disabled {
-    background: #555;
-    cursor: not-allowed;
-}
-
-.duration-info {
-    background: #333;
-    padding: 15px;
-    border-radius: 5px;
-    margin-top: 20px;
-}
-
-.timeline-markers {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-}
-
-.marker {
-    position: absolute;
-    width: 1px;
-    height: 100%;
-    background: rgba(255,255,255,0.2);
-}
-
-.marker-label {
-    position: absolute;
-    bottom: -20px;
-    font-size: 10px;
-    color: #999;
-    transform: translateX(-50%);
 }
 
 /* Video form styling - consistent with trimmer container */
@@ -251,68 +266,4 @@
 
 .btn-secondary:hover {
     background: #666;
-}
-
-/* Video player overlay styling */
-.video-player-wrapper {
-    position: relative;
-    display: block;
-    width: 100%;
-}
-
-.video-player {
-    width: 100%;
-    height: auto;
-    max-width: 100%;
-    display: block;
-}
-
-.play-pause-overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.play-pause-overlay.show {
-    opacity: 1;
-    animation: flashIcon 0.6s ease-out;
-}
-
-.play-pause-overlay i {
-    font-size: 64px;
-    color: white;
-    text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-    background: rgba(0, 0, 0, 0.6);
-    border-radius: 50%;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 80px;
-    height: 80px;
-    box-sizing: border-box;
-}
-
-.play-pause-overlay i.pi-play {
-    padding-left: 44px;
-    padding-right: 36px;
-}
-
-@keyframes flashIcon {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
-    }
-    50% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.1);
-    }
-    100% {
-        opacity: 0.8;
-        transform: translate(-50%, -50%) scale(1);
-    }
 }
