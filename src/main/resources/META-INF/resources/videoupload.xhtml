@@ -49,7 +49,7 @@
                 </div>
             </div>
 
-            <div class="trimmer-bar" id="trimmerBar">
+            <div class="trimmer-bar" id="trimmer-bar">
                 <div class="timeline">
                     <div class="timeline-markers" id="timelineMarkers">
                         <ui:repeat value="#{[0,1,2,3,4,5,6,7,8,9]}" var="i">
@@ -57,10 +57,10 @@
                         </ui:repeat>
                     </div>
                 </div>
-                <div class="progress-bar" id="progressBar"><!-- --></div>
-                <div class="trimmer-handle handle-left" id="leftHandle"><!-- --></div>
-                <div class="trimmer-handle handle-right" id="rightHandle"><!-- --></div>
-                <div class="position-indicator" id="positionIndicator"><!-- --></div>
+                <div class="progress-bar" id="progress-bar"><!-- --></div>
+                <div class="trimmer-handle handle-left" id="left-handle"><!-- --></div>
+                <div class="trimmer-handle handle-right" id="right-handle"><!-- --></div>
+                <div class="position-indicator" id="position-indicator"><!-- --></div>
             </div>
 
             <div class="time-display">
@@ -71,15 +71,15 @@
 
             <form class="video-form">
                 <div class="form-group">
-                    <label for="videoTitleInput" class="form-label">Video Title:</label>
-                    <input type="text" id="videoTitleInput" name="videoTitleInput" 
+                    <label for="video-title-input" class="form-label">Video Title</label>
+                    <input type="text" id="video-title-input" name="videoTitleInput"
                            class="form-input" placeholder="Enter video title" required="required" />
                 </div>
                 <div class="form-actions">
-                    <button id="trimButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-button-primary no-underline">
+                    <button id="trim-button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-button-primary-form no-underline">
                         <span class="ui-button-text">Trim And Upload</span>
                     </button>
-                    <button id="uploadButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-button-primary no-underline">
+                    <button id="upload-button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-button-primary-form no-underline">
                         <span class="ui-button-text">Upload Full Video</span>
                     </button>
                 </div>

@@ -201,7 +201,7 @@
     color: #ccc;
 }
 
-/* Video form styling - consistent with trimmer container */
+/* Video form styling */
 .video-form {
     background: #333;
     padding: 20px;
@@ -210,15 +210,10 @@
     border: 1px solid #444;
 }
 
-.form-group {
-    margin-bottom: 20px;
-}
-
 .form-label {
     display: block;
     color: #ccc;
     font-size: 14px;
-    font-weight: 500;
     margin-bottom: 8px;
 }
 
@@ -230,7 +225,7 @@
     border-radius: 6px;
     color: #fff;
     font-size: 14px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.2s ease;
     box-sizing: border-box;
 }
 
@@ -250,20 +245,11 @@
     justify-content: flex-start;
 }
 
-.btn-primary {
-    background: #007bff;
-    color: white;
+.ui-button-primary-form {
+    background-color: #6c757d !important;
+    color: white !important;
 }
 
-.btn-primary:hover {
-    background: #0056b3;
-}
-
-.btn-secondary {
-    background: #555;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #666;
+.ui-button-primary-form:hover {
+    background-color: #5a6268 !important;
 }

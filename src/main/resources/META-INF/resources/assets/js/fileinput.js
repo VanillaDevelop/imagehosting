@@ -57,7 +57,7 @@ dropZone.addEventListener('drop', function(e) {
 });
 
 // Handle trim button click
-document.getElementById('trimButton').addEventListener('click', function(e) {
+document.getElementById('trim-button').addEventListener('click', function(e) {
     e.preventDefault();
 
     if (!trimmer) {
@@ -70,7 +70,7 @@ document.getElementById('trimButton').addEventListener('click', function(e) {
     document.getElementById('endTimeSeconds').value = trimmer.endTime;
 
     // Get video title
-    const videoTitle = document.getElementById('videoTitleInput').value;
+    const videoTitle = document.getElementById('video-title-input').value;
     document.getElementById('videoTitle').value = videoTitle;
 
     // Submit the form

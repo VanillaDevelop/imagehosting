@@ -20,14 +20,14 @@ class VideoTrimmer {
 
     initializeElements() {
         //Main bar element, to click on to set start/end time
-        this.trimmerBar = document.getElementById('trimmerBar');
+        this.trimmerBar = document.getElementById('trimmer-bar');
         //Handle elements which can be dragged to set start/end time
-        this.leftHandle = document.getElementById('leftHandle');
-        this.rightHandle = document.getElementById('rightHandle');
+        this.leftHandle = document.getElementById('left-handle');
+        this.rightHandle = document.getElementById('right-handle');
         //Progress bar element, to show the selected portion of the video
-        this.progressBar = document.getElementById('progressBar');
+        this.progressBar = document.getElementById('progress-bar');
         //Position indicator element, to show the current position of the video
-        this.positionIndicator = document.getElementById('positionIndicator');
+        this.positionIndicator = document.getElementById('position-indicator');
         //Time display elements
         this.startTimeEl = document.getElementById('start-time');
         this.selectedDurationEl = document.getElementById('selected-duration');
