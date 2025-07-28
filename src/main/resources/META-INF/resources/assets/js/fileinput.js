@@ -7,8 +7,8 @@ const fileInput = document.getElementById('video-input');
 // Handle file selection (both click and drop)
 function handleFileSelect(file) {
     if (file && file.type.startsWith('video/')) {
-        const video = document.getElementById('videoPlayer');
-        const source = document.getElementById('videoSource');
+        const video = document.getElementById('video-player');
+        const source = document.getElementById('video-source');
 
         source.src = URL.createObjectURL(file);
         source.type = file.type;

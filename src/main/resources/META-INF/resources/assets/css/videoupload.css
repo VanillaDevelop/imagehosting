@@ -185,6 +185,7 @@
     color: #999;
     transform: translateX(-50%);
 }
+
 /* Video form styling - consistent with trimmer container */
 .video-form {
     background: #333;
@@ -255,7 +256,15 @@
 /* Video player overlay styling */
 .video-player-wrapper {
     position: relative;
-    display: inline-block;
+    display: block;
+    width: 100%;
+}
+
+.video-player {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    display: block;
 }
 
 .play-pause-overlay {
@@ -286,6 +295,11 @@
     width: 80px;
     height: 80px;
     box-sizing: border-box;
+}
+
+.play-pause-overlay i.pi-play {
+    padding-left: 44px;
+    padding-right: 36px;
 }
 
 @keyframes flashIcon {

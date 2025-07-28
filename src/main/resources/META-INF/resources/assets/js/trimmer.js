@@ -34,10 +34,10 @@ class VideoTrimmer {
         this.selectedDurationEl = document.getElementById('selectedDuration');
         this.endTimeEl = document.getElementById('endTime');
         //Video player, to show the video being trimmed
-        this.videoPlayer = document.getElementById('videoPlayer');
+        this.videoPlayer = document.getElementById('video-player');
         //Play/pause overlay elements
-        this.playPauseOverlay = document.getElementById('playPauseOverlay');
-        this.playPauseIcon = document.getElementById('playPauseIcon');
+        this.playPauseOverlay = document.getElementById('play-pause-overlay');
+        this.playPauseIcon = document.getElementById('play-pause-icon');
     }
 
     setupEventListeners() {

@@ -20,7 +20,7 @@
         </div>
 
         <!-- File input to select local video -->
-        <form id="video-upload-form" action="/v/" method="post" enctype="multipart/form-data">
+        <form id="video-upload-form" action="${pageContext.request.contextPath}/v/" method="post" enctype="multipart/form-data">
             <div class="video-drop-zone" onclick="document.getElementById('video-input').click()">
                 <i class="pi pi-cloud-upload upload-icon" />
                 <div class="upload-text">Drop your video here</div>
@@ -38,12 +38,12 @@
 
         <div class="trimmer-container">
             <div class="video-player-wrapper">
-                <video id="videoPlayer" preload="auto" width="640" height="360">
-                    <source id="videoSource" src="" type="" />
+                <video id="video-player" class="video-player" preload="auto">
+                    <source id="video-source" src="" type="" />
                     Your browser does not support the video tag.
                 </video>
-                <div id="playPauseOverlay" class="play-pause-overlay">
-                    <i id="playPauseIcon" class="pi pi-play"></i>
+                <div id="play-pause-overlay" class="play-pause-overlay">
+                    <i id="play-pause-icon" class="pi pi-play" />
                 </div>
             </div>
 
