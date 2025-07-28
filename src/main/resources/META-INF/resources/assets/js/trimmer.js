@@ -35,6 +35,9 @@ class VideoTrimmer {
         this.endTimeEl = document.getElementById('endTime');
         //Video player, to show the video being trimmed
         this.videoPlayer = document.getElementById('videoPlayer');
+        //Play/pause overlay elements
+        this.playPauseOverlay = document.getElementById('playPauseOverlay');
+        this.playPauseIcon = document.getElementById('playPauseIcon');
     }
 
     setupEventListeners() {
@@ -47,6 +50,8 @@ class VideoTrimmer {
         document.addEventListener('mouseup', () => this.endDrag());
         // Click on timeline to set position
         this.trimmerBar.addEventListener('click', (e) => this.handleTimelineClick(e));
+        // Click on video to play/pause
+        this.videoPlayer.addEventListener('click', (e) => this.togglePlayPause(e));
     }
 
     // Start dragging the handle
@@ -190,6 +195,39 @@ class VideoTrimmer {
         requestAnimationFrame(() => this.updatePositionIndicator());
     }
 
+    // Toggle play/pause when video is clicked
+    togglePlayPause(e) {
+        e.preventDefault();
+        
+        if (this.videoPlayer.paused) {
+            this.videoPlayer.play();
+            this.showPlayPauseIcon('pi-play');
+        } else {
+            this.videoPlayer.pause();
+            this.showPlayPauseIcon('pi-pause');
+        }
+    }
+
+    // Show play/pause icon with flash animation
+    showPlayPauseIcon(iconClass) {
+        // Update icon
+        this.playPauseIcon.className = `pi ${iconClass}`;
+        
+        // Remove existing animation class
+        this.playPauseOverlay.classList.remove('show');
+        
+        // Force reflow to ensure class removal takes effect
+        this.playPauseOverlay.offsetHeight;
+        
+        // Add animation class
+        this.playPauseOverlay.classList.add('show');
+        
+        // Remove animation class after animation completes
+        setTimeout(() => {
+            this.playPauseOverlay.classList.remove('show');
+        }, 600);
+    }
+
     destroy() {
         // Remove event listeners
         this.leftHandle.removeEventListener('mousedown', this.startDrag);
@@ -197,6 +235,7 @@ class VideoTrimmer {
         document.removeEventListener('mousemove', this.drag);
         document.removeEventListener('mouseup', this.endDrag);
         this.trimmerBar.removeEventListener('click', this.handleTimelineClick);
+        this.videoPlayer.removeEventListener('click', this.togglePlayPause);
 
         // Clear elements
         this.trimmerBar = null;

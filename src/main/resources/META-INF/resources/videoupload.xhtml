@@ -37,10 +37,15 @@
         </form>
 
         <div class="trimmer-container">
-            <video id="videoPlayer" preload="auto" width="640" height="360">
-                <source id="videoSource" src="" type="" />
-                Your browser does not support the video tag.
-            </video>
+            <div class="video-player-wrapper">
+                <video id="videoPlayer" preload="auto" width="640" height="360">
+                    <source id="videoSource" src="" type="" />
+                    Your browser does not support the video tag.
+                </video>
+                <div id="playPauseOverlay" class="play-pause-overlay">
+                    <i id="playPauseIcon" class="pi pi-play"></i>
+                </div>
+            </div>
 
             <h2>Video Trimmer</h2>
 
@@ -60,11 +65,17 @@
                 <div>End: <span id="endTime">1:00</span></div>
             </div>
 
-            <div class="titleSelect">
-                <label for="videoTitle">Video Title:</label>
-                <input type="text" id="videoTitleInput" name="videoTitleInput" placeholder="Enter video title" required="required" />
-            </div>
-            <button id="trimButton" class="btn btn-primary">Trim And Upload</button>
+            <form class="video-form">
+                <div class="form-group">
+                    <label for="videoTitleInput" class="form-label">Video Title:</label>
+                    <input type="text" id="videoTitleInput" name="videoTitleInput" 
+                           class="form-input" placeholder="Enter video title" required="required" />
+                </div>
+                <div class="form-actions">
+                    <button id="trimButton" class="btn btn-primary">Trim And Upload</button>
+                    <button id="uploadButton" class="btn btn-secondary">Upload Full Video</button>
+                </div>
+            </form>
         </div>
 
         <h:outputScript name="/assets/js/fileinput.js"/>
