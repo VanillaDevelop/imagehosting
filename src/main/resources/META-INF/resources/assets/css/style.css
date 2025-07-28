@@ -51,7 +51,9 @@ h1, h2, h3 {
     margin: 0;
 }
 
-.no-underline {
+.no-underline,
+.no-underline a,
+.no-underline span {
     text-decoration: none !important;
 }
 
@@ -143,6 +145,20 @@ h1, h2, h3 {
 
 .ui-button-primary:hover {
     background-color: #6B9BE0 !important;
+}
+
+.ui-button-secondary {
+    background-color: #D1E0F2 !important;
+    color: #1A4FA3 !important;
+    border: 1px solid #95B8E7 !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.ui-button-secondary:hover {
+    background-color: #C4D7F0 !important;
+    border-color: #6B9BE0 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(26, 79, 163, 0.2);
 }
 
 /* Label styling */
