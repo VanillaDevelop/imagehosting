@@ -20,19 +20,19 @@
         </div>
 
         <!-- File input to select local video -->
-        <form id="videoForm" action="/v/" method="post" enctype="multipart/form-data">
-            <div class="video-drop-zone" onclick="document.getElementById('videoInput').click()">
-                <i class="pi pi-cloud-upload upload-icon"></i>
+        <form id="video-upload-form" action="/v/" method="post" enctype="multipart/form-data">
+            <div class="video-drop-zone" onclick="document.getElementById('video-input').click()">
+                <i class="pi pi-cloud-upload upload-icon" />
                 <div class="upload-text">Drop your video here</div>
                 <div class="upload-hint">or click to browse files</div>
-                <div class="file-input-wrapper">
-                    <button type="button" class="browse-button">Choose Video</button>
-                    <input type="file" id="videoInput" name="videoInput" accept="video/*" />
-                </div>
+                <button type="button" class="browse-button btn">Choose Video</button>
             </div>
-            <input type="hidden" id="startTimeSeconds" name="startTimeSeconds" />
-            <input type="hidden" id="endTimeSeconds" name="endTimeSeconds" />
-            <input type="hidden" id="videoTitle" name="videoTitle" />
+
+            <!-- Hidden form for submitting to the /v/ endpoint -->
+            <input type="file" id="video-input" name="videoInput" accept="video/*" hidden="hidden" />
+            <input type="hidden" id="start-time-seconds" name="startTimeSeconds" />
+            <input type="hidden" id="end-time-seconds" name="endTimeSeconds" />
+            <input type="hidden" id="video-title" name="videoTitle" />
             <input type="hidden" name="_csrf" value="${_csrf.token}" />
         </form>
 

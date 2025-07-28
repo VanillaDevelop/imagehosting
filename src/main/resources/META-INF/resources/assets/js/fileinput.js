@@ -2,7 +2,7 @@ let trimmer = null;
 
 // Get drop zone element
 const dropZone = document.querySelector('.video-drop-zone');
-const fileInput = document.getElementById('videoInput');
+const fileInput = document.getElementById('video-input');
 
 // Handle file selection (both click and drop)
 function handleFileSelect(file) {
