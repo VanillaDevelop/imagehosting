@@ -35,10 +35,11 @@
             <input type="hidden" id="start-time-seconds" name="startTimeSeconds" />
             <input type="hidden" id="end-time-seconds" name="endTimeSeconds" />
             <input type="hidden" id="video-title" name="videoTitle" />
+            <input type="hidden" id="full-video" name="fullVideo" />
             <input type="hidden" name="_csrf" value="${_csrf.token}" />
         </form>
 
-        <div class="trimmer-container">
+        <div id="trimmer-container" class="trimmer-container" style="display: none">
             <div class="video-player-wrapper">
                 <video id="video-player" class="video-player" preload="auto">
                     <source id="video-source" src="" type="" />

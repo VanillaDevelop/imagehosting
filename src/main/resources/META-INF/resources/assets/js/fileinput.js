@@ -1,10 +1,11 @@
-let trimmer = null;
-
-// Get drop zone element
 const dropZone = document.querySelector('.video-drop-zone');
 const fileInput = document.getElementById('video-input');
+const trimmerContainer = document.getElementById('trimmer-container');
 
-// Handle file selection (both click and drop)
+/**
+ * Handles file selection from input or drag-and-drop.
+ * @param file - The file selected by the user.
+ */
 function handleFileSelect(file) {
     if (file && file.type.startsWith('video/')) {
         const video = document.getElementById('video-player');
@@ -14,16 +15,17 @@ function handleFileSelect(file) {
         source.type = file.type;
 
         video.addEventListener('loadedmetadata', function() {
+            // Initialize the video trimmer as soon as metadata is loaded
             const duration = video.duration;
-            trimmer = new VideoTrimmer(duration);
+            new VideoTrimmer(duration);
         });
 
         video.load();
         video.play();
 
-        // Update drop zone to show selected file
-        dropZone.querySelector('.upload-text').textContent = file.name;
-        dropZone.querySelector('.upload-hint').textContent = 'Video loaded successfully';
+        dropZone.style.display = 'none';
+        trimmerContainer.style.display = 'block';
+
     } else if (file) {
         alert('Please select a video file.');
     }
@@ -54,25 +56,4 @@ dropZone.addEventListener('drop', function(e) {
     if (files.length > 0) {
         handleFileSelect(files[0]);
     }
-});
-
-// Handle trim button click
-document.getElementById('trim-button').addEventListener('click', function(e) {
-    e.preventDefault();
-
-    if (!trimmer) {
-        alert('Please select a video file first.');
-        return;
-    }
-
-    // Set the hidden fields with current trimmer values
-    document.getElementById('startTimeSeconds').value = trimmer.startTime;
-    document.getElementById('endTimeSeconds').value = trimmer.endTime;
-
-    // Get video title
-    const videoTitle = document.getElementById('video-title-input').value;
-    document.getElementById('videoTitle').value = videoTitle;
-
-    // Submit the form
-    document.getElementById('videoForm').submit();
 });

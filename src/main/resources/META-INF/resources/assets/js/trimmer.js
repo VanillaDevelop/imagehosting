@@ -37,6 +37,9 @@ class VideoTrimmer {
         //Play/pause overlay elements
         this.playPauseOverlay = document.getElementById('play-pause-overlay');
         this.playPauseIcon = document.getElementById('play-pause-icon');
+        //Buttons for submitting the form
+        this.trimButton = document.getElementById('trim-button');
+        this.uploadButton = document.getElementById('upload-button');
     }
 
     setupEventListeners() {
@@ -51,6 +54,15 @@ class VideoTrimmer {
         this.trimmerBar.addEventListener('click', (e) => this.handleTimelineClick(e));
         // Click on video to play/pause
         this.videoPlayer.addEventListener('click', (e) => this.togglePlayPause(e));
+        // Click on trim button to submit the form
+        this.trimButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.submitForm(false);
+        });
+        this.uploadButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.submitForm(true);
+        })
     }
 
     // Start dragging the handle
@@ -210,23 +222,22 @@ class VideoTrimmer {
         }, 600);
     }
 
-    destroy() {
-        // Remove event listeners
-        this.leftHandle.removeEventListener('mousedown', this.startDrag);
-        this.rightHandle.removeEventListener('mousedown', this.startDrag);
-        document.removeEventListener('mousemove', this.drag);
-        document.removeEventListener('mouseup', this.endDrag);
-        this.trimmerBar.removeEventListener('click', this.handleTimelineClick);
-        this.videoPlayer.removeEventListener('click', this.togglePlayPause);
+    submitForm(fullVideo) {
+        this.startTimeSecondsEl = document.getElementById('start-time-seconds');
+        this.endTimeSecondsEl = document.getElementById('end-time-seconds');
+        this.videoTitleEl = document.getElementById('video-title');
+        this.fullVideoEl = document.getElementById('full-video');
+        this.videoFormEl = document.getElementById('video-upload-form');
 
-        // Clear elements
-        this.trimmerBar = null;
-        this.leftHandle = null;
-        this.rightHandle = null;
-        this.progressBar = null;
-        this.startTimeEl = null;
-        this.selectedDurationEl = null;
-        this.endTimeEl = null;
-        this.videoPlayer = null;
+        this.videoTitleInputEl = document.getElementById('video-title-input');
+
+        // Fill properties
+        this.fullVideoEl.value = fullVideo;
+        this.startTimeSecondsEl.value = this.startTime;
+        this.endTimeSecondsEl.value = this.endTime;
+        this.videoTitleEl.value = this.videoTitleInputEl.value;
+
+        // Submit the form
+        this.videoFormEl.submit();
     }
 }
