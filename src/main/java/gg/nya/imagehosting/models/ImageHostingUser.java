@@ -23,7 +23,7 @@ public class ImageHostingUser implements Serializable {
     @NotNull
     @Column(name = "mode")
     @Enumerated(EnumType.STRING)
-    private ImageHostingModes imageHostingMode;
+    private HostingMode imageHostingMode;
 
     @NotNull
     @Column(name = "api_key")
@@ -36,7 +36,7 @@ public class ImageHostingUser implements Serializable {
      */
     public ImageHostingUser(User user) {
         this.user = user;
-        this.imageHostingMode = ImageHostingModes.ALPHANUMERIC;
+        this.imageHostingMode = HostingMode.ALPHANUMERIC;
         this.apiKey = java.util.UUID.randomUUID().toString();
     }
 
@@ -63,11 +63,11 @@ public class ImageHostingUser implements Serializable {
         this.user = user;
     }
 
-    public ImageHostingModes getImageHostingMode() {
+    public HostingMode getImageHostingMode() {
         return imageHostingMode;
     }
 
-    public void setImageHostingMode(ImageHostingModes imageHostingMode) {
+    public void setImageHostingMode(HostingMode imageHostingMode) {
         this.imageHostingMode = imageHostingMode;
     }
 

@@ -102,7 +102,7 @@ public class ImageHostingService {
         log.debug("uploadImageForUser, attempting to upload image for user with API key {}", apiKey);
         ImageHostingUser user = validateApiKey(apiKey);
         //Just a check to see if we can parse the file type
-        Utils.getMediaTypeFromFilename(originalFileName);
+        Utils.getImageTypeFromFileName(originalFileName);
         String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
         log.debug("uploadImageForUser, uploading image for user {} with file type {}", user.getUser().getUsername(), fileExtension);
         //Generate a file name for the image

@@ -231,6 +231,13 @@ class VideoTrimmer {
 
         this.videoTitleInputEl = document.getElementById('video-title-input');
 
+        // Validate title
+        if (!this.videoTitleInputEl.value.trim()) {
+            alert('Please choose a video name.');
+            this.videoTitleInputEl.focus();
+            return;
+        }
+
         // Fill properties
         this.fullVideoEl.value = fullVideo;
         this.startTimeSecondsEl.value = this.startTime;

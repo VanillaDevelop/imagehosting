@@ -1,6 +1,6 @@
 package gg.nya.imagehosting.utils;
 
-import gg.nya.imagehosting.models.ImageHostingModes;
+import gg.nya.imagehosting.models.HostingMode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,7 +34,7 @@ public abstract class Utils {
      * @param filename The file name.
      * @return The media type.
      */
-    public static MediaType getMediaTypeFromFilename(String filename) {
+    public static MediaType getImageTypeFromFileName(String filename) {
         if (filename == null || !filename.contains(".")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filename");
         }
@@ -50,13 +50,28 @@ public abstract class Utils {
         };
     }
 
+    public static MediaType getVideoTypeFromFileName(String filename) {
+        if (filename == null || !filename.contains(".")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filename");
+        }
+
+        String ext = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
+        return switch (ext) {
+            case "mp4" -> MediaType.valueOf("video/mp4");
+            case "webm" -> MediaType.valueOf("video/webm");
+            case "avi" -> MediaType.valueOf("video/x-msvideo");
+            case "mov" -> MediaType.valueOf("video/quicktime");
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown file type");
+        };
+    }
+
     /**
      * Generates a filename based on the provided strategy.
      *
      * @param strategy The strategy to use.
      * @return A filename based on the provided strategy.
      */
-    public static String generateFilenameFromStrategy(ImageHostingModes strategy) {
+    public static String generateFilenameFromStrategy(HostingMode strategy) {
         return switch (strategy) {
             case UUID -> UUID.randomUUID().toString();
             case ALPHANUMERIC -> generateRandomAlphanumericString(8);

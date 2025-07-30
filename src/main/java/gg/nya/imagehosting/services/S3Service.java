@@ -78,11 +78,32 @@ public class S3Service {
             s3Client.putObject(builder -> builder
                     .bucket(bucketName)
                     .key(key)
-                    .contentType(Utils.getMediaTypeFromFilename(fileName).toString())
+                    .contentType(Utils.getImageTypeFromFileName(fileName).toString())
                     .build(), RequestBody.fromInputStream(fileStream, fileStream.available()));
         } catch (AwsServiceException | SdkClientException | IOException e) {
             log.error("uploadImage, could not upload image with key {} to bucket {}", key, bucketName);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not upload image");
+        }
+    }
+
+    /**
+     * Upload video to S3 bucket. Throws a 500 error if the video could not be uploaded successfully.
+     * @param subdomain The subdomain of the video (username).
+     * @param fileName The filename of the video.
+     * @param fileStream The video as an InputStream.
+     */
+    public void uploadVideo(String subdomain, String fileName, InputStream fileStream) {
+        String key = getKeyName(subdomain, fileName);
+        try {
+            log.debug("uploadVideo, attempting to upload video with key {} to bucket {}", key, bucketName);
+            s3Client.putObject(builder -> builder
+                    .bucket(bucketName)
+                    .key(key)
+                    .contentType(Utils.getVideoTypeFromFileName(fileName).toString())
+                    .build(), RequestBody.fromInputStream(fileStream, fileStream.available()));
+        } catch (AwsServiceException | SdkClientException | IOException e) {
+            log.error("uploadVideo, could not upload video with key {} to bucket {}", key, bucketName);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not upload video");
         }
     }
 

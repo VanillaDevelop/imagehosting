@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS video_upload_user_files
     file_name VARCHAR(255) NOT NULL,
     file_size BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL,
+    upload_status VARCHAR(255) NOT NULL,
     FOREIGN KEY (video_upload_user_id) REFERENCES video_upload_users (id)
 
 );
