@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +30,7 @@ public class VideoApiController {
     }
 
     @PostMapping(value = "/v/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String uploadVideo(
+    public RedirectView uploadVideo(
             HttpServletRequest request,
             @RequestParam("videoInput") MultipartFile videoFile,
             @RequestParam("startTimeSeconds") double startTimeSeconds,
@@ -54,8 +55,7 @@ public class VideoApiController {
                 fullVideo
         );
 
-        return "redirect:" + generatedUrl;
-
+        return new RedirectView(generatedUrl);
     }
 
 }
