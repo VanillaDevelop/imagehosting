@@ -39,6 +39,21 @@ public class VideoHostingService {
        this.userRepository = userRepository;
     }
 
+
+
+    /**
+     * Uploads a video for the user associated with the given User ID.
+     * @param request   The HTTP request, used to construct the URL for the uploaded video.
+     * @param userId The ID of the user for whom the video is being uploaded.
+     * @param videoInputStream The InputStream containing the video data to be uploaded.
+     * @param originalFileName The original file name of the video being uploaded.
+     * @param startTimeSeconds The start time in seconds for the video segment, if applicable.
+     * @param endTimeSeconds The end time in seconds for the video segment, if applicable.
+     * @param videoTitle The title of the video being uploaded.
+     * @param fullVideo A boolean indicating whether the full video is being uploaded or just a segment.
+     * @return The URL of the uploaded video file.
+     * @throws IOException If an error occurs while processing the video upload.
+     */
     public String uploadVideoForUser(
             HttpServletRequest request,
             long userId,
@@ -87,6 +102,34 @@ public class VideoHostingService {
         return RESTUtils.fetchURLFromRequest(request, userOpt.get().getUsername(), "v", newFileName);
     }
 
+    /**
+     * Finds or creates a video upload user for the given user.
+     *
+     * @param userId The user ID to find or create a video upload user for.
+     * @return The video upload user for the given user.
+     */
+    public VideoUploadUser getOrCreateVideoUploadUser(Long userId) {
+        log.debug("getOrCreateVideoUploadUser, getting or creating video upload user for user ID {}", userId);
+        
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            log.error("getOrCreateVideoUploadUser, user ID {} not found", userId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user");
+        }
+        User user = userOpt.get();
+
+        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findVideoUploadUserByUser(user.getUsername());
+        if (videoUploadUserOpt.isPresent()) {
+            log.debug("getOrCreateVideoUploadUser, video upload user for user {} found", user.getUsername());
+            return videoUploadUserOpt.get();
+        }
+
+        //Create and persist new video upload user
+        log.debug("getOrCreateVideoUploadUser, creating new video upload user for user {}", user.getUsername());
+        VideoUploadUser videoUploadUser = new VideoUploadUser(user);
+        videoUploadUserRepository.save(videoUploadUser);
+        return videoUploadUser;
+    }
 
     /**
      * Attempts to create a file name for the user's given strategy. Aborts with a 500 error after 100 failed attempts.

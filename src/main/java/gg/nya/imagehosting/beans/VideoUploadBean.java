@@ -1,12 +1,12 @@
 package gg.nya.imagehosting.beans;
 
 import gg.nya.imagehosting.config.ApplicationContextProvider;
-import gg.nya.imagehosting.models.ImageHostingUser;
+import gg.nya.imagehosting.models.HostingMode;
+import gg.nya.imagehosting.models.VideoUploadUser;
 import gg.nya.imagehosting.services.AuthenticationService;
-import gg.nya.imagehosting.services.ImageHostingService;
+import gg.nya.imagehosting.services.VideoHostingService;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
@@ -16,40 +16,40 @@ import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 
-@Component("imageHostingBean")
+@Component
 @Scope("view")
-public class ImageHostingBean implements Serializable {
+public class VideoUploadBean implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private ImageHostingUser imageHostingUser;
+    private VideoUploadUser videoUploadUser;
 
-    private transient ImageHostingService imageHostingService;
+    private transient VideoHostingService videoHostingService;
     private transient AuthenticationService authenticationService;
 
-    private static final Logger log = LoggerFactory.getLogger(ImageHostingBean.class);
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(VideoUploadBean.class);
 
     @Autowired
-    public ImageHostingBean(ImageHostingService imageHostingService, AuthenticationService authenticationService) {
-        this.imageHostingService = imageHostingService;
+    public VideoUploadBean(VideoHostingService videoHostingService, AuthenticationService authenticationService) {
+        this.videoHostingService = videoHostingService;
         this.authenticationService = authenticationService;
     }
 
     @PostConstruct
     public void init() {
-        log.debug("init, fetching image hosting user for user ID {}", authenticationService.getCurrentUserId());
-        this.imageHostingUser = imageHostingService.getOrCreateImageHostingUser(authenticationService.getCurrentUserId());
+        log.debug("init, fetching video upload user for user ID {}", authenticationService.getCurrentUserId());
+        this.videoUploadUser = videoHostingService.getOrCreateVideoUploadUser(authenticationService.getCurrentUserId());
     }
 
-    public String getApiKey() {
-        return imageHostingUser.getApiKey();
+    public HostingMode getCurrentUploadMode() {
+        return videoUploadUser.getVideoUploadMode();
     }
 
     @Serial
     private void readObject(ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
         in.defaultReadObject();
         ApplicationContext ctx = ApplicationContextProvider.getApplicationContext();
-        this.imageHostingService = ctx.getBean(ImageHostingService.class);
+        this.videoHostingService = ctx.getBean(VideoHostingService.class);
         this.authenticationService = ctx.getBean(AuthenticationService.class);
     }
 }

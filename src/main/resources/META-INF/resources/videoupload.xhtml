@@ -3,7 +3,7 @@
         xmlns="http://www.w3.org/1999/xhtml"
         xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
         xmlns:p="http://primefaces.org/ui"
-        xmlns:h="http://xmlns.jcp.org/jsf/html"
+        xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
 >
 <ui:composition template="/templates/template.xhtml">
     <ui:define name="title">Nya.GG - Video Upload</ui:define>
@@ -89,6 +89,13 @@
 
         <h:outputScript name="/assets/js/fileinput.js"/>
         <h:outputScript name="/assets/js/trimmer.js"/>
+
+        <div class="library-container" hidden="hidden">
+            <h2>Library</h2>
+            <p:selectOneMenu>
+                <f:selectItem itemLabel="#{videoUploadBean.currentUploadMode.toString()}" itemValue="#{videoUploadBean.currentUploadMode}" />
+            </p:selectOneMenu>
+        </div>
     </ui:define>
 
 </ui:composition>
