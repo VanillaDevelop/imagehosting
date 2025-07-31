@@ -30,13 +30,15 @@ public class VideoHostingService {
     private final VideoUploadUserRepository videoUploadUserRepository;
     private final VideoUploadUserFileRepository videoUploadUserFileRepository;
     private final UserRepository userRepository;
+    private final MediaManagementService mediaManagementService;
 
     @Autowired
     public VideoHostingService(VideoUploadUserRepository videoUploadUserRepository,
-                               VideoUploadUserFileRepository userFileRepository, UserRepository userRepository) {
+                               VideoUploadUserFileRepository userFileRepository, UserRepository userRepository, MediaManagementService mediaManagementService) {
        this.videoUploadUserRepository = videoUploadUserRepository;
          this.videoUploadUserFileRepository = userFileRepository;
        this.userRepository = userRepository;
+        this.mediaManagementService = mediaManagementService;
     }
 
 
@@ -84,6 +86,10 @@ public class VideoHostingService {
 
         //Create new file name
         String newFileName = tryCreateFileName(videoUser.get());
+
+        //Upload input video file
+        String originalFileType = originalFileName.split("\\.")[originalFileName.split("\\.").length - 1];
+        String inputFile = mediaManagementService.storeTempFile(videoInputStream, userOpt.get().getUsername(), newFileName.split("\\.")[0], originalFileType);
 
         //Process video upload asynchronously
         //TODO

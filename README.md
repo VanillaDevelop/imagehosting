@@ -22,3 +22,7 @@ VALUES (
     1
 );
 ```
+
+# Modules
+## Video Upload Module
+A user with the `VIDEO_UPLOAD` role can upload videos for public access. 

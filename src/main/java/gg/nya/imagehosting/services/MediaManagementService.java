@@ -6,9 +6,12 @@ import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+
+import jakarta.annotation.PostConstruct;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -20,21 +23,53 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class FFmpegService {
+public class MediaManagementService {
 
-    private static final Logger log = LoggerFactory.getLogger(FFmpegService.class);
+    private static final Logger log = LoggerFactory.getLogger(MediaManagementService.class);
 
-    private final FFmpeg ffmpeg;
-    private final FFprobe ffprobe;
-    private final FFmpegExecutor executor;
+    @Value("${media.ffmpeg.path}")
+    private String ffmpegPath;
 
-    public FFmpegService() throws IOException {
-        String ffmpegPath = getClass().getClassLoader().getResource("ffmpeg/ffmpeg").getPath();
-        String ffprobePath = getClass().getClassLoader().getResource("ffmpeg/ffprobe").getPath();
+    @Value("${media.ffprobe.path}")
+    private String ffprobePath;
 
+    @Value("${media.temp.directory}")
+    private String tempDirectory;
+
+    private FFmpeg ffmpeg;
+    private FFprobe ffprobe;
+    private FFmpegExecutor executor;
+
+    @PostConstruct
+    public void init() throws IOException {
         this.ffmpeg = new FFmpeg(ffmpegPath);
         this.ffprobe = new FFprobe(ffprobePath);
         this.executor = new FFmpegExecutor(ffmpeg, ffprobe);
+    }
+
+    /**
+     * Store a temporary file in the specified directory.
+     * @param inputStream The input stream of the file to be stored.
+     * @param user The user identifier for whom the file is being stored.
+     * @param fileName The name of the file to be stored.
+     * @param fileExtension The file extension of the file to be stored.
+     * @return The path to the stored temporary file as a string.
+     * @throws RuntimeException if an error occurs while storing the file.
+     */
+    public String storeTempFile(InputStream inputStream, String user, String fileName, String fileExtension) {
+        final Path tempInputFile;
+        try {
+            String filename = "input_" + user + "_" + fileName;
+            Path tempDir = Path.of(tempDirectory);
+            Files.createDirectories(tempDir);
+            tempInputFile = Files.createFile(Path.of(tempDir + "/" + filename + "." + fileExtension));
+            Files.copy(inputStream, tempInputFile, StandardCopyOption.REPLACE_EXISTING);
+            log.debug("storeTempFile, uploaded file {} for user {} to temporary location: {}", fileName, user, tempInputFile);
+            return tempInputFile.toString();
+        } catch (IOException e) {
+            log.error("storeTempFile, failed to upload file {} for user {}", fileName, user, e);
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -54,8 +89,10 @@ public class FFmpegService {
         UUID tempFileId = UUID.randomUUID();
         try {
             String fileExtension = getFileExtension(originalFilename);
-            tempInputFile = Files.createTempFile("input_video_" + tempFileId, "." + fileExtension);
-            tempOutputFile = Files.createTempFile("output_video_" + tempFileId, ".mp4");
+            Path tempDir = Path.of(tempDirectory);
+            Files.createDirectories(tempDir);
+            tempInputFile = Files.createTempFile(tempDir, "input_video_" + tempFileId, "." + fileExtension);
+            tempOutputFile = Files.createTempFile(tempDir, "output_video_" + tempFileId, ".mp4");
             
             Files.copy(inputStream, tempInputFile, StandardCopyOption.REPLACE_EXISTING);
 
