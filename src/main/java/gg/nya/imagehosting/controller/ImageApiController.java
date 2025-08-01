@@ -34,7 +34,7 @@ public class ImageApiController {
         log.info("getImage, image requested for user {}, filename: {}", user, filename);
         ByteArrayInputStream imageStream = imageHostingService.retrieveImage(user, filename);
         imageStream.reset();
-        MediaType contentType = Utils.getMediaTypeFromFilename(filename);
+        MediaType contentType = Utils.getImageTypeFromFileName(filename);
 
         return ResponseEntity.ok()
                 .contentType(contentType)

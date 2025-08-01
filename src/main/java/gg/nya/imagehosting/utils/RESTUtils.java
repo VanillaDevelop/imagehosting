@@ -18,7 +18,7 @@ public abstract class RESTUtils {
      */
     public static ImageApiEntity createImageApiEntityResponse(HttpServletRequest request, String username, String filename) {
         ImageApiEntity imageApiEntity = new ImageApiEntity();
-        imageApiEntity.setURL(RESTUtils.fetchURLFromRequest(request, username, filename));
+        imageApiEntity.setURL(RESTUtils.fetchURLFromRequest(request, username, "i", filename));
         return imageApiEntity;
     }
 
@@ -30,9 +30,9 @@ public abstract class RESTUtils {
      * @param filename The filename of the image
      * @return The URL to retrieve the image
      */
-    private static String fetchURLFromRequest(HttpServletRequest request, String username, String filename) {
+    public static String fetchURLFromRequest(HttpServletRequest request, String username, String category, String filename) {
         String port = request.getServerPort() == 80 ? "" : ":" + request.getServerPort();
         String baseUrl = request.getScheme() + "://" + username + "." + request.getServerName() + port;
-        return baseUrl + "/i/" + filename;
+        return baseUrl + "/" + category + "/" + filename;
     }
 }

@@ -24,7 +24,7 @@ public class SubdomainRedirectFilter implements Filter {
         String queryString = httpRequest.getQueryString();
 
         // Skip redirect for API paths
-        if (requestURI.startsWith("/i/")) {
+        if (requestURI.startsWith("/i/") || requestURI.startsWith("/v/")) {
             chain.doFilter(request, response);
             return;
         }

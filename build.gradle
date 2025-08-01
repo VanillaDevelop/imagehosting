@@ -75,6 +75,7 @@ dependencies {
     implementation 'org.springframework.security:spring-security-crypto'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.session:spring-session-jdbc'
+    implementation 'net.bramp.ffmpeg:ffmpeg:0.8.0'
 }
 
 tasks.named('test') {

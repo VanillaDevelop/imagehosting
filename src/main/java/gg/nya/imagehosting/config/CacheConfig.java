@@ -15,9 +15,9 @@ public class CacheConfig {
 
     @Bean
     public CacheManager cacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("imageCache");
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager("fileCache");
         cacheManager.setCaffeine(Caffeine.newBuilder()
-                .maximumSize(100) // Cache up to 100 images
+                .maximumSize(200) // Cache up to 200 files
                 .expireAfterWrite(30, TimeUnit.MINUTES) // Cache entries expire after 30 minutes
                 .recordStats());
         return cacheManager;
