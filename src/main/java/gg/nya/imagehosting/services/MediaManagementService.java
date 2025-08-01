@@ -32,6 +32,7 @@ public class MediaManagementService {
     private static final Logger log = LoggerFactory.getLogger(MediaManagementService.class);
     private final S3Service s3Service;
     private final VideoUploadUserFileRepository videoUploadUserFileRepository;
+    private final StaticDataService staticDataService;
 
     @Value("${media.ffmpeg.path}")
     private String ffmpegPath;
@@ -46,9 +47,10 @@ public class MediaManagementService {
     private FFprobe ffprobe;
     private FFmpegExecutor executor;
 
-    public MediaManagementService(S3Service s3Service, VideoUploadUserFileRepository videoUploadUserFileRepository) {
+    public MediaManagementService(S3Service s3Service, VideoUploadUserFileRepository videoUploadUserFileRepository, StaticDataService staticDataService) {
         this.s3Service = s3Service;
         this.videoUploadUserFileRepository = videoUploadUserFileRepository;
+        this.staticDataService = staticDataService;
     }
 
     @PostConstruct
@@ -99,12 +101,28 @@ public class MediaManagementService {
         log.debug("processVideoAsync, starting async video processing for user {} file {}", username, outputFileName);
 
         try {
+            String processedVideoFileName = "output_" + username + "_" + outputFileName;
+            
             log.debug("processVideoAsync, converting video file: {}", inputFileName);
-            convertToMp4(inputFileName, "output_" + username + "_" + outputFileName, startTimeSeconds, endTimeSeconds);
+            convertToMp4(inputFileName, processedVideoFileName, startTimeSeconds, endTimeSeconds);
+
+            log.debug("processVideoAsync, generating thumbnail for user {} file {}", username, outputFileName);
+            String thumbnailFileName = "thumbnail_" + username + "_" + outputFileName.replaceAll("\\.[^.]+$", ".png");
+            generateThumbnail(processedVideoFileName, thumbnailFileName);
+            
+            log.debug("processVideoAsync, storing thumbnail for user {} file {}", username, outputFileName);
+            try {
+                InputStream thumbnailInputStream = createThumbnailInputStream(thumbnailFileName);
+                String baseFileName = outputFileName.replaceAll("\\.[^.]+$", "");
+                staticDataService.storeThumbnail(username, baseFileName, thumbnailInputStream);
+                thumbnailInputStream.close();
+            } catch (IOException e) {
+                log.error("processVideoAsync, failed to store thumbnail for user {} file {}", username, outputFileName, e);
+            }
 
             log.debug("processVideoAsync, uploading video to S3 for user {}", username);
             try {
-                InputStream videoInputStream = new FileInputStream(tempDirectory + "/output_" + username + "_" + outputFileName);
+                InputStream videoInputStream = new FileInputStream(tempDirectory + "/" + processedVideoFileName);
                 s3Service.uploadVideo(username, outputFileName, videoInputStream);
             }
             catch (IOException e) {
@@ -157,6 +175,52 @@ public class MediaManagementService {
         } catch (Exception e) {
             log.error("convertToMp4, failed to convert video to MP4", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to convert video to MP4", e);
+        }
+    }
+
+    /**
+     * Generates a thumbnail from the first frame of a video file at 480p resolution.
+     * 
+     * @param videoFileName The name of the video file to extract thumbnail from
+     * @param thumbnailFileName The name of the thumbnail file to create
+     * @throws RuntimeException if an error occurs during thumbnail generation
+     */
+    private void generateThumbnail(String videoFileName, String thumbnailFileName) {
+        try {
+            log.debug("generateThumbnail, generating thumbnail from video {} to {}", videoFileName, thumbnailFileName);
+            
+            FFmpegBuilder builder = new FFmpegBuilder()
+                .setInput(tempDirectory + "/" + videoFileName)
+                .overrideOutputFiles(true)
+                .addOutput(tempDirectory + "/" + thumbnailFileName)
+                .setFrames(1)
+                .setVideoFilter("scale=480:270")
+                .done();
+            
+            executor.createJob(builder).run();
+            
+            log.debug("generateThumbnail, thumbnail generation completed successfully for file {}", thumbnailFileName);
+        } catch (Exception e) {
+            log.error("generateThumbnail, failed to generate thumbnail from video {}", videoFileName, e);
+            throw new RuntimeException("Failed to generate thumbnail", e);
+        }
+    }
+
+    /**
+     * Creates an InputStream for reading a thumbnail file from the temp directory.
+     * 
+     * @param thumbnailFileName The name of the thumbnail file to read
+     * @return InputStream for the thumbnail file
+     * @throws RuntimeException if an error occurs while reading the thumbnail
+     */
+    private InputStream createThumbnailInputStream(String thumbnailFileName) {
+        try {
+            Path thumbnailPath = Path.of(tempDirectory, thumbnailFileName);
+            log.debug("createThumbnailInputStream, creating input stream for thumbnail {}", thumbnailPath);
+            return new FileInputStream(thumbnailPath.toFile());
+        } catch (IOException e) {
+            log.error("createThumbnailInputStream, failed to create input stream for thumbnail {}", thumbnailFileName, e);
+            throw new RuntimeException("Failed to create thumbnail input stream", e);
         }
     }
 
