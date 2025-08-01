@@ -1,5 +1,6 @@
 package gg.nya.imagehosting.repositories;
 
+import gg.nya.imagehosting.models.VideoUploadStatus;
 import gg.nya.imagehosting.models.VideoUploadUser;
 import gg.nya.imagehosting.models.VideoUploadUserFile;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +12,9 @@ import java.util.Optional;
 @Repository
 public interface VideoUploadUserFileRepository extends CrudRepository<VideoUploadUserFile, Long> {
     boolean existsByVideoUploadUserAndFileName(VideoUploadUser videoUploadUser, String fileName);
+
+    boolean existsByVideoUploadUserAndFileNameAndUploadStatus(VideoUploadUser videoUploadUser, String fileName, VideoUploadStatus uploadStatus);
+
     @Query("SELECT vuf FROM video_upload_user_files vuf WHERE vuf.videoUploadUser.user.username = ?1 AND vuf.fileName = ?2")
     Optional<VideoUploadUserFile> getVideoUploadUserFileByUploadUsernameAndFileName(String username, String fileName);
 }

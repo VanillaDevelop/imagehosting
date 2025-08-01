@@ -34,24 +34,24 @@ public class S3Service {
     private String env;
 
     /**
-     * Get image from S3 bucket. Throws a 404 error if the image could not be retrieved successfully.
+     * Get file from S3 bucket. Throws a 404 error if the file could not be retrieved successfully.
      *
-     * @param subdomain The subdomain of the image (username).
-     * @param fileName  The filename of the image.
-     * @return The image as an InputStream.
+     * @param subdomain The subdomain of the file (username).
+     * @param fileName  The filename of the file.
+     * @return The file as an InputStream.
      */
-    @Cacheable(value = "imageCache", key = "#subdomain + '/' + #fileName")
-    public ByteArrayInputStream getImage(String subdomain, String fileName) {
+    @Cacheable(value = "fileCache", key = "#subdomain + '/i/' + #fileName")
+    public ByteArrayInputStream getFile(String subdomain, String fileName) {
         String key = getKeyName(subdomain, fileName);
         try {
-            log.debug("getImage, cache miss - retrieving image with key {} from bucket {}", key, bucketName);
+            log.debug("getFile, cache miss - retrieving file with key {} from bucket {}", key, bucketName);
             InputStream originalStream = s3Client.getObject(GetObjectRequest.builder()
                     .bucket(bucketName)
                     .key(key)
                     .build());
             if (originalStream == null) {
-                log.error("getImage, image with key {} not found in bucket {}", key, bucketName);
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
+                log.error("getFile, file with key {} not found in bucket {}", key, bucketName);
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
             }
 
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -59,8 +59,8 @@ public class S3Service {
             return new ByteArrayInputStream(buffer.toByteArray());
 
         } catch (AwsServiceException | SdkClientException | IOException e) {
-            log.error("getImage, could not retrieve image with key {} from bucket {}", key, bucketName);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
+            log.error("getFile, could not retrieve file with key {} from bucket {}", key, bucketName);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
         }
     }
 

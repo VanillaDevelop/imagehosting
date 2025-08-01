@@ -55,7 +55,7 @@ public class ImageHostingService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
         }
         log.debug("retrieveImage, image for user {} with filename {} found in DB, querying cached S3", username, filename);
-        return s3Service.getImage(username, filename);
+        return s3Service.getFile(username, filename);
     }
 
     /**

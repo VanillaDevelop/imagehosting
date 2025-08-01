@@ -12,5 +12,5 @@ import java.util.Optional;
 public interface VideoUploadUserRepository extends CrudRepository<VideoUploadUser, Long> {
 
     @Query("SELECT v FROM video_upload_users v WHERE v.user.username = :username")
-    Optional<VideoUploadUser> findVideoUploadUserByUser(@Param("username") String username);
+    Optional<VideoUploadUser> findVideoUploadUserByUsername(@Param("username") String username);
 }

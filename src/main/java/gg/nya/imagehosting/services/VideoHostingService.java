@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -31,17 +32,34 @@ public class VideoHostingService {
     private final VideoUploadUserFileRepository videoUploadUserFileRepository;
     private final UserRepository userRepository;
     private final MediaManagementService mediaManagementService;
+    private final S3Service s3Service;
 
     @Autowired
     public VideoHostingService(VideoUploadUserRepository videoUploadUserRepository,
-                               VideoUploadUserFileRepository userFileRepository, UserRepository userRepository, MediaManagementService mediaManagementService) {
+                               VideoUploadUserFileRepository userFileRepository, UserRepository userRepository, MediaManagementService mediaManagementService, S3Service s3Service) {
        this.videoUploadUserRepository = videoUploadUserRepository;
          this.videoUploadUserFileRepository = userFileRepository;
        this.userRepository = userRepository;
         this.mediaManagementService = mediaManagementService;
+        this.s3Service = s3Service;
     }
 
-
+    /**
+     * Serve a video from the given user.
+     *
+     * @param username The username of the user.
+     * @param filename The filename of the video.
+     * @return The video as an input stream, if it exists. Throws a 404 error if the video does not exist.
+     */
+    public ByteArrayInputStream retrieveVideo(String username, String filename) {
+        log.debug("retrieveVideo, checking if video for user {} with filename {} exists", username, filename);
+        if (!checkVideoExists(username, filename)) {
+            log.error("retrieveVideo, video for user {} with filename {} not found", username, filename);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Video not found");
+        }
+        log.debug("retrieveVideo, video for user {} with filename {} found in DB, querying cached S3", username, filename);
+        return s3Service.getFile(username, filename);
+    }
 
     /**
      * Uploads a video for the user associated with the given User ID.
@@ -71,7 +89,7 @@ public class VideoHostingService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user");
         }
 
-        Optional<VideoUploadUser> videoUser = videoUploadUserRepository.findVideoUploadUserByUser(userOpt.get().getUsername());
+        Optional<VideoUploadUser> videoUser = videoUploadUserRepository.findVideoUploadUserByUsername(userOpt.get().getUsername());
         if(videoUser.isEmpty()) {
             log.error("uploadVideoForUser, video upload user for username {} not found", userOpt.get().getUsername());
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find video upload user");
@@ -144,7 +162,7 @@ public class VideoHostingService {
         }
         User user = userOpt.get();
 
-        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findVideoUploadUserByUser(user.getUsername());
+        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findVideoUploadUserByUsername(user.getUsername());
         if (videoUploadUserOpt.isPresent()) {
             log.debug("getOrCreateVideoUploadUser, video upload user for user {} found", user.getUsername());
             return videoUploadUserOpt.get();
@@ -173,5 +191,19 @@ public class VideoHostingService {
         log.error("tryCreateFileName, could not create file name for user {} with strategy {}",
                 videoUploadUser.getUser().getUsername(), videoUploadUser.getVideoUploadMode());
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not create file for user.");
+    }
+
+    private boolean checkVideoExists(String username, String filename) {
+        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findVideoUploadUserByUsername(username);
+        if (videoUploadUserOpt.isEmpty()) {
+            log.error("checkVideoExists, video upload user for user {} not found", username);
+            return false;
+        }
+        //Check if this user has a file with the given filename
+        if (!videoUploadUserFileRepository.existsByVideoUploadUserAndFileNameAndUploadStatus(videoUploadUserOpt.get(), filename, VideoUploadStatus.COMPLETED)) {
+            log.error("checkVideoExists, video upload user for user {} does not have an uploaded file with filename {}", username, filename);
+            return false;
+        }
+        return true;
     }
 }

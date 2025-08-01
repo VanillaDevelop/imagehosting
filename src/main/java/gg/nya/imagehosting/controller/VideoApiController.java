@@ -2,17 +2,19 @@ package gg.nya.imagehosting.controller;
 
 import gg.nya.imagehosting.services.AuthenticationService;
 import gg.nya.imagehosting.services.VideoHostingService;
+import gg.nya.imagehosting.utils.Utils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -27,6 +29,20 @@ public class VideoApiController {
     public VideoApiController(VideoHostingService videoHostingService, AuthenticationService authenticationService) {
         this.videoHostingService = videoHostingService;
         this.authenticationService = authenticationService;
+    }
+
+    @GetMapping(value = "/v/{filename}", produces = MediaType.ALL_VALUE)
+    public ResponseEntity<InputStreamResource> getVideo(@PathVariable String filename, HttpServletRequest request) {
+        String serverName = request.getServerName();
+        String user = Utils.extractUsernameFromServerName(serverName);
+        log.info("getVideo, video requested for user {}, filename: {}", user, filename);
+        ByteArrayInputStream videoStream = videoHostingService.retrieveVideo(user, filename);
+        videoStream.reset();
+        MediaType contentType = MediaType.parseMediaType("video/webm");
+
+        return ResponseEntity.ok()
+                .contentType(contentType)
+                .body(new InputStreamResource(videoStream));
     }
 
     @PostMapping(value = "/v/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
