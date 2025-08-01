@@ -32,6 +32,7 @@ public class SecurityConfig {
                                 "/index.xhtml",
                                 "/",
                                 "/i/**",
+                                "/v/**",
                                 "/error.xhtml",
                                 "/error",
                                 "/favicon.ico"
@@ -41,6 +42,8 @@ public class SecurityConfig {
                         .access((authentication, context) -> new AuthorizationDecision(hasAdminRole(authentication)))
                         .requestMatchers("/imagehosting.xhtml")
                         .access((authentication, context) -> new AuthorizationDecision(hasImageHostingRole(authentication)))
+                        .requestMatchers("/videoupload.xhtml")
+                        .access((authentication, context) -> new AuthorizationDecision(hasVideoUploadRole(authentication)))
                         .anyRequest()
                         .authenticated())
                 .securityContext(securityContext -> securityContext.requireExplicitSave(false))
@@ -62,5 +65,11 @@ public class SecurityConfig {
         if (!(authentication.get() instanceof CustomAuthenticationToken customAuthenticationToken))
             return false;
         return customAuthenticationToken.getRoles().contains("IMAGE_HOSTING");
+    }
+
+    private boolean hasVideoUploadRole(Supplier<Authentication> authentication) {
+        if (!(authentication.get() instanceof CustomAuthenticationToken customAuthenticationToken))
+            return false;
+        return customAuthenticationToken.getRoles().contains("VIDEO_UPLOAD");
     }
 }

@@ -34,6 +34,10 @@ public class VideoUploadUserFile implements Serializable {
     private LocalDateTime createdAt;
 
     @NotNull
+    @Column(name = "video_title")
+    private String videoTitle;
+
+    @NotNull
     @Column(name = "upload_status")
     @Enumerated(EnumType.STRING)
     private VideoUploadStatus uploadStatus;
@@ -84,5 +88,13 @@ public class VideoUploadUserFile implements Serializable {
 
     public void setUploadStatus(VideoUploadStatus uploadStatus) {
         this.uploadStatus = uploadStatus;
+    }
+
+    public String getVideoTitle() {
+        return videoTitle;
+    }
+
+    public void setVideoTitle(String videoTitle) {
+        this.videoTitle = videoTitle;
     }
 }

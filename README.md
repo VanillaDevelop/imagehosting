@@ -10,6 +10,18 @@ Migrations are applied automatically on startup, but you can also run them manua
 ./gradlew flywayMigrate
 ```
 
+Both in development and production, AWS access is configured automatically via the credentials file. On linux,
+place this file at `~/.aws/credentials` with the following content:
+```
+[default]
+aws_access_key_id = [your_access_key_id]
+aws_secret_access_key = [your_secret_access_key]
+```
+
+The user should have `AmazonS3FullAccess` permissions to allow the application to upload files to S3. This type of 
+user can be configured in the IAM console of AWS, not to confuse with "IAM Identity Center", which for some reason 
+is something else entirely.
+
 # User Management
 A user can be created easily via the login page.  
 A user with the admin role can view and control the roles of other users.  

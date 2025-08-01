@@ -35,13 +35,12 @@ public class VideoApiController {
             @RequestParam("videoInput") MultipartFile videoFile,
             @RequestParam("startTimeSeconds") double startTimeSeconds,
             @RequestParam("endTimeSeconds") double endTimeSeconds,
-            @RequestParam("videoTitle") String videoTitle,
-            @RequestParam("fullVideo") boolean fullVideo
+            @RequestParam("videoTitle") String videoTitle
             ) throws IOException {
 
         long userId = this.authenticationService.getCurrentUserId();
-        log.info("uploadVideo, video upload requested for user with ID {}, original file name {}, start time: {}, end time: {}, full video: {}, requested title: {}",
-                userId, videoFile.getOriginalFilename(), startTimeSeconds, endTimeSeconds, fullVideo, videoTitle);
+        log.info("uploadVideo, video upload requested for user with ID {}, original file name {}, start time: {}, end time: {}, requested title: {}",
+                userId, videoFile.getOriginalFilename(), startTimeSeconds, endTimeSeconds, videoTitle);
 
         InputStream videoInputStream = videoFile.getInputStream();
         String generatedUrl = videoHostingService.uploadVideoForUser(
@@ -51,8 +50,7 @@ public class VideoApiController {
                 videoFile.getOriginalFilename(),
                 startTimeSeconds,
                 endTimeSeconds,
-                videoTitle,
-                fullVideo
+                videoTitle
         );
 
         return new RedirectView(generatedUrl);

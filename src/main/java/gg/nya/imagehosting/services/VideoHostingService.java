@@ -52,7 +52,6 @@ public class VideoHostingService {
      * @param startTimeSeconds The start time in seconds for the video segment, if applicable.
      * @param endTimeSeconds The end time in seconds for the video segment, if applicable.
      * @param videoTitle The title of the video being uploaded.
-     * @param fullVideo A boolean indicating whether the full video is being uploaded or just a segment.
      * @return The URL of the uploaded video file.
      * @throws IOException If an error occurs while processing the video upload.
      */
@@ -63,8 +62,7 @@ public class VideoHostingService {
             String originalFileName,
             double startTimeSeconds,
             double endTimeSeconds,
-            String videoTitle,
-            boolean fullVideo) throws IOException {
+            String videoTitle) throws IOException {
         log.debug("uploadVideoForUser, attempting to upload video for user with ID {}", userId);
 
         Optional<User> userOpt = userRepository.findById(userId);
@@ -77,6 +75,27 @@ public class VideoHostingService {
         if(videoUser.isEmpty()) {
             log.error("uploadVideoForUser, video upload user for username {} not found", userOpt.get().getUsername());
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find video upload user");
+        }
+
+        //Sanity checks on the input
+        if (videoInputStream == null || videoInputStream.available() == 0) {
+            log.error("uploadVideoForUser, video input stream is empty for user {}", userOpt.get().getUsername());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Video input stream is empty");
+        }
+
+        if (originalFileName == null || originalFileName.isEmpty()) {
+            log.error("uploadVideoForUser, original file name is empty for user {}", userOpt.get().getUsername());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Original file name is empty");
+        }
+
+        if (videoTitle == null || videoTitle.isEmpty()) {
+            log.error("uploadVideoForUser, video title is empty for user {}", userOpt.get().getUsername());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Video title is empty");
+        }
+
+        if (startTimeSeconds < 0 || endTimeSeconds < startTimeSeconds) {
+            log.error("uploadVideoForUser, invalid start or end time for user {}", userOpt.get().getUsername());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid start or end time");
         }
 
         //Check if we can parse the file type
@@ -92,14 +111,15 @@ public class VideoHostingService {
         String inputFile = mediaManagementService.storeTempFile(videoInputStream, userOpt.get().getUsername(), newFileName.split("\\.")[0], originalFileType);
 
         //Process video upload asynchronously
-        //TODO
+        mediaManagementService.processVideoAsync(inputFile, userOpt.get().getUsername(), newFileName, startTimeSeconds, endTimeSeconds);
 
         // Save the video file to the repository
-        log.debug("uploadVideoForUser, saving video file for user {} with file name {}", userOpt.get().getUsername(), newFileName);
+        log.debug("uploadVideoForUser, storing video file for user {} with file name {} in database as PROCESSING", userOpt.get().getUsername(), newFileName);
         VideoUploadUserFile videoUploadUserFile = new VideoUploadUserFile();
         videoUploadUserFile.setVideoUploadUser(videoUser.get());
         videoUploadUserFile.setFileName(newFileName);
         videoUploadUserFile.setFileSize((long) videoInputStream.available());
+        videoUploadUserFile.setVideoTitle(videoTitle);
         videoUploadUserFile.setCreatedAt(java.time.LocalDateTime.now());
         videoUploadUserFile.setUploadStatus(VideoUploadStatus.PROCESSING);
         videoUploadUserFileRepository.save(videoUploadUserFile);

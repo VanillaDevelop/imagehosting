@@ -59,10 +59,6 @@ class VideoTrimmer {
             e.preventDefault();
             this.submitForm(false);
         });
-        this.uploadButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.submitForm(true);
-        })
     }
 
     // Start dragging the handle
@@ -222,11 +218,10 @@ class VideoTrimmer {
         }, 600);
     }
 
-    submitForm(fullVideo) {
+    submitForm() {
         this.startTimeSecondsEl = document.getElementById('start-time-seconds');
         this.endTimeSecondsEl = document.getElementById('end-time-seconds');
         this.videoTitleEl = document.getElementById('video-title');
-        this.fullVideoEl = document.getElementById('full-video');
         this.videoFormEl = document.getElementById('video-upload-form');
 
         this.videoTitleInputEl = document.getElementById('video-title-input');
@@ -239,7 +234,6 @@ class VideoTrimmer {
         }
 
         // Fill properties
-        this.fullVideoEl.value = fullVideo;
         this.startTimeSecondsEl.value = this.startTime;
         this.endTimeSecondsEl.value = this.endTime;
         this.videoTitleEl.value = this.videoTitleInputEl.value;
