@@ -45,7 +45,7 @@ public class VideoApiController {
                 .body(new InputStreamResource(videoStream));
     }
 
-    @PostMapping(value = "/v/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = {"/v", "/v/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public RedirectView uploadVideo(
             HttpServletRequest request,
             @RequestParam("videoInput") MultipartFile videoFile,
