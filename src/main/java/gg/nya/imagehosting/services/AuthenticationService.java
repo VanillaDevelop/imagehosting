@@ -9,19 +9,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class AuthenticationService {
     private final UserService userService;
-    private final RoleService roleService;
     private static final Logger log = LoggerFactory.getLogger(AuthenticationService.class);
 
-    public AuthenticationService(UserService userService, RoleService roleService) {
+    public AuthenticationService(UserService userService) {
         this.userService = userService;
-        this.roleService = roleService;
     }
 
     public Optional<User> authenticate(String username, String password) {
@@ -32,8 +30,14 @@ public class AuthenticationService {
             return Optional.empty();
         }
 
+        if (isRateLimitExceeded(user.get())) {
+            log.debug("authenticate, user {} is rate limited", username);
+            return Optional.empty();
+        }
+
         if (!comparePassword(password, user.get().getPassword())) {
             log.debug("authenticate, password mismatch for user {}", username);
+            userService.increaseFailedLoginAttempts(user.get());
             return Optional.empty();
         }
 
@@ -43,6 +47,7 @@ public class AuthenticationService {
         SecurityContextHolder.getContext().setAuthentication(
                 new CustomAuthenticationToken(user.get().getId(), username, userRoles));
 
+        userService.clearFailedLoginAttempts(user.get());
         log.info("authenticate, user {} authenticated", username);
         return user;
     }
@@ -99,5 +104,21 @@ public class AuthenticationService {
     private boolean comparePassword(String password, String hashedPassword) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         return encoder.matches(password, hashedPassword);
+    }
+
+    private boolean isRateLimitExceeded(User user) {
+        log.debug("isRateLimitExceeded, checking rate limit for user {} => {} failed attempts", user.getUsername(),
+                user.getFailedLoginAttempts());
+        // After 3 failed login attempts, lock the account for 15 minutes
+        // After 5 failed login attempts, lock the account for 1 hour
+        // After 10 failed login attempts, lock the account for 24 hours
+        if(user.getFailedLoginAttempts() >= 3 && user.getFailedLoginAttempts() < 5) {
+            return user.getLastLoginAttempt().plusMinutes(15).isAfter(LocalDateTime.now());
+        } else if(user.getFailedLoginAttempts() >= 5 && user.getFailedLoginAttempts() < 10) {
+            return user.getLastLoginAttempt().plusHours(1).isAfter(LocalDateTime.now());
+        } else if(user.getFailedLoginAttempts() >= 10) {
+            return user.getLastLoginAttempt().plusDays(1).isAfter(LocalDateTime.now());
+        }
+        return false;
     }
 }
