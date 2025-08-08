@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -114,5 +115,20 @@ public class UserService {
         userRepository.save(updatedUser);
         log.info("addRoleToUser, role {} added to user {}", roleToAdd.getRole(), updatedUser.getUsername());
         return Optional.empty();
+    }
+
+    public void increaseFailedLoginAttempts(User user) {
+        user.setFailedLoginAttempts(user.getFailedLoginAttempts() + 1);
+        user.setLastLoginAttempt(LocalDateTime.now());
+        userRepository.save(user);
+        log.debug("increaseFailedLoginAttempts, increased failed login attempts for user {} to {}", user.getUsername(),
+                user.getFailedLoginAttempts());
+    }
+
+    public void clearFailedLoginAttempts(User user) {
+        user.setFailedLoginAttempts(0);
+        user.setLastLoginAttempt(null);
+        userRepository.save(user);
+        log.debug("clearFailedLoginAttempts, cleared failed login attempts for user {}", user.getUsername());
     }
 }

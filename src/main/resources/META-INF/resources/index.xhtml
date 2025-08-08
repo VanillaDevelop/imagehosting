@@ -46,10 +46,13 @@
                                          action="#{loginBean.signUp}"
                                          styleClass="w-full ui-button-primary"
                                          update="loginPanel"/>
-                        <p:commandButton value="Login"
+                        <p:commandButton id="loginButton"
+                                         value="Login"
                                          action="#{loginBean.login}"
                                          styleClass="w-full ui-button-primary"
-                                         update="loginPanel"/>
+                                         update="loginPanel"
+                        />
+                        <p:defaultCommand target="loginButton"/>
                     </p:panelGrid>
                 </p:panelGrid>
             </h:form>

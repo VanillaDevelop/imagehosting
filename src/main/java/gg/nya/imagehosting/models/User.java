@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,12 @@ public class User implements Serializable {
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<Role> roles;
 
+    @Column
+    private LocalDateTime lastLoginAttempt;
+
+    @NotNull
+    private int failedLoginAttempts;
+
     protected User() {
 
     }
@@ -44,6 +51,7 @@ public class User implements Serializable {
         this.username = username.toLowerCase();
         this.displayName = username;
         this.password = password;
+        this.failedLoginAttempts = 0;
         this.roles = new ArrayList<>();
     }
 
@@ -67,4 +75,19 @@ public class User implements Serializable {
         return roles;
     }
 
+    public LocalDateTime getLastLoginAttempt() {
+        return lastLoginAttempt;
+    }
+
+    public void setLastLoginAttempt(LocalDateTime lastLoginAttempt) {
+        this.lastLoginAttempt = lastLoginAttempt;
+    }
+
+    public int getFailedLoginAttempts() {
+        return failedLoginAttempts;
+    }
+
+    public void setFailedLoginAttempts(int failedLoginAttempts) {
+        this.failedLoginAttempts = failedLoginAttempts;
+    }
 }

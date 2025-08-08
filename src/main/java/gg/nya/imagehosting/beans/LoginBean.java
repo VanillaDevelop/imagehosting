@@ -94,7 +94,6 @@ public class LoginBean implements Serializable {
         log.info("handleUnsuccessfulLoginAttemptInternal, login unsuccessful for user: {}", username);
         this.username = "";
         this.password = "";
-        authenticationService.logout();
 
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
                 "Invalid credentials!", null));
@@ -106,11 +105,9 @@ public class LoginBean implements Serializable {
         log.info("handleUnsuccessfulSignUpAttemptInternal, sign up unsuccessful for user: {}", username);
         this.username = "";
         this.password = "";
-        authenticationService.logout();
 
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
                 "Username already exists!", null));
-
         return null;
     }
 
