@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -175,6 +177,18 @@ public class VideoHostingService {
         return videoUploadUser;
     }
 
+    public List<VideoUploadUserFile> getVideos(int page, int size, String username) {
+        log.debug("getVideos, fetching videos for user {} with page {} and size {}", username, page, size);
+        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findVideoUploadUserByUsername(username);
+        if (videoUploadUserOpt.isEmpty()) {
+            log.error("getVideos, video upload user for user {} not found", username);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find video upload user");
+        }
+
+        PageRequest request = PageRequest.of(page, size);
+        return videoUploadUserFileRepository.findAllByVideoUploadUser(videoUploadUserOpt.get(), request).getContent();
+    }
+
     /**
      * Attempts to create a file name for the user's given strategy. Aborts with a 500 error after 100 failed attempts.
      *
@@ -182,7 +196,7 @@ public class VideoHostingService {
      */
     private String tryCreateFileName(VideoUploadUser videoUploadUser) {
         for (int i = 0; i < 100; i++) {
-            String fileName = Utils.generateFilenameFromStrategy(videoUploadUser.getVideoUploadMode()) + ".webm";
+            String fileName = Utils.generateFilenameFromStrategy(videoUploadUser.getVideoUploadMode()) + ".mp4";
             if (!videoUploadUserFileRepository.existsByVideoUploadUserAndFileName(videoUploadUser, fileName)) {
                 log.debug("tryCreateFileName, determined file name {} for image hosting user {}", fileName, videoUploadUser.getId());
                 return fileName;

@@ -7,7 +7,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 @RestController
 public class VideoApiController {
@@ -32,17 +35,49 @@ public class VideoApiController {
     }
 
     @GetMapping(value = "/v/{filename}", produces = MediaType.ALL_VALUE)
-    public ResponseEntity<InputStreamResource> getVideo(@PathVariable String filename, HttpServletRequest request) {
+    public ResponseEntity<ByteArrayResource> getVideo(@PathVariable String filename, HttpServletRequest request) {
         String serverName = request.getServerName();
         String user = Utils.extractUsernameFromServerName(serverName);
         log.info("getVideo, video requested for user {}, filename: {}", user, filename);
+        
         ByteArrayInputStream videoStream = videoHostingService.retrieveVideo(user, filename);
-        videoStream.reset();
-        MediaType contentType = MediaType.parseMediaType("video/webm");
+        videoStream.reset(); // Reset position to beginning
+        byte[] videoData;
+        videoData = videoStream.readAllBytes();
 
+        long contentLength = videoData.length;
+        String rangeHeader = request.getHeader("Range");
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Accept-Ranges", "bytes");
+        headers.add("Cache-Control", "public, max-age=31536000");
+        headers.setContentType(MediaType.parseMediaType("video/mp4"));
+        
+        // Handle Range requests
+        if (rangeHeader != null && rangeHeader.startsWith("bytes=")) {
+            String[] ranges = rangeHeader.substring(6).split("-");
+            long start = Long.parseLong(ranges[0]);
+            long end = ranges.length > 1 && !ranges[1].isEmpty() ? 
+                      Long.parseLong(ranges[1]) : contentLength - 1;
+            
+            end = Math.min(end, contentLength - 1);
+            long rangeLength = end - start + 1;
+            
+            headers.add("Content-Range", String.format("bytes %d-%d/%d", start, end, contentLength));
+            headers.setContentLength(rangeLength);
+            
+            byte[] rangeData = Arrays.copyOfRange(videoData, (int)start, (int)end + 1);
+            
+            return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+                    .headers(headers)
+                    .body(new ByteArrayResource(rangeData));
+        }
+        
+        // Full content response
+        headers.setContentLength(contentLength);
         return ResponseEntity.ok()
-                .contentType(contentType)
-                .body(new InputStreamResource(videoStream));
+                .headers(headers)
+                .body(new ByteArrayResource(videoData));
     }
 
     @PostMapping(value = {"/v", "/v/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

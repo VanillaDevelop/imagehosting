@@ -15,6 +15,10 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+
+import java.net.URI;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -24,14 +28,37 @@ import java.io.InputStream;
 @Service
 @Scope("singleton")
 public class S3Service {
-    final Region region = Region.EU_NORTH_1;
-    final String bucketName = "nya.gg";
-    final S3Client s3Client = S3Client.builder().region(region).build();
-
-    final private static Logger log = LoggerFactory.getLogger(S3Service.class);
-
+    @Value("${digitalocean.spaces.access-key}")
+    private String accessKey;
+    
+    @Value("${digitalocean.spaces.secret-key}")
+    private String secretKey;
+    
+    @Value("${digitalocean.spaces.endpoint:https://fra1.digitaloceanspaces.com}")
+    private String endpoint;
+    
+    @Value("${digitalocean.spaces.bucket:nya.gg}")
+    private String bucketName;
+    
+    private S3Client s3Client;
+    
     @Value("${spring.profiles.active:prod}")
     private String env;
+    
+    // Initialize client after properties are loaded
+    private S3Client getS3Client() {
+        if (s3Client == null) {
+            AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
+            s3Client = S3Client.builder()
+                .endpointOverride(URI.create(endpoint))
+                .credentialsProvider(StaticCredentialsProvider.create(credentials))
+                .region(Region.US_EAST_1) // Required but ignored for DigitalOcean Spaces
+                .build();
+        }
+        return s3Client;
+    }
+
+    final private static Logger log = LoggerFactory.getLogger(S3Service.class);
 
     /**
      * Get file from S3 bucket. Throws a 404 error if the file could not be retrieved successfully.
@@ -45,7 +72,7 @@ public class S3Service {
         String key = getKeyName(subdomain, fileName);
         try {
             log.debug("getFile, cache miss - retrieving file with key {} from bucket {}", key, bucketName);
-            InputStream originalStream = s3Client.getObject(GetObjectRequest.builder()
+            InputStream originalStream = getS3Client().getObject(GetObjectRequest.builder()
                     .bucket(bucketName)
                     .key(key)
                     .build());
@@ -75,7 +102,7 @@ public class S3Service {
         String key = getKeyName(subdomain, fileName);
         try {
             log.debug("uploadImage, attempting to upload image with key {} to bucket {}", key, bucketName);
-            s3Client.putObject(builder -> builder
+            getS3Client().putObject(builder -> builder
                     .bucket(bucketName)
                     .key(key)
                     .contentType(Utils.getImageTypeFromFileName(fileName).toString())
@@ -96,7 +123,7 @@ public class S3Service {
         String key = getKeyName(subdomain, fileName);
         try {
             log.debug("uploadVideo, attempting to upload video with key {} to bucket {}", key, bucketName);
-            s3Client.putObject(builder -> builder
+            getS3Client().putObject(builder -> builder
                     .bucket(bucketName)
                     .key(key)
                     .contentType(Utils.getVideoTypeFromFileName(fileName).toString())

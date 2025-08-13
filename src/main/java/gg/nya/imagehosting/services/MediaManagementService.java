@@ -109,12 +109,11 @@ public class MediaManagementService {
             log.debug("processVideoAsync, generating thumbnail for user {} file {}", username, outputFileName);
             String thumbnailFileName = "thumbnail_" + username + "_" + outputFileName.replaceAll("\\.[^.]+$", ".png");
             generateThumbnail(processedVideoFileName, thumbnailFileName);
-            
+
             log.debug("processVideoAsync, storing thumbnail for user {} file {}", username, outputFileName);
             try {
                 InputStream thumbnailInputStream = createThumbnailInputStream(thumbnailFileName);
-                String baseFileName = outputFileName.replaceAll("\\.[^.]+$", "");
-                staticDataService.storeThumbnail(username, baseFileName, thumbnailInputStream);
+                staticDataService.storeThumbnail(username, outputFileName, thumbnailInputStream);
                 thumbnailInputStream.close();
             } catch (IOException e) {
                 log.error("processVideoAsync, failed to store thumbnail for user {} file {}", username, outputFileName, e);
@@ -153,19 +152,21 @@ public class MediaManagementService {
             final long startTimeMs = (long) (startDurationSeconds * 1000);
             final long endTimeMs = (long) (endDurationSeconds * 1000);
             
-            log.debug("convertToMp4, converting video {} to webm {} and clipping to ({}, {})",
+            log.debug("convertToMp4, converting video {} to mp4 {} and clipping to ({}, {})",
                 originalFilename, newFileName, startDurationSeconds, endDurationSeconds);
 
             FFmpegBuilder builder = new FFmpegBuilder()
                 .setInput(tempDirectory + "/" + originalFilename)
                 .overrideOutputFiles(true)
                 .addOutput(tempDirectory + "/" + newFileName)
-                .setFormat("webm")
-                .setVideoCodec("libvpx-vp9")
-                .setAudioCodec("libopus")
+                .setFormat("mp4")
+                .setVideoCodec("libx264")
+                .setAudioCodec("aac")
                 .setStartOffset(startTimeMs, TimeUnit.MILLISECONDS)
                 .setDuration(endTimeMs - startTimeMs, TimeUnit.MILLISECONDS)
-                .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL)
+                .addExtraArgs("-preset", "fast")
+                .addExtraArgs("-crf", "23")
+                .addExtraArgs("-threads", "0")
                 .done();
             
             // Execute conversion
