@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -173,6 +175,18 @@ public class VideoHostingService {
         VideoUploadUser videoUploadUser = new VideoUploadUser(user);
         videoUploadUserRepository.save(videoUploadUser);
         return videoUploadUser;
+    }
+
+    public List<VideoUploadUserFile> getVideos(int page, int size, String username) {
+        log.debug("getVideos, fetching videos for user {} with page {} and size {}", username, page, size);
+        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findVideoUploadUserByUsername(username);
+        if (videoUploadUserOpt.isEmpty()) {
+            log.error("getVideos, video upload user for user {} not found", username);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find video upload user");
+        }
+
+        PageRequest request = PageRequest.of(page, size);
+        return videoUploadUserFileRepository.findAllByVideoUploadUser(videoUploadUserOpt.get(), request).getContent();
     }
 
     /**

@@ -44,4 +44,45 @@ public class StaticDataService {
             throw new RuntimeException("Failed to store thumbnail", e);
         }
     }
+
+    /**
+     * Retrieves a thumbnail image from the local disk.
+     *
+     * @param username The username of the user
+     * @param filename The filename (without extension)
+     * @return An InputStream of the thumbnail image
+     * @throws RuntimeException if the thumbnail does not exist or an error occurs while retrieving it
+     */
+    public InputStream retrieveThumbnail(String username, String filename) {
+        try {
+            Path thumbnailPath = Path.of(thumbnailDirectory, username, filename + ".png");
+            if (!Files.exists(thumbnailPath)) {
+                log.warn("retrieveThumbnail, thumbnail not found for user {} with filename {}", username, filename);
+                throw new RuntimeException("Thumbnail not found");
+            }
+            log.debug("retrieveThumbnail, retrieved thumbnail for user {} with filename {} from path {}",
+                    username, filename, thumbnailPath);
+            return Files.newInputStream(thumbnailPath);
+        } catch (IOException e) {
+            log.error("retrieveThumbnail, failed to retrieve thumbnail for user {} with filename {}",
+                    username, filename, e);
+            throw new RuntimeException("Failed to retrieve thumbnail", e);
+        }
+    }
+
+    /**
+     * Retrieves a backup thumbnail image from the resources.
+     *
+     * @return An InputStream of the backup thumbnail image
+     * @throws RuntimeException if the backup thumbnail is not found
+     */
+    public InputStream retrieveBackupThumbnail() {
+        InputStream backupStream = getClass().getResourceAsStream("/META-INF/resources/assets/images/backup.png");
+        if (backupStream == null) {
+            log.error("retrieveBackupThumbnail, backup thumbnail not found in resources");
+            throw new RuntimeException("Backup thumbnail not found");
+        }
+        log.debug("retrieveBackupThumbnail, retrieved backup thumbnail from resources");
+        return backupStream;
+    }
 }

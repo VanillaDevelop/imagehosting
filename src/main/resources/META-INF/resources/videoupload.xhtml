@@ -12,10 +12,14 @@
         <h:outputStylesheet name="/assets/css/videoupload.css"/>
     </ui:define>
     <ui:define name="content">
-        <div class="my-3">
+        <div class="my-3 flex-header">
             <p:linkButton outcome="/home.xhtml"
                           styleClass="ui-button ui-button-secondary no-underline">
                 <i class="pi pi-arrow-left"/> Back to Home
+            </p:linkButton>
+            <p:linkButton outcome="/videolibrary.xhtml"
+                          styleClass="ui-button ui-button-secondary no-underline">
+                <i class="pi pi-video"/> My Library
             </p:linkButton>
         </div>
 

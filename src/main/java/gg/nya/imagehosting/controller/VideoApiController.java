@@ -38,7 +38,7 @@ public class VideoApiController {
         log.info("getVideo, video requested for user {}, filename: {}", user, filename);
         ByteArrayInputStream videoStream = videoHostingService.retrieveVideo(user, filename);
         videoStream.reset();
-        MediaType contentType = MediaType.parseMediaType("video/webm");
+        MediaType contentType = MediaType.parseMediaType("video/mp4");
 
         return ResponseEntity.ok()
                 .contentType(contentType)

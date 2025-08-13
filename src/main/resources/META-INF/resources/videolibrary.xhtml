@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui"
+>
+<ui:composition template="/templates/template.xhtml">
+    <ui:define name="title">Nya.GG - Video Library</ui:define>
+    <ui:define name="heading">Video Library</ui:define>
+    <ui:define name="content">
+        <div class="my-3 flex-header">
+            <p:linkButton outcome="/home.xhtml"
+                          styleClass="ui-button ui-button-secondary no-underline">
+                <i class="pi pi-arrow-left"/> Back to Home
+            </p:linkButton>
+            <p:linkButton outcome="/videoupload.xhtml"
+                          styleClass="ui-button ui-button-secondary no-underline">
+                <i class="pi pi-upload"/> Upload Video
+            </p:linkButton>
+        </div>
+        <div class="video-grid">
+            <ui:repeat value="#{videoLibraryBean.videos}" var="video">
+                <div class="video-card">
+                    <div class="video-thumbnail">
+                        <p:link href="#{videoLibraryBean.getVideoUrl(video)}" target="_blank">
+                            <p:graphicImage value="#{videoLibraryBean.getThumbnailUrl(video)}"
+                                            alt="Video Thumbnail"
+                                            styleClass="thumbnail-image"/>
+                        </p:link>
+                    </div>
+                </div>
+            </ui:repeat>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>
