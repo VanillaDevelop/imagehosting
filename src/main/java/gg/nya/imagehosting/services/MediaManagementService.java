@@ -152,7 +152,7 @@ public class MediaManagementService {
             final long startTimeMs = (long) (startDurationSeconds * 1000);
             final long endTimeMs = (long) (endDurationSeconds * 1000);
             
-            log.debug("convertToMp4, converting video {} to webm {} and clipping to ({}, {})",
+            log.debug("convertToMp4, converting video {} to mp4 {} and clipping to ({}, {})",
                 originalFilename, newFileName, startDurationSeconds, endDurationSeconds);
 
             FFmpegBuilder builder = new FFmpegBuilder()

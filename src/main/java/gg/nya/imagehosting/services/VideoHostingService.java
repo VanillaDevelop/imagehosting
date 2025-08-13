@@ -196,7 +196,7 @@ public class VideoHostingService {
      */
     private String tryCreateFileName(VideoUploadUser videoUploadUser) {
         for (int i = 0; i < 100; i++) {
-            String fileName = Utils.generateFilenameFromStrategy(videoUploadUser.getVideoUploadMode()) + ".webm";
+            String fileName = Utils.generateFilenameFromStrategy(videoUploadUser.getVideoUploadMode()) + ".mp4";
             if (!videoUploadUserFileRepository.existsByVideoUploadUserAndFileName(videoUploadUser, fileName)) {
                 log.debug("tryCreateFileName, determined file name {} for image hosting user {}", fileName, videoUploadUser.getId());
                 return fileName;
