@@ -10,17 +10,21 @@ Migrations are applied automatically on startup, but you can also run them manua
 ./gradlew flywayMigrate
 ```
 
-Both in development and production, AWS access is configured automatically via the credentials file. On linux,
-place this file at `~/.aws/credentials` with the following content:
-```
-[default]
-aws_access_key_id = [your_access_key_id]
-aws_secret_access_key = [your_secret_access_key]
+In local development, MinIO is used for S3-compatible storage.
+You can run MinIO in a container, for example using the following command:
+```bash
+podman run -p 9000:9000 -p 9001:9001 \
+  -e "MINIO_ROOT_USER=minioadmin" -e "MINIO_ROOT_PASSWORD=minioadmin" \
+  -v /home/vanilla/Code/.imagehosting/minio:/data quay.io/minio/minio \
+  server /data --console-address ":9001"
 ```
 
-The user should have `AmazonS3FullAccess` permissions to allow the application to upload files to S3. This type of 
-user can be configured in the IAM console of AWS, not to confuse with "IAM Identity Center", which for some reason 
-is something else entirely.
+Ensure that the `application-dev.properties` variables match your MinIO configuration. access-key and secret-key 
+need to match the username and password you set in the MinIO container. The mounted volume should be 
+persistent to avoid losing data on container restarts. The endpoint port must also match the mapped port of the container.
+Finally, the console port is used to access the MinIO web interface. Ensure your MinIO instance has a storage container 
+configured with the name defined in `application-dev.properties` (default is `nya.gg`).
+
 
 # User Management
 A user can be created easily via the login page.  

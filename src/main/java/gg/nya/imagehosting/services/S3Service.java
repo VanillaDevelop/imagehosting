@@ -14,6 +14,7 @@ import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -49,11 +50,16 @@ public class S3Service {
     private S3Client getS3Client() {
         if (s3Client == null) {
             AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
-            s3Client = S3Client.builder()
+            S3ClientBuilder clientBuilder = S3Client.builder()
                 .endpointOverride(URI.create(endpoint))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
-                .region(Region.US_EAST_1) // Required but ignored for DigitalOcean Spaces
-                .build();
+                .region(Region.US_EAST_1);
+
+            if(env.equals("dev")) {
+                clientBuilder = clientBuilder.forcePathStyle(true);
+            }
+
+            s3Client = clientBuilder.build();
         }
         return s3Client;
     }
@@ -142,10 +148,6 @@ public class S3Service {
      * @return The environment-specific name of the key in the S3 bucket.
      */
     private String getKeyName(String subdomain, String fileName) {
-        String key = String.format("%s/%s", subdomain, fileName);
-        if (env.equals("dev")) {
-            key = "@dev/" + key;
-        }
-        return key;
+        return String.format("%s/%s", subdomain, fileName);
     }
 }
