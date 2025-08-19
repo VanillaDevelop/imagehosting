@@ -31,8 +31,20 @@ public abstract class RESTUtils {
      * @return The URL to retrieve the image
      */
     public static String fetchURLFromRequest(HttpServletRequest request, String username, String category, String filename) {
-        String port = request.getServerPort() == 80 ? "" : ":" + request.getServerPort();
-        String baseUrl = request.getScheme() + "://" + username + "." + request.getServerName() + port;
+        return fetchURLFromLocation(
+                request.getScheme(),
+                request.getServerName(),
+                request.getServerPort(),
+                username,
+                category,
+                filename
+        );
+    }
+
+    public static String fetchURLFromLocation(String scheme, String serverName, int serverPort, String username,
+                                              String category, String filename) {
+        String port = serverPort == 80 ? "" : ":" + serverPort;
+        String baseUrl = scheme + "://" + username + "." + serverName + port;
         return baseUrl + "/" + category + "/" + filename;
     }
 }

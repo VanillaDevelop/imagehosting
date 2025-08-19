@@ -29,19 +29,23 @@ public class VideoLibraryBean implements Serializable {
 
     private transient VideoHostingService videoHostingService;
     private transient AuthenticationService authenticationService;
-    private transient HttpServletRequest httpServletRequest;
 
     private static final Logger log = LoggerFactory.getLogger(VideoLibraryBean.class);
 
     private final List<VideoUploadUserFile> videos = new ArrayList<>();
     private boolean canLoadMoreVideos = true;
     private int page = 0;
+    private final String requestScheme;
+    private final String serverName;
+    private final int serverPort;
 
     @Autowired
     public VideoLibraryBean(VideoHostingService videoHostingService, AuthenticationService authenticationService, HttpServletRequest httpServletRequest) {
         this.videoHostingService = videoHostingService;
         this.authenticationService = authenticationService;
-        this.httpServletRequest = httpServletRequest;
+        this.requestScheme = httpServletRequest.getScheme();
+        this.serverName = httpServletRequest.getServerName();
+        this.serverPort = httpServletRequest.getServerPort();
     }
 
     @PostConstruct
@@ -81,7 +85,8 @@ public class VideoLibraryBean implements Serializable {
     }
 
     public String getVideoUrl(VideoUploadUserFile video) {
-        return RESTUtils.fetchURLFromRequest(httpServletRequest, authenticationService.getCurrentUsername(), "v", video.getFileName());
+        return RESTUtils.fetchURLFromLocation(requestScheme, serverName, serverPort,
+                authenticationService.getCurrentUsername(), "v", video.getFileName());
     }
 
     @Serial
@@ -91,6 +96,5 @@ public class VideoLibraryBean implements Serializable {
         ApplicationContext ctx = ApplicationContextProvider.getApplicationContext();
         this.videoHostingService = ctx.getBean(VideoHostingService.class);
         this.authenticationService = ctx.getBean(AuthenticationService.class);
-        this.httpServletRequest = ctx.getBean(HttpServletRequest.class);
     }
 }

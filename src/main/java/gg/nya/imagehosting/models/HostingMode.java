@@ -1,6 +1,8 @@
 package gg.nya.imagehosting.models;
 
-public enum HostingMode {
+import java.io.Serializable;
+
+public enum HostingMode implements Serializable {
     /**
      * Hosting links will be generated with a random UUID, e.g., 123e4567-e89b-12d3-a456-426614174000.png
      */
