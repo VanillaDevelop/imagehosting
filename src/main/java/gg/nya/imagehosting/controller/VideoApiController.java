@@ -34,8 +34,9 @@ public class VideoApiController {
         this.authenticationService = authenticationService;
     }
 
-    @GetMapping(value = "/v/{filename}", produces = MediaType.ALL_VALUE)
+    @GetMapping(value = "/v/{filename:.*\\.mp4$}", produces = MediaType.ALL_VALUE)
     public ResponseEntity<ByteArrayResource> getVideo(@PathVariable String filename, HttpServletRequest request) {
+        
         String serverName = request.getServerName();
         String user = Utils.extractUsernameFromServerName(serverName);
         log.info("getVideo, video requested for user {}, filename: {}", user, filename);

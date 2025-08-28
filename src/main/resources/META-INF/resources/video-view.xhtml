@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Video Player</title>
+    <link rel="stylesheet" href="/assets/css/style.css"/>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+    <div class="container">
+        <h1>${filename}</h1>
+        <video controls="controls" width="800" height="600">
+            <source src="${videoUrl}" type="video/mp4"/>
+            Your browser does not support the video tag.
+        </video>
+    </div>
+</body>
+</html>
