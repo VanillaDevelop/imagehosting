@@ -145,7 +145,7 @@ public class VideoHostingService {
         videoUploadUserFileRepository.save(videoUploadUserFile);
 
         // Return the file name for further processing
-        return RESTUtils.fetchURLFromRequest(request, userOpt.get().getUsername(), "v", newFileName);
+        return RESTUtils.fetchURLFromRequest(request, userOpt.get().getUsername(), "v", newFileName, false);
     }
 
     /**
@@ -175,6 +175,11 @@ public class VideoHostingService {
         VideoUploadUser videoUploadUser = new VideoUploadUser(user);
         videoUploadUserRepository.save(videoUploadUser);
         return videoUploadUser;
+    }
+
+    public VideoUploadUser saveVideoUploadUser(VideoUploadUser videoUploadUser) {
+        log.debug("updateVideoUploadUser, updating video upload user with ID {}", videoUploadUser.getId());
+        return videoUploadUserRepository.save(videoUploadUser);
     }
 
     public List<VideoUploadUserFile> getVideos(int page, int size, String username) {

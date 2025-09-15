@@ -28,11 +28,13 @@ h1, h2, h3 {
     color: #1A4FA3;
 }
 
-.ui-panelgrid-cell h3 {
-    color: #333 !important;
+/* Utility classes */
+.flex-row {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5em;
 }
 
-/* Utility classes */
 .text-center {
     text-align: center;
 }
@@ -57,9 +59,6 @@ h1, h2, h3 {
     text-decoration: none !important;
 }
 
-.ui-state-disabled div {
-    background-color: #DDD;
-}
 
 .error-text {
     color: red;
@@ -112,6 +111,10 @@ h1, h2, h3 {
 /* Form styling */
 .ui-password {
     width: 100%;
+}
+
+.form-group {
+    margin-bottom: 20px;
 }
 
 /* Panel styling */
@@ -172,6 +175,12 @@ h1, h2, h3 {
     background-color: transparent !important;
 }
 
-.form-group {
-    margin-bottom: 20px;
+.ui-panelgrid-cell h3 {
+    color: #333 !important;
 }
+
+/* Disabled state styling */
+.ui-state-disabled div {
+    background-color: #DDD;
+}
+

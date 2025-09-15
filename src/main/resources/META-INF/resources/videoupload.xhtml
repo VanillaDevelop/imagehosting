@@ -3,7 +3,8 @@
         xmlns="http://www.w3.org/1999/xhtml"
         xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
         xmlns:p="http://primefaces.org/ui"
-        xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:h="http://xmlns.jcp.org/jsf/html"
+        xmlns:f="http://xmlns.jcp.org/jsf/core"
 >
 <ui:composition template="/templates/template.xhtml">
     <ui:define name="title">Nya.GG - Video Upload</ui:define>
@@ -22,6 +23,22 @@
                 <i class="pi pi-video"/> My Library
             </p:linkButton>
         </div>
+
+        <h:form id="upload-mode-form" styleClass="upload-mode-form">
+            <input type="hidden" name="_csrf" value="${_csrf.token}" />
+            <div class="form-group">
+                <p:outputLabel for="upload-mode" styleClass="form-label" value="Select Name Generator Strategy" />
+                <div class="flex-row">
+                    <p:selectOneMenu id="upload-mode" styleClass="form-input" value="#{videoUploadBean.videoUploadUser.videoUploadMode}">
+                        <f:selectItems value="#{videoUploadBean.availableUploadModes}" var="mode"
+                                       itemLabel="#{mode.description}"
+                                       itemValue="#{mode}" />
+                    </p:selectOneMenu>
+                    <p:commandButton value="Update" styleClass="ui-button-primary"
+                                     action="#{videoUploadBean.updateUser}" update="upload-mode-form" />
+                </div>
+            </div>
+        </h:form>
 
         <!-- File input to select local video -->
         <form id="video-upload-form" action="${pageContext.request.contextPath}/v/" method="post" enctype="multipart/form-data">
@@ -89,13 +106,6 @@
 
         <h:outputScript name="/assets/js/fileinput.js"/>
         <h:outputScript name="/assets/js/trimmer.js"/>
-
-        <div class="library-container" hidden="hidden">
-            <h2>Library</h2>
-            <p:selectOneMenu>
-                <f:selectItem itemLabel="#{videoUploadBean.currentUploadMode.toString()}" itemValue="#{videoUploadBean.currentUploadMode}" />
-            </p:selectOneMenu>
-        </div>
     </ui:define>
 
 </ui:composition>

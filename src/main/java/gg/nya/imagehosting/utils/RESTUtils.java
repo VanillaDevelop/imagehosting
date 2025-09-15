@@ -18,7 +18,7 @@ public abstract class RESTUtils {
      */
     public static ImageApiEntity createImageApiEntityResponse(HttpServletRequest request, String username, String filename) {
         ImageApiEntity imageApiEntity = new ImageApiEntity();
-        imageApiEntity.setURL(RESTUtils.fetchURLFromRequest(request, username, "i", filename));
+        imageApiEntity.setURL(RESTUtils.fetchURLFromRequest(request, username, "i", filename, true));
         return imageApiEntity;
     }
 
@@ -30,21 +30,26 @@ public abstract class RESTUtils {
      * @param filename The filename of the image
      * @return The URL to retrieve the image
      */
-    public static String fetchURLFromRequest(HttpServletRequest request, String username, String category, String filename) {
+    public static String fetchURLFromRequest(HttpServletRequest request, String username, String category, String filename, boolean pureVideo) {
         return fetchURLFromLocation(
                 request.getScheme(),
                 request.getServerName(),
                 request.getServerPort(),
                 username,
                 category,
-                filename
+                filename,
+                pureVideo
         );
     }
 
     public static String fetchURLFromLocation(String scheme, String serverName, int serverPort, String username,
-                                              String category, String filename) {
+                                              String category, String filename, boolean pureVideo) {
         String port = serverPort == 80 ? "" : ":" + serverPort;
         String baseUrl = scheme + "://" + username + "." + serverName + port;
-        return baseUrl + "/" + category + "/" + filename;
+        String fileUrl = baseUrl + "/" + category + "/" + filename;
+        if (pureVideo) {
+            return fileUrl;
+        }
+        return fileUrl.substring(0, fileUrl.lastIndexOf('.'));
     }
 }
