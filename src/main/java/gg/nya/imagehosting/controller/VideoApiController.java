@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+/**
+ * This REST controller handles video upload and retrieval requests at the /v/ endpoint.
+ */
 @RestController
 public class VideoApiController {
     private final VideoHostingService videoHostingService;
@@ -28,12 +31,25 @@ public class VideoApiController {
 
     private static final Logger log = LoggerFactory.getLogger(VideoApiController.class);
 
+    /**
+     * Constructor for VideoApiController.
+     * Injects the relevant services.
+     *
+     * @param videoHostingService Service for handling video upload and retrieval.
+     * @param authenticationService Service for retrieving the currently authenticated user.
+     */
     @Autowired
     public VideoApiController(VideoHostingService videoHostingService, AuthenticationService authenticationService) {
         this.videoHostingService = videoHostingService;
         this.authenticationService = authenticationService;
     }
 
+    /**
+     * 
+     * @param filename
+     * @param request
+     * @return
+     */
     @GetMapping(value = "/v/{filename:.*\\.mp4$}", produces = MediaType.ALL_VALUE)
     public ResponseEntity<ByteArrayResource> getVideo(@PathVariable String filename, HttpServletRequest request) {
         
