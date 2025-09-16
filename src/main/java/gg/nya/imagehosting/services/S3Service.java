@@ -64,6 +64,25 @@ public class S3Service {
         return s3Client;
     }
 
+    /**
+     * Get the size of a file in the S3 bucket. Throws a 404 error if the file could not be found.
+     * @param subdomain The subdomain of the file (username).
+     * @param fileName The filename of the file.
+     * @return The size of the file in bytes.
+     */
+    public long getFileSize(String subdomain, String fileName) {
+        String key = getKeyName(subdomain, fileName);
+        try {
+            return getS3Client().headObject(builder -> builder
+                    .bucket(bucketName)
+                    .key(key)
+                    .build()).contentLength();
+        } catch (AwsServiceException | SdkClientException e) {
+            log.error("getFileSize, could not retrieve file size for key {} from bucket {}", key, bucketName);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
+        }
+    }
+
     final private static Logger log = LoggerFactory.getLogger(S3Service.class);
 
     /**
@@ -73,7 +92,7 @@ public class S3Service {
      * @param fileName  The filename of the file.
      * @return The file as an InputStream.
      */
-    @Cacheable(value = "fileCache", key = "#subdomain + '/i/' + #fileName")
+    @Cacheable(value = "fileCache", key = "#subdomain + '/' + #fileName")
     public ByteArrayInputStream getFile(String subdomain, String fileName) {
         String key = getKeyName(subdomain, fileName);
         try {
@@ -93,6 +112,36 @@ public class S3Service {
 
         } catch (AwsServiceException | SdkClientException | IOException e) {
             log.error("getFile, could not retrieve file with key {} from bucket {}", key, bucketName);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
+        }
+    }
+
+    /**
+     * Get file stream from S3 bucket with byte range. Throws a 404 error if the file could not be retrieved successfully.
+     *
+     * @param subdomain The subdomain of the file (username).
+     * @param fileName The filename of the file.
+     * @param start The start byte of the range.
+     * @param end The end byte of the range.
+     * @return The file as an InputStream.
+     */
+    public InputStream getFileStreamRange(String subdomain, String fileName, long start, long end) {
+        String key = getKeyName(subdomain, fileName);
+        try {
+            log.debug("getFileStreamRange, retrieving file with key {} from bucket {} with range bytes={}-{}",
+                    key, bucketName, start, end);
+            InputStream originalStream = getS3Client().getObject(GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .range("bytes=" + start + "-" + end)
+                    .build());
+            if (originalStream == null) {
+                log.error("getFileStreamRange, file with key {} not found in bucket {}", key, bucketName);
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
+            }
+            return originalStream;
+        } catch (AwsServiceException | SdkClientException e) {
+            log.error("getFileStreamRange, could not retrieve file with key {} from bucket {}", key, bucketName);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
         }
     }

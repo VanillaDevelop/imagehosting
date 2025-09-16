@@ -19,7 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -51,16 +50,18 @@ public class VideoHostingService {
      *
      * @param username The username of the user.
      * @param filename The filename of the video.
+     * @param start The start byte of the video to serve.
+     * @param end The end byte of the video to serve.
      * @return The video as an input stream, if it exists. Throws a 404 error if the video does not exist.
      */
-    public ByteArrayInputStream retrieveVideo(String username, String filename) {
+    public InputStream retrieveVideo(String username, String filename, long start, long end) {
         log.debug("retrieveVideo, checking if video for user {} with filename {} exists", username, filename);
         if (!checkVideoExists(username, filename)) {
             log.error("retrieveVideo, video for user {} with filename {} not found", username, filename);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Video not found");
         }
-        log.debug("retrieveVideo, video for user {} with filename {} found in DB, querying cached S3", username, filename);
-        return s3Service.getFile(username, filename);
+        log.debug("retrieveVideo, video for user {} with filename {} found in DB", username, filename);
+        return s3Service.getFileStreamRange(username, filename, start, end);
     }
 
     /**
@@ -175,6 +176,21 @@ public class VideoHostingService {
         VideoUploadUser videoUploadUser = new VideoUploadUser(user);
         videoUploadUserRepository.save(videoUploadUser);
         return videoUploadUser;
+    }
+
+    /**
+     * Get the length of a video in bytes from S3, if it exists.
+     * @param username The username of the user.
+     * @param filename The filename of the video.
+     * @return The length of the video in bytes.
+     */
+    public long getVideoLength(String username, String filename) {
+        log.debug("getVideoLength, fetching video length for user {} with filename {}", username, filename);
+        if (!checkVideoExists(username, filename)) {
+            log.error("getVideoLength, video for user {} with filename {} not found", username, filename);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Video not found");
+        }
+        return s3Service.getFileSize(username, filename);
     }
 
     public VideoUploadUser saveVideoUploadUser(VideoUploadUser videoUploadUser) {
