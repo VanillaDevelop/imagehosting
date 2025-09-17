@@ -74,7 +74,6 @@ public class VideoHostingService {
      * @param endTimeSeconds The end time in seconds for the video segment, if applicable.
      * @param videoTitle The title of the video being uploaded.
      * @return The URL of the uploaded video file.
-     * @throws IOException If an error occurs while processing the video upload.
      */
     public String uploadVideoForUser(
             HttpServletRequest request,
@@ -83,7 +82,7 @@ public class VideoHostingService {
             String originalFileName,
             double startTimeSeconds,
             double endTimeSeconds,
-            String videoTitle) throws IOException {
+            String videoTitle) {
         log.debug("uploadVideoForUser, attempting to upload video for user with ID {}", userId);
 
         Optional<User> userOpt = userRepository.findById(userId);
@@ -99,9 +98,18 @@ public class VideoHostingService {
         }
 
         //Sanity checks on the input
-        if (videoInputStream == null || videoInputStream.available() == 0) {
-            log.error("uploadVideoForUser, video input stream is empty for user {}", userOpt.get().getUsername());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Video input stream is empty");
+        final long videoInputStreamAvailable;
+        try {
+            videoInputStreamAvailable = videoInputStream.available();
+            if (videoInputStreamAvailable == 0) {
+                log.error("uploadVideoForUser, video input stream is empty for user {}", userOpt.get().getUsername());
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Video input stream is empty");
+            }
+        }
+        catch (IOException e) {
+            //No cleanup required - nothing was created yet
+            log.error("uploadVideoForUser, error checking video input stream for user {}", userOpt.get().getUsername(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error checking video input stream");
         }
 
         if (originalFileName == null || originalFileName.isEmpty()) {
@@ -139,7 +147,7 @@ public class VideoHostingService {
         VideoUploadUserFile videoUploadUserFile = new VideoUploadUserFile();
         videoUploadUserFile.setVideoUploadUser(videoUser.get());
         videoUploadUserFile.setFileName(newFileName);
-        videoUploadUserFile.setFileSize((long) videoInputStream.available());
+        videoUploadUserFile.setFileSize(videoInputStreamAvailable);
         videoUploadUserFile.setVideoTitle(videoTitle);
         videoUploadUserFile.setCreatedAt(java.time.LocalDateTime.now());
         videoUploadUserFile.setUploadStatus(VideoUploadStatus.PROCESSING);

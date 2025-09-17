@@ -1,5 +1,8 @@
 package gg.nya.imagehosting.models;
 
+/**
+ * Enum representing the different hosting modes for file uploads.
+ */
 public enum HostingMode {
     /**
      * Hosting links will be generated with a random UUID, e.g., 123e4567-e89b-12d3-a456-426614174000.png

@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * Represents a user who uploads videos, along with their preferred video upload mode.
+ */
 @Entity(name = "video_upload_users")
 public class VideoUploadUser implements Serializable {
     @Serial
@@ -26,7 +29,7 @@ public class VideoUploadUser implements Serializable {
     private HostingMode videoUploadMode;
 
     /**
-     * Creates a new VideoUploadUser with the given user and default settings.
+     * Creates a new VideoUploadUser for the given user and default settings.
      *
      * @param user The user to create the VideoUploadUser for.
      */

@@ -44,7 +44,7 @@ public class VideoApiController {
     }
 
     /**
-     * Retrieve a video file.
+     * Retrieve a video file. Supports HTTP Range requests for partial content delivery.
      *
      * @param filename The name of the video file to retrieve - must end with .mp4
      * @param request The HTTP request, for extracting username and request headers.
@@ -110,9 +110,20 @@ public class VideoApiController {
         HttpStatus status = rangeHeader != null ? HttpStatus.PARTIAL_CONTENT : HttpStatus.OK;
         InputStream in = videoHostingService.retrieveVideo(user, filename, start, end);
 
+        // Synchronous IO streaming because otherwise Weld complains - should be fine for low to medium traffic levels
         return ResponseEntity.status(status).headers(headers).body(new InputStreamResource(in));
     }
 
+    /**
+     * Upload a video file as a multipart/form-data POST request.
+     *
+     * @param request The HTTP request, for extracting the target user.
+     * @param videoFile The uploaded video file.
+     * @param startTimeSeconds The start time in seconds for trimming the video.
+     * @param endTimeSeconds The end time in seconds for trimming the video.
+     * @param videoTitle The title of the video.
+     * @return A RedirectView to the URL of the uploaded video.
+     */
     @PostMapping(value = {"/v", "/v/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public RedirectView uploadVideo(
             HttpServletRequest request,
@@ -120,24 +131,35 @@ public class VideoApiController {
             @RequestParam("startTimeSeconds") double startTimeSeconds,
             @RequestParam("endTimeSeconds") double endTimeSeconds,
             @RequestParam("videoTitle") String videoTitle
-            ) throws IOException {
+            ) {
 
         long userId = this.authenticationService.getCurrentUserId();
         log.info("uploadVideo, video upload requested for user with ID {}, original file name {}, start time: {}, end time: {}, requested title: {}",
                 userId, videoFile.getOriginalFilename(), startTimeSeconds, endTimeSeconds, videoTitle);
 
-        InputStream videoInputStream = videoFile.getInputStream();
-        String generatedUrl = videoHostingService.uploadVideoForUser(
-                request,
-                userId,
-                videoInputStream,
-                videoFile.getOriginalFilename(),
-                startTimeSeconds,
-                endTimeSeconds,
-                videoTitle
-        );
+        try {
+            //IOException may be thrown here if the file is not accessible
+            InputStream videoInputStream = videoFile.getInputStream();
 
-        return new RedirectView(generatedUrl);
+            // Delegate to service to handle the upload
+            String generatedUrl = videoHostingService.uploadVideoForUser(
+                    request,
+                    userId,
+                    videoInputStream,
+                    videoFile.getOriginalFilename(),
+                    startTimeSeconds,
+                    endTimeSeconds,
+                    videoTitle
+            );
+            return new RedirectView(generatedUrl);
+        } catch (IOException e) {
+            //This error is early enough that no cleanup is necessary
+            log.error("uploadVideo, error obtaining input stream from uploaded file for user with ID {}, original file name {}",
+                    userId, videoFile.getOriginalFilename(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error processing uploaded file");
+        }
+
+
     }
 
 }

@@ -7,6 +7,9 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * Represents a video file uploaded by a user.
+ */
 @Entity(name = "video_upload_user_files")
 public class VideoUploadUserFile implements Serializable {
     @Serial
