@@ -51,8 +51,8 @@ public class VideoUploadBean implements Serializable {
      */
     @PostConstruct
     public void init() {
-        log.info("init, fetching video upload user for user ID {}", authenticationService.getCurrentUserId());
-        this.videoUploadUser = videoHostingService.getOrCreateVideoUploadUser(authenticationService.getCurrentUserId());
+        log.info("init, fetching video upload user for user {}", authenticationService.getCurrentUsername());
+        this.videoUploadUser = videoHostingService.getOrCreateVideoUploadUser(authenticationService.getCurrentUsername());
     }
 
     /**
@@ -64,10 +64,10 @@ public class VideoUploadBean implements Serializable {
     }
 
     /**
-     * Updates the VideoUploadUser settings in the database.
+     * Updates the VideoUploadUser's preferred upload type in the database.
      */
-    public void updateUser() {
-        videoHostingService.saveVideoUploadUser(this.videoUploadUser);
+    public void updateUploadType() {
+        videoHostingService.setUserUploadTypePreference(this.videoUploadUser, this.videoUploadUser.getVideoUploadMode());
     }
 
     /**
