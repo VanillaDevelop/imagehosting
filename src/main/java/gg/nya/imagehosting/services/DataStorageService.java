@@ -94,7 +94,41 @@ public class DataStorageService {
             return tempInputFile;
         } catch (IOException e) {
             log.error("storeTempFile, failed to store temporary file {}", filename, e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error storing temporary file", e);
+            throw new RuntimeException("Failed to store temporary file", e);
+        }
+    }
+
+    /**
+     * Generates a path for a temporary file in the specified directory.
+     * @param filename The name of the file (with extension).
+     * @return The path to the temporary file
+     */
+    public Path generateTempPath(String filename) {
+        try {
+            Path tempDir = Path.of(tempDirectory);
+            Files.createDirectories(tempDir);
+            Path tempInputFile = tempDir.resolve(filename);
+            log.trace("generateTempPath, generated path {}", tempInputFile);
+            return tempInputFile;
+        }
+        catch (IOException e) {
+            log.error("generateTempPath, failed to generate temporary path for file {}", filename, e);
+            throw new RuntimeException("Failed to generate temporary path", e);
+        }
+    }
+
+    /**
+     * Removes a temporary file from the specified directory.
+     * @param filename The name of the file to be removed (with extension).
+     */
+    public void removeTempFile(String filename) {
+        try {
+            Path tempFile = Path.of(tempDirectory, filename);
+            Files.deleteIfExists(tempFile);
+            log.debug("removeTempFile, deleted temporary file {}", tempFile);
+        } catch (IOException e) {
+            log.error("removeTempFile, failed to delete temporary file {}", filename, e);
+            //Don't throw here, worst case we leave a temp file behind
         }
     }
 

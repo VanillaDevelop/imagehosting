@@ -5,22 +5,31 @@ import gg.nya.imagehosting.repositories.VideoUploadUserFileRepository;
 import gg.nya.imagehosting.repositories.VideoUploadUserRepository;
 import gg.nya.imagehosting.utils.RESTUtils;
 import gg.nya.imagehosting.utils.Utils;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import net.bramp.ffmpeg.FFmpeg;
+import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.FFprobe;
+import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Service for handling video hosting operations, including uploading and retrieving videos.
@@ -35,6 +44,13 @@ public class VideoHostingService {
     private final S3Service s3Service;
     private final DataStorageService dataStorageService;
     private final UserService userService;
+
+    @Value("${media.ffmpeg.path}")
+    private String ffmpegPath;
+    @Value("${media.ffprobe.path}")
+    private String ffprobePath;
+
+    private FFmpegExecutor executor;
 
     /**
      * Constructor for VideoHostingService.
@@ -54,6 +70,17 @@ public class VideoHostingService {
         this.videoUploadUserFileRepository = userFileRepository;
         this.s3Service = s3Service;
         this.userService = userService;
+    }
+
+    /**
+     * Initializes the FFmpeg executor with the configured paths to the FFmpeg and FFprobe binaries.
+     * @throws IOException if the binaries cannot be found or accessed.
+     */
+    @PostConstruct
+    public void init() throws IOException {
+        FFmpeg ffmpeg = new FFmpeg(ffmpegPath);
+        FFprobe ffprobe = new FFprobe(ffprobePath);
+        this.executor = new FFmpegExecutor(ffmpeg, ffprobe);
     }
 
     /**
@@ -144,18 +171,18 @@ public class VideoHostingService {
         MediaType fileType = Utils.getVideoTypeFromFileName(originalFileName);
         log.debug("uploadVideoForUser, uploading video for user {} with file type {}", username, fileType);
 
-        //Create new file name
+        //Create new file name - function returns name without extension
         String newFileName = tryCreateFileName(videoUser);
 
         //Upload input video file
-        String originalFileType = originalFileName.split("\\.")[originalFileName.split("\\.").length - 1]; //e.g. "mp4"
-        String newFileNameWithoutExtension = newFileName.replaceAll("\\.[^.]+$", ""); //e.g. "abcd1234"
-        String inputFile = username + "_" + newFileNameWithoutExtension + "_input." + originalFileName; //e.g. "myusername_abcd1234_input.mp4"
+        String originalFileType = fileType.getSubtype(); //e.g. "mp4"
+        String inputFile = username + "_" + newFileName + "_input." + originalFileType; //e.g. "myusername_abcd1234_input.mp4"
         log.debug("uploadVideoForUser, storing temporary input video file for user {} with file name {}", username, inputFile);
-        Path tempInputFile = dataStorageService.storeTempFile(videoInputStream, inputFile);
+
+        dataStorageService.storeTempFile(videoInputStream, inputFile);
 
         //Process video upload asynchronously
-        processVideoAsync(tempInputFile, username, newFileName, startTimeSeconds, endTimeSeconds);
+        processVideoAsync(newFileName, fileType, username, startTimeSeconds, endTimeSeconds);
 
         // Save the video file to the repository as processing
         storeVideoInDatabase(username, videoTitle, newFileName, videoUser, videoInputStreamAvailable);
@@ -251,11 +278,11 @@ public class VideoHostingService {
      * Attempts to create a file name for the user's given strategy. Aborts with a 500 error after 100 failed attempts.
      *
      * @param videoUploadUser The video upload user entity.
-     * @return The generated file name.
+     * @return The generated file name, without extension.
      */
     private String tryCreateFileName(VideoUploadUser videoUploadUser) {
         for (int i = 0; i < 100; i++) {
-            String fileName = Utils.generateFilenameFromStrategy(videoUploadUser.getVideoUploadMode()) + ".mp4";
+            String fileName = Utils.generateFilenameFromStrategy(videoUploadUser.getVideoUploadMode());
             if (isVideoInvalid(videoUploadUser, fileName)) { //Invalid = file does not exist (yet)
                 log.trace("tryCreateFileName, determined file name {} for image hosting user {}", fileName, videoUploadUser.getId());
                 return fileName;
@@ -303,139 +330,135 @@ public class VideoHostingService {
     /**
      * Asynchronously processes the video and uploads the result to S3.
      *
-     * @param inputFileName    The  of the input video file.
-     * @param username         The username of the user who uploaded the video.
-     * @param outputFileName   The name of the output video file.
+     * @param filename         The base filename (without extension) for the processed video.
+     * @param originalFileType The original file type of the uploaded video.
+     * @param username         The username of the user who uploaded the video - to determine S3 bucket path.
      * @param startTimeSeconds The start time in seconds for the video segment to process.
      * @param endTimeSeconds   The end time in seconds for the video segment to process.
-     * @throws RuntimeException if an error occurs during video processing.
      */
     @Async
-    private void processVideoAsync(String inputFileName, String username, String outputFileName,
-                                  double startTimeSeconds, double endTimeSeconds) {
-        log.debug("processVideoAsync, starting async video processing for user {} file {}", username, outputFileName);
+    protected void processVideoAsync(String filename, MediaType originalFileType, String username,
+                                     double startTimeSeconds, double endTimeSeconds) {
+        Path inputFilePath = dataStorageService.generateTempPath(username + "_" + filename + "_input." + originalFileType.getSubtype());
+        Path outputFilePath = dataStorageService.generateTempPath(username + "_" + filename + ".mp4");
+        Path thumbnailPath = dataStorageService.generateTempPath("thumbnail_" + username + "_" + filename + ".png");
 
+        log.debug("processVideoAsync, converting video file: {} -> {}", inputFilePath, outputFilePath);
+        convertToMp4(inputFilePath, outputFilePath, startTimeSeconds, endTimeSeconds);
+
+        log.debug("processVideoAsync, generating thumbnail for user {} file {}", username, filename);
+        generateThumbnail(inputFilePath, thumbnailPath);
+
+        log.debug("processVideoAsync, copying thumbnail {} to final location", thumbnailPath);
         try {
-            String processedVideoFileName = "output_" + username + "_" + outputFileName;
-
-            log.debug("processVideoAsync, converting video file: {}", inputFileName);
-            convertToMp4(inputFileName, processedVideoFileName, startTimeSeconds, endTimeSeconds);
-
-            log.debug("processVideoAsync, generating thumbnail for user {} file {}", username, outputFileName);
-            String thumbnailFileName = "thumbnail_" + username + "_" + outputFileName.replaceAll("\\.[^.]+$", ".png");
-            generateThumbnail(processedVideoFileName, thumbnailFileName);
-
-            log.debug("processVideoAsync, storing thumbnail for user {} file {}", username, outputFileName);
-
-            InputStream thumbnailInputStream = createThumbnailInputStream(thumbnailFileName);
-            dataStorageService.storeThumbnail(username, outputFileName, thumbnailInputStream);
+            InputStream thumbnailInputStream = new FileInputStream(thumbnailPath.toFile());
+            dataStorageService.storeThumbnail(username, filename, thumbnailInputStream);
             thumbnailInputStream.close();
-
-
-            log.debug("processVideoAsync, uploading video to S3 for user {}", username);
-            try {
-                InputStream videoInputStream = new FileInputStream(tempDirectory + "/" + processedVideoFileName);
-                s3Service.uploadVideo(username, outputFileName, videoInputStream);
-            }
-            catch (IOException e) {
-                log.error("processVideoAsync, failed to read video file for user {} file {}", username, outputFileName, e);
-                throw new RuntimeException("Failed to read video file", e);
-            }
-
-            log.debug("processVideoAsync, video processing completed for user {} file {}", username, outputFileName);
-            updateDatabaseStatus(username, outputFileName, VideoUploadStatus.COMPLETED);
-        } catch (Exception e) {
-            log.error("Failed to process video for user {} file {}", username, outputFileName, e);
-            updateDatabaseStatus(username, outputFileName, VideoUploadStatus.FAILED);
-            throw e;
         }
+        catch(IOException e) {
+            log.error("processVideoAsync, failed to write thumbnail file {} for user {}", thumbnailPath, username, e);
+            cleanUpUpload(username, filename, List.of(inputFilePath, outputFilePath, thumbnailPath), VideoUploadStatus.FAILED);
+            return;
+        }
+
+        log.debug("processVideoAsync, uploading video {} to S3 for user {}", outputFilePath, username);
+        try {
+            InputStream videoInputStream = new FileInputStream(outputFilePath.toFile());
+            s3Service.uploadVideo(username, filename + ".mp4", videoInputStream);
+        }
+        catch (IOException e) {
+            log.error("processVideoAsync, failed to store video file {} to S3", outputFilePath, e);
+            cleanUpUpload(username, filename, List.of(inputFilePath, outputFilePath, thumbnailPath), VideoUploadStatus.FAILED);
+            return;
+        }
+
+        log.debug("processVideoAsync, video processing completed for user {} file {}", username, filename);
+        cleanUpUpload(username, filename, List.of(inputFilePath, outputFilePath, thumbnailPath), VideoUploadStatus.COMPLETED);
+    }
+
+    /**
+     * Cleans up temporary files and updates the database status to the specified status.
+     *
+     * @param username    the username of the user who uploaded the file
+     * @param newFileName the name of the file
+     * @param tempFiles   list of temporary files to delete
+     * @param status      the status to set in the database (e.g., "COMPLETED", "FAILED")
+     */
+    public void cleanUpUpload(String username, String newFileName, List<Path> tempFiles, VideoUploadStatus status) {
+        log.debug("cleanUpUpload, cleaning up upload for user {} with file name {}, status {}", username, newFileName, status);
+        //Delete temp input file
+        for(Path tempFile : tempFiles) {
+            try {
+                log.trace("cleanUpUpload, deleting temporary file {} for user {}", tempFile, username);
+                dataStorageService.removeTempFile(tempFile.toString());
+            } catch (Exception e) {
+                log.error("cleanUpUpload, failed to delete temporary file {} for user {}", tempFile, username, e);
+            }
+        }
+
+        //Update database status
+        updateDatabaseStatus(username, newFileName, status);
     }
 
     /**
      * Convert a video file to MP4 format with the same resolution as input.
      *
-     * @param originalFilename The original filename to convert from.
-     * @param newFileName The name of the new file to be created.
+     * @param inputFilePath The original path to the file to convert from.
+     * @param outputFilePath The output path to the file to convert to.
      * @param startDurationSeconds Start time in seconds for the video segment
      * @param endDurationSeconds End time in seconds for the video segment
      */
-    public void convertToMp4(String originalFilename, String newFileName,
-                             double startDurationSeconds, double endDurationSeconds) {
-        try {
-            final long startTimeMs = (long) (startDurationSeconds * 1000);
-            final long endTimeMs = (long) (endDurationSeconds * 1000);
+    private void convertToMp4(Path inputFilePath, Path outputFilePath, double startDurationSeconds,
+                             double endDurationSeconds) {
+        final long startTimeMs = (long) (startDurationSeconds * 1000);
+        final long endTimeMs = (long) (endDurationSeconds * 1000);
 
-            log.debug("convertToMp4, converting video {} to mp4 {} and clipping to ({}, {})",
-                    originalFilename, newFileName, startDurationSeconds, endDurationSeconds);
+        log.trace("convertToMp4, converting video {} to {} and clipping to ({}, {})",
+                inputFilePath, outputFilePath, startDurationSeconds, endDurationSeconds);
 
-            FFmpegBuilder builder = new FFmpegBuilder()
-                    .setInput(tempDirectory + "/" + originalFilename)
-                    .overrideOutputFiles(true)
-                    .addOutput(tempDirectory + "/" + newFileName)
-                    .setFormat("mp4")
-                    .setVideoCodec("libx264")
-                    .setAudioCodec("aac")
-                    .setStartOffset(startTimeMs, TimeUnit.MILLISECONDS)
-                    .setDuration(endTimeMs - startTimeMs, TimeUnit.MILLISECONDS)
-                    .addExtraArgs("-preset", "fast")
-                    .addExtraArgs("-crf", "23")
-                    .addExtraArgs("-threads", "0")
-                    .done();
+        long startTimeExecution = System.currentTimeMillis();
 
-            // Execute conversion
-            executor.createJob(builder).run();
+        FFmpegBuilder builder = new FFmpegBuilder()
+                .setInput(inputFilePath.toString())
+                .overrideOutputFiles(true)
+                .addOutput(outputFilePath.toString())
+                .setFormat("mp4")
+                .setVideoCodec("libx264")
+                .setAudioCodec("aac")
+                .setStartOffset(startTimeMs, TimeUnit.MILLISECONDS)
+                .setDuration(endTimeMs - startTimeMs, TimeUnit.MILLISECONDS)
+                .addExtraArgs("-preset", "fast")
+                .addExtraArgs("-crf", "23")
+                .addExtraArgs("-threads", "0")
+                .done();
 
-            log.debug("convertToMp4, video conversion completed successfully for file {}", newFileName);
-        } catch (Exception e) {
-            log.error("convertToMp4, failed to convert video to MP4", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to convert video to MP4", e);
-        }
+        // Execute conversion
+        executor.createJob(builder).run();
+
+        long endTimeExecution = System.currentTimeMillis();
+        long executionMs = endTimeExecution - startTimeExecution;
+        log.debug("convertToMp4, conversion completed successfully to file {} in {}ms", outputFilePath, executionMs);
     }
 
     /**
      * Generates a thumbnail from the first frame of a video file at 480p resolution.
      *
-     * @param videoFileName The name of the video file to extract thumbnail from
-     * @param thumbnailFileName The name of the thumbnail file to create
-     * @throws RuntimeException if an error occurs during thumbnail generation
+     * @param inputFilePath The original path to the file to convert from.
+     * @param thumbnailFilePath The path at which to save the generated thumbnail.
      */
-    private void generateThumbnail(String videoFileName, String thumbnailFileName) {
-        try {
-            log.debug("generateThumbnail, generating thumbnail from video {} to {}", videoFileName, thumbnailFileName);
+    private void generateThumbnail(Path inputFilePath, Path thumbnailFilePath) {
+        log.trace("generateThumbnail, generating thumbnail from video {} to {}", inputFilePath, thumbnailFilePath);
 
-            FFmpegBuilder builder = new FFmpegBuilder()
-                    .setInput(tempDirectory + "/" + videoFileName)
-                    .overrideOutputFiles(true)
-                    .addOutput(tempDirectory + "/" + thumbnailFileName)
-                    .setFrames(1)
-                    .setVideoFilter("scale=480:270")
-                    .done();
+        FFmpegBuilder builder = new FFmpegBuilder()
+                .setInput(inputFilePath.toString())
+                .overrideOutputFiles(true)
+                .addOutput(thumbnailFilePath.toString())
+                .setFrames(1)
+                .setVideoFilter("scale=480:270")
+                .done();
+        executor.createJob(builder).run();
 
-            executor.createJob(builder).run();
-
-            log.debug("generateThumbnail, thumbnail generation completed successfully for file {}", thumbnailFileName);
-        } catch (Exception e) {
-            log.error("generateThumbnail, failed to generate thumbnail from video {}", videoFileName, e);
-            throw new RuntimeException("Failed to generate thumbnail", e);
-        }
-    }
-
-    /**
-     * Creates an InputStream for reading a thumbnail file from the temp directory.
-     *
-     * @param thumbnailFileName The name of the thumbnail file to read
-     * @return InputStream for the thumbnail file
-     * @throws RuntimeException if an error occurs while reading the thumbnail
-     */
-    private InputStream createThumbnailInputStream(String thumbnailFileName) {
-        try {
-            Path thumbnailPath = Path.of(tempDirectory, thumbnailFileName);
-            log.debug("createThumbnailInputStream, creating input stream for thumbnail {}", thumbnailPath);
-            return new FileInputStream(thumbnailPath.toFile());
-        } catch (IOException e) {
-            log.error("createThumbnailInputStream, failed to create input stream for thumbnail {}", thumbnailFileName, e);
-            throw new RuntimeException("Failed to create thumbnail input stream", e);
-        }
+        log.debug("generateThumbnail, thumbnail generation completed successfully for file {}", thumbnailFilePath);
     }
 
     /**
@@ -468,5 +491,7 @@ public class VideoHostingService {
         videoUploadUserFile.setUploadStatus(VideoUploadStatus.PROCESSING);
         videoUploadUserFileRepository.save(videoUploadUserFile);
     }
+
+
 
 }

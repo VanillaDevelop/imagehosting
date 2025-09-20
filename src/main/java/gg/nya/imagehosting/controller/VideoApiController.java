@@ -133,9 +133,9 @@ public class VideoApiController {
             @RequestParam("videoTitle") String videoTitle
             ) {
 
-        long userId = this.authenticationService.getCurrentUserId();
-        log.info("uploadVideo, video upload requested for user with ID {}, original file name {}, start time: {}, end time: {}, requested title: {}",
-                userId, videoFile.getOriginalFilename(), startTimeSeconds, endTimeSeconds, videoTitle);
+        String username = authenticationService.getCurrentUsername();
+        log.info("uploadVideo, video upload requested for user {}, original file name {}, start time: {}, end time: {}, requested title: {}",
+                username, videoFile.getOriginalFilename(), startTimeSeconds, endTimeSeconds, videoTitle);
 
         try {
             //IOException may be thrown here if the file is not accessible
@@ -144,7 +144,7 @@ public class VideoApiController {
             // Delegate to service to handle the upload
             String generatedUrl = videoHostingService.uploadVideoForUser(
                     request,
-                    userId,
+                    username,
                     videoInputStream,
                     videoFile.getOriginalFilename(),
                     startTimeSeconds,
@@ -154,8 +154,8 @@ public class VideoApiController {
             return new RedirectView(generatedUrl);
         } catch (IOException e) {
             //This error is early enough that no cleanup is necessary
-            log.error("uploadVideo, error obtaining input stream from uploaded file for user with ID {}, original file name {}",
-                    userId, videoFile.getOriginalFilename(), e);
+            log.error("uploadVideo, error obtaining input stream from uploaded file for user {}, original file name {}",
+                    username, videoFile.getOriginalFilename(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error processing uploaded file");
         }
 
