@@ -111,7 +111,7 @@ public class VideoLibraryBean implements Serializable {
      * @return The thumbnail URL as a String.
      */
     public String getThumbnailUrl(VideoUploadUserFile video) {
-        return "/thumbnails/" + video.getFileName();
+        return "/thumbnails/v-" + video.getFileName();
     }
 
     /**
@@ -121,7 +121,7 @@ public class VideoLibraryBean implements Serializable {
      */
     public String getVideoUrl(VideoUploadUserFile video) {
         return RESTUtils.fetchURLFromLocation(requestScheme, serverName, serverPort,
-                authenticationService.getCurrentUsername(), "v", video.getFileName(), false);
+                authenticationService.getCurrentUsername(), "v", video.getFileName());
     }
 
     /**

@@ -181,14 +181,14 @@ public class VideoHostingService {
 
         dataStorageService.storeTempFile(videoInputStream, inputFile);
 
-        //Process video upload asynchronously
-        processVideoAsync(newFileName, fileType, username, startTimeSeconds, endTimeSeconds);
-
         // Save the video file to the repository as processing
         storeVideoInDatabase(username, videoTitle, newFileName, videoUser, videoInputStreamAvailable);
 
+        //Process video upload asynchronously
+        processVideoAsync(newFileName, fileType, username, startTimeSeconds, endTimeSeconds);
+
         // Return the URL of the uploaded video
-        String videoUrl = RESTUtils.fetchURLFromRequest(request, username, "v", newFileName, false);
+        String videoUrl = RESTUtils.fetchURLFromRequest(request, username, "v", newFileName);
         log.debug("uploadVideoForUser, video upload initiated at URL {}", videoUrl);
         return videoUrl;  
     }
@@ -275,6 +275,17 @@ public class VideoHostingService {
     }
 
     /**
+     * Fetches video metadata for the given user and filename.
+     * @param username The username of the user.
+     * @param filename The filename of the video.
+     * @return An Optional containing the video metadata if found, or empty if not found.
+     */
+    public Optional<VideoUploadUserFile> getVideoData(String username, String filename) {
+        log.debug("getVideoData, fetching video data for user {} with filename {}", username, filename);
+        return videoUploadUserFileRepository.getVideoUploadUserFileByUploadUsernameAndFileName(username, filename);
+    }
+
+    /**
      * Attempts to create a file name for the user's given strategy. Aborts with a 500 error after 100 failed attempts.
      *
      * @param videoUploadUser The video upload user entity.
@@ -352,7 +363,7 @@ public class VideoHostingService {
         log.debug("processVideoAsync, copying thumbnail {} to final location", thumbnailPath);
         try {
             InputStream thumbnailInputStream = new FileInputStream(thumbnailPath.toFile());
-            dataStorageService.storeThumbnail(username, filename, thumbnailInputStream);
+            dataStorageService.storeThumbnail(username, "v-" + filename, thumbnailInputStream);
             thumbnailInputStream.close();
         }
         catch(IOException e) {
