@@ -101,7 +101,7 @@ public class VideoHostingService {
         }
 
         //Defer to S3 service and directly serve the returned input stream
-        return s3Service.getFileStreamRange(username, filename, start, end);
+        return s3Service.getFileStreamRange(username, filename + ".mp4", start, end);
     }
 
     /**
@@ -233,7 +233,7 @@ public class VideoHostingService {
             log.error("getVideoLength, video for user {} with filename {} not found", username, filename);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Video not found");
         }
-        return s3Service.getFileSize(username, filename);
+        return s3Service.getFileSize(username, filename + ".mp4");
     }
 
     /**
@@ -331,7 +331,7 @@ public class VideoHostingService {
         //Check if this user has a file with the given filename
         if (!videoUploadUserFileRepository.existsByVideoUploadUserAndFileNameAndUploadStatus(
                 videoUploadUser, filename, VideoUploadStatus.COMPLETED)) {
-            log.trace("checkVideoExists, video upload user for user {} does not have an uploaded file with filename {}",
+            log.trace("isVideoInvalid, video upload user for user {} does not have an uploaded file with filename {}",
                     videoUploadUser.getUser().getUsername(), filename);
             return true;
         }

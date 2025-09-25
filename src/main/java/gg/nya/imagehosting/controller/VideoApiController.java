@@ -50,7 +50,7 @@ public class VideoApiController {
      * @param request The HTTP request, for extracting username and request headers.
      * @return ResponseEntity containing the video data and appropriate headers.
      */
-    @GetMapping(value = "/v/{filename:.*\\.mp4$}", produces = MediaType.ALL_VALUE)
+    @GetMapping(value = "/v/{filename:.*}.mp4", produces = MediaType.ALL_VALUE)
     public ResponseEntity<InputStreamResource> getVideo(@PathVariable String filename, HttpServletRequest request) {
         // Identify file to serve
         String serverName = request.getServerName();

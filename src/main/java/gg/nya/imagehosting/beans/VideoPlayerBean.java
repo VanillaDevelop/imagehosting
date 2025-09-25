@@ -22,7 +22,9 @@ public class VideoPlayerBean {
     public VideoPlayerBean(VideoHostingService videoHostingService, HttpServletRequest request) {
         String serverName = request.getServerName();
         String username = Utils.extractUsernameFromServerName(serverName);
-        String filename = extractFilenameFromUrl(request.getRequestURL().toString());
+        //Contains the original URI before forwarding through WebMvcConfig
+        String originalUri = (String) request.getAttribute("jakarta.servlet.forward.request_uri");
+        String filename = extractFilenameFromUri(originalUri != null ? originalUri : request.getRequestURI());
         Optional<VideoUploadUserFile> videoOpt = videoHostingService.getVideoData(username, filename);
         this.video = videoOpt.orElse(null);
     }
@@ -31,8 +33,12 @@ public class VideoPlayerBean {
         return video.getVideoTitle();
     }
 
-    private String extractFilenameFromUrl(String url) {
-        int lastSlashIndex = url.lastIndexOf('/');
-        return lastSlashIndex >= 0 ? url.substring(lastSlashIndex + 1) : url;
+    public String getVideoUrl() {
+        return "/v/" + video.getFileName() + ".mp4";
+    }
+
+    private String extractFilenameFromUri(String uri) {
+        int lastSlashIndex = uri.lastIndexOf('/');
+        return lastSlashIndex >= 0 ? uri.substring(lastSlashIndex + 1) : uri;
     }
 }
