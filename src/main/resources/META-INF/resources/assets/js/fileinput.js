@@ -11,6 +11,11 @@ function handleFileSelect(file) {
         const video = document.getElementById('video-player');
         const source = document.getElementById('video-source');
 
+        // Set the file input element for form submission
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
+
         source.src = URL.createObjectURL(file);
         source.type = file.type;
 
