@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -50,6 +51,7 @@ public class VideoHostingService {
     @Value("${media.ffprobe.path}")
     private String ffprobePath;
 
+    private final ApplicationContext applicationContext;
     private FFmpegExecutor executor;
 
     /**
@@ -61,15 +63,18 @@ public class VideoHostingService {
      * @param userFileRepository Repository for retrieving video files uploaded by users.
      * @param s3Service Service for interacting with S3 storage to retrieve and store video.
      * @param userService Service for managing user information, in case a new video upload user needs to be created.
+     * @param applicationContext The Spring application context, used to get a proxy of this service for async processing.
      */
     @Autowired
     public VideoHostingService(VideoUploadUserRepository videoUploadUserRepository, DataStorageService dataStorageService,
-                               VideoUploadUserFileRepository userFileRepository, S3Service s3Service, UserService userService) {
+                               VideoUploadUserFileRepository userFileRepository, S3Service s3Service, UserService userService,
+                               ApplicationContext applicationContext) {
         this.videoUploadUserRepository = videoUploadUserRepository;
         this.dataStorageService = dataStorageService;
         this.videoUploadUserFileRepository = userFileRepository;
         this.s3Service = s3Service;
         this.userService = userService;
+        this.applicationContext = applicationContext;
     }
 
     /**
@@ -184,8 +189,9 @@ public class VideoHostingService {
         // Save the video file to the repository as processing
         storeVideoInDatabase(username, videoTitle, newFileName, videoUser, videoInputStreamAvailable);
 
-        //Process video upload asynchronously
-        processVideoAsync(newFileName, fileType, username, startTimeSeconds, endTimeSeconds);
+        //Process video upload asynchronously - call via proxy for async to work
+        applicationContext.getBean(VideoHostingService.class).processVideoAsync(
+                newFileName, fileType, username, startTimeSeconds, endTimeSeconds);
 
         // Return the URL of the uploaded video
         String videoUrl = RESTUtils.fetchURLFromRequest(request, username, "v", newFileName);
