@@ -35,6 +35,11 @@ h1, h2, h3 {
     gap: 0.5em;
 }
 
+.flex-align-center {
+    display: flex;
+    align-items: center;
+}
+
 .text-center {
     text-align: center;
 }
@@ -45,12 +50,20 @@ h1, h2, h3 {
 }
 
 .my-3 {
-    margin-top: 1em;
-    margin-bottom: 1em;
+    margin-top: 1em !important;
+    margin-bottom: 1em !important;
+}
+
+.mb-2 {
+    margin-bottom: 0.5em !important;
 }
 
 .m-0 {
-    margin: 0;
+    margin: 0 !important;
+}
+
+.inline-block {
+    display: inline-block !important;
 }
 
 .no-underline,
