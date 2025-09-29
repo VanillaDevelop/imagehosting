@@ -139,16 +139,33 @@ public class VideoLibraryBean implements Serializable {
     }
 
     /**
+     * Indicates whether more videos can be loaded.
+     * @return true if more videos can be loaded, false otherwise.
+     */
+    public boolean isCanLoadMoreVideos() {
+        return canLoadMoreVideos;
+    }
+
+    /**
      * Returns the creation date of the video as a String.
      * @param video The video for which to get the creation date.
      * @return The creation date as a String.
      */
     public String getCreatedAt(VideoUploadUserFile video) {
-
         return video.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
-
+    /**
+     * Returns the appropriate text for the load more videos button based on whether more videos can be loaded.
+     * @return The button text as a String.
+     */
+    public String getLoadVideosButtonText() {
+        if (canLoadMoreVideos) {
+            return "Load More Videos";
+        } else {
+            return "End of Video List";
+        }
+    }
 
     /**
      * Rehydrates transient services after deserialization.

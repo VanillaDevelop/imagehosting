@@ -23,7 +23,7 @@
                 <i class="pi pi-upload"/> Upload Video
             </p:linkButton>
         </div>
-        <div class="video-grid">
+        <h:panelGroup id="video-grid" styleClass="video-grid" layout="block">
             <ui:repeat value="#{videoLibraryBean.videos}" var="video">
                 <nya:videoPreview
                         thumbnailUrl="#{videoLibraryBean.getThumbnailUrl(video)}"
@@ -32,6 +32,16 @@
                         title="#{videoLibraryBean.getVideoTitle(video)}"
                 />
             </ui:repeat>
+        </h:panelGroup>
+
+        <div class="my-5 flex-column flex-align-center">
+            <p:commandButton
+                    value="#{videoLibraryBean.loadVideosButtonText}"
+                    action="#{videoLibraryBean.loadMoreVideos}"
+                    disabled="#{!videoLibraryBean.canLoadMoreVideos}"
+                    update=":video-grid @this"
+                    styleClass="ui-button-secondary"
+            />
         </div>
     </ui:define>
 

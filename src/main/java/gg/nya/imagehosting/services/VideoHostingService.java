@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
@@ -261,7 +262,7 @@ public class VideoHostingService {
     }
 
     /**
-     * Gets a paginated list of videos for the given user.
+     * Gets a paginated list of videos for the given user. Videos are sorted by creation date in descending order.
      *
      * @param page The page number to retrieve (0-indexed).
      * @param size The number of videos per page.
@@ -276,7 +277,9 @@ public class VideoHostingService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find video upload user");
         }
 
-        PageRequest request = PageRequest.of(page, size);
+        PageRequest request = PageRequest.of(page, size).withSort(
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
         return videoUploadUserFileRepository.findAllByVideoUploadUser(videoUploadUserOpt.get(), request).getContent();
     }
 

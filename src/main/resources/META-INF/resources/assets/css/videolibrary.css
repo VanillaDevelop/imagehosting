@@ -7,10 +7,6 @@
 }
 
 /** Video Preview Component **/
-.video-preview {
-    margin: 10px;
-}
-
 .video-preview-thumbnail-container {
     width: 250px;
     height: 150px;
