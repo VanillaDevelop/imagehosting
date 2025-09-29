@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:composite="http://xmlns.jcp.org/jsf/composite"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+>
+<composite:interface>
+    <composite:attribute name="title" required="true" type="String"/>
+    <composite:attribute name="createdAt" required="true" type="String"/>
+    <composite:attribute name="videoUrl" required="true" type="String"/>
+    <composite:attribute name="thumbnailUrl" required="true" type="String"/>
+</composite:interface>
+
+<composite:implementation>
+    <a href="${cc.attrs.videoUrl}" target="_blank" style="text-decoration: none;">
+        <div class="video-preview">
+            <div class="video-preview-thumbnail-container">
+                <img src="${cc.attrs.thumbnailUrl}" alt="Video Thumbnail" class="video-thumbnail"/>
+            </div>
+
+            <div class="video-preview-metadata">
+                <h3 class="video-preview-title">${cc.attrs.title}</h3>
+                <p class="video-preview-timestamp">${cc.attrs.createdAt}</p>
+            </div>
+        </div>
+    </a>
+</composite:implementation>
+</html>

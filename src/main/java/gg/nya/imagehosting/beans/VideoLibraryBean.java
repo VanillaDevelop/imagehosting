@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,6 +124,31 @@ public class VideoLibraryBean implements Serializable {
         return RESTUtils.fetchURLFromLocation(requestScheme, serverName, serverPort,
                 authenticationService.getCurrentUsername(), "v", video.getFileName());
     }
+
+    /**
+     * Returns the title of the video, or the filename if the title is not set.
+     * @param video The video for which to get the title.
+     * @return The video title or filename as a String.
+     */
+    public String getVideoTitle(VideoUploadUserFile video) {
+        String title = video.getVideoTitle();
+        if(title == null || title.isBlank()) {
+            return video.getFileName();
+        }
+        return title;
+    }
+
+    /**
+     * Returns the creation date of the video as a String.
+     * @param video The video for which to get the creation date.
+     * @return The creation date as a String.
+     */
+    public String getCreatedAt(VideoUploadUserFile video) {
+
+        return video.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+
 
     /**
      * Rehydrates transient services after deserialization.
