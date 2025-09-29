@@ -12,7 +12,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addViewControllers(@NonNull ViewControllerRegistry registry) {
         registry.addViewController("/").setViewName("forward:/index.xhtml");
-        registry.addViewController("/v/{filename:^(?!.*\\.mp4$).*$}").setViewName("forward:/video-view.xhtml");
+        registry.addViewController("/v/{filename:^(?!.*\\.mp4$).*$}").setViewName("forward:/videodisplay.xhtml");
         registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
     }
 }

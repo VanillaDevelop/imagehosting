@@ -33,7 +33,7 @@ public class SecurityConfig {
                                 "/",
                                 "/i/**",
                                 "/v/**",
-                                "/video-view.xhtml",
+                                "/videodisplay.xhtml",
                                 "/error.xhtml",
                                 "/error",
                                 "/favicon.ico"

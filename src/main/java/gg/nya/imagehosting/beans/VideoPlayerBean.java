@@ -1,5 +1,6 @@
 package gg.nya.imagehosting.beans;
 
+import gg.nya.imagehosting.models.VideoUploadStatus;
 import gg.nya.imagehosting.models.VideoUploadUserFile;
 import gg.nya.imagehosting.services.VideoHostingService;
 import gg.nya.imagehosting.utils.Utils;
@@ -8,6 +9,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 /**
@@ -17,6 +20,7 @@ import java.util.Optional;
 @Scope("request")
 public class VideoPlayerBean {
     private final VideoUploadUserFile video;
+    private final String username;
 
     @Autowired
     public VideoPlayerBean(VideoHostingService videoHostingService, HttpServletRequest request) {
@@ -27,6 +31,12 @@ public class VideoPlayerBean {
         String filename = extractFilenameFromUri(originalUri != null ? originalUri : request.getRequestURI());
         Optional<VideoUploadUserFile> videoOpt = videoHostingService.getVideoData(username, filename);
         this.video = videoOpt.orElse(null);
+        if(this.video != null) {
+            // We do this query because the display name that the user used to register might have different capitalization
+            this.username = video.getVideoUploadUser().getUser().getDisplayName();
+        } else {
+            this.username = "Unknown";
+        }
     }
 
     public String getVideoTitle() {
@@ -35,6 +45,18 @@ public class VideoPlayerBean {
 
     public String getVideoUrl() {
         return "/v/" + video.getFileName() + ".mp4";
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public VideoUploadStatus getVideoStatus() {
+        return video.getUploadStatus();
+    }
+
+    public String getTimestamp() {
+        return video.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
     private String extractFilenameFromUri(String uri) {
