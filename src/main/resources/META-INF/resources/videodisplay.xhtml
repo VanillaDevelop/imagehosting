@@ -7,7 +7,14 @@
 <ui:composition template="/templates/template.xhtml">
     <ui:define name="title">Nya. GG - #{videoPlayerBean.videoTitle}</ui:define>
     <ui:define name="head">
+        <h:outputStylesheet name="assets/css/style.css" />
         <h:outputStylesheet name="/assets/css/videodisplay.css"/>
+        <meta name="twitter:card" content="player" />
+        <meta name="twitter:url" content="#{videoPlayerBean.playerUrl}" />
+        <meta name="twitter:title" content="#{videoPlayerBean.videoTitle} - Uploaded to Nya.GG by #{videoPlayerBean.username}" />
+        <meta name="twitter:image" content="#{videoPlayerBean.thumbnailUrl}" />
+        <meta name="twitter:player" content="#{videoPlayerBean.videoUrl}" />
+        <meta name="twitter:site" content="#{videoPlayerBean.username}" />
     </ui:define>
     <ui:define name="header" />
     <ui:define name="content">

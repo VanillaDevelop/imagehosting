@@ -112,7 +112,8 @@ public class VideoLibraryBean implements Serializable {
      * @return The thumbnail URL as a String.
      */
     public String getThumbnailUrl(VideoUploadUserFile video) {
-        return "/thumbnails/v-" + video.getFileName();
+        return RESTUtils.fetchURLFromLocation(requestScheme, serverName, serverPort,
+                authenticationService.getCurrentUsername(), "thumbnails", "v-" + video.getFileName());
     }
 
     /**

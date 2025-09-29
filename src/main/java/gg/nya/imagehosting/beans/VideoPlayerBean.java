@@ -3,6 +3,7 @@ package gg.nya.imagehosting.beans;
 import gg.nya.imagehosting.models.VideoUploadStatus;
 import gg.nya.imagehosting.models.VideoUploadUserFile;
 import gg.nya.imagehosting.services.VideoHostingService;
+import gg.nya.imagehosting.utils.RESTUtils;
 import gg.nya.imagehosting.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -21,6 +22,9 @@ import java.util.Optional;
 public class VideoPlayerBean {
     private final VideoUploadUserFile video;
     private final String username;
+    private final String thumbnailUrl;
+    private final String playerUrl;
+    private final String videoUrl;
 
     @Autowired
     public VideoPlayerBean(VideoHostingService videoHostingService, HttpServletRequest request) {
@@ -34,8 +38,32 @@ public class VideoPlayerBean {
         if(this.video != null) {
             // We do this query because the display name that the user used to register might have different capitalization
             this.username = video.getVideoUploadUser().getUser().getDisplayName();
+            this.thumbnailUrl = RESTUtils.fetchURLWithoutUsername(
+                    request.getScheme(),
+                    request.getServerName(),
+                    request.getServerPort(),
+                    "thumbnails",
+                    "v-" + video.getFileName() + ".png"
+            );
+            this.playerUrl = RESTUtils.fetchURLWithoutUsername(
+                    request.getScheme(),
+                    request.getServerName(),
+                    request.getServerPort(),
+                    "v",
+                    video.getFileName()
+            );
+            this.videoUrl = RESTUtils.fetchURLWithoutUsername(
+                    request.getScheme(),
+                    request.getServerName(),
+                    request.getServerPort(),
+                    "v",
+                    video.getFileName() + ".mp4"
+            );
         } else {
             this.username = "Unknown";
+            this.thumbnailUrl = "#";
+            this.playerUrl = "#";
+            this.videoUrl = "#";
         }
     }
 
@@ -44,7 +72,15 @@ public class VideoPlayerBean {
     }
 
     public String getVideoUrl() {
-        return "/v/" + video.getFileName() + ".mp4";
+        return videoUrl;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+    public String getPlayerUrl() {
+        return playerUrl;
     }
 
     public String getUsername() {

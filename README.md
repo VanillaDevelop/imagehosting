@@ -43,6 +43,12 @@ ingress:
   httpHostHeader: vanilla.localhost # sets vanilla.localhost as the host header
 - service: http://localhost:8080 # fallback to the main domain
 ```
+
+More information can be found [here](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/). 
+The relevant command to launch the tunnel after setup is: 
+```bash
+cloudflared tunnel run [UUID/Name]
+```
  
 # User Management
 A user can be created easily via the login page.  
