@@ -277,10 +277,9 @@ public class VideoHostingService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find video upload user");
         }
 
-        PageRequest request = PageRequest.of(page, size).withSort(
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
-        return videoUploadUserFileRepository.findAllByVideoUploadUser(videoUploadUserOpt.get(), request).getContent();
+        PageRequest request = PageRequest.of(page, size)
+                .withSort(Sort.by(Sort.Direction.DESC, "createdAt"));
+        return videoUploadUserFileRepository.findAllByVideoUploadUserAndUploadStatus(videoUploadUserOpt.get(), VideoUploadStatus.COMPLETED, request).getContent();
     }
 
     /**
