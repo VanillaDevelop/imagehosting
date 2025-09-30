@@ -27,8 +27,8 @@ public class SubdomainRedirectFilter implements Filter {
         String requestURI = httpRequest.getRequestURI();
         String queryString = httpRequest.getQueryString();
 
-        // Skip redirect for API paths
-        if (requestURI.startsWith("/i/") || requestURI.startsWith("/v/") || requestURI.startsWith("/thumbnails/")) {
+        // Skip redirect for API paths and static resources
+        if (requestURI.startsWith("/i/") || requestURI.startsWith("/v/") || requestURI.startsWith("/thumbnails/") || requestURI.startsWith("/jakarta.faces.resource/") || requestURI.startsWith("/javax.faces.resource/")) {
             chain.doFilter(request, response);
             return;
         }
