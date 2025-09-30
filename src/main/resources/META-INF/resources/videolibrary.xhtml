@@ -3,10 +3,15 @@
         xmlns="http://www.w3.org/1999/xhtml"
         xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
         xmlns:p="http://primefaces.org/ui"
+        xmlns:nya="http://xmlns.jcp.org/jsf/composite/components"
+        xmlns:h="http://xmlns.jcp.org/jsf/html"
 >
 <ui:composition template="/templates/template.xhtml">
     <ui:define name="title">Nya.GG - Video Library</ui:define>
     <ui:define name="heading">Video Library</ui:define>
+    <ui:define name="head">
+        <h:outputStylesheet name="/assets/css/videolibrary.css"/>
+    </ui:define>
     <ui:define name="content">
         <div class="my-3 flex-header">
             <p:linkButton outcome="/home.xhtml"
@@ -18,18 +23,25 @@
                 <i class="pi pi-upload"/> Upload Video
             </p:linkButton>
         </div>
-        <div class="video-grid">
+        <h:panelGroup id="video-grid" styleClass="video-grid" layout="block">
             <ui:repeat value="#{videoLibraryBean.videos}" var="video">
-                <div class="video-card">
-                    <div class="video-thumbnail">
-                        <p:link href="#{videoLibraryBean.getVideoUrl(video)}" target="_blank">
-                            <p:graphicImage value="#{videoLibraryBean.getThumbnailUrl(video)}"
-                                            alt="Video Thumbnail"
-                                            styleClass="thumbnail-image"/>
-                        </p:link>
-                    </div>
-                </div>
+                <nya:videoPreview
+                        thumbnailUrl="#{videoLibraryBean.getThumbnailUrl(video)}"
+                        createdAt="#{videoLibraryBean.getCreatedAt(video)}"
+                        videoUrl="#{videoLibraryBean.getVideoUrl(video)}"
+                        title="#{videoLibraryBean.getVideoTitle(video)}"
+                />
             </ui:repeat>
+        </h:panelGroup>
+
+        <div class="my-5 flex-column flex-align-center">
+            <p:commandButton
+                    value="#{videoLibraryBean.loadVideosButtonText}"
+                    action="#{videoLibraryBean.loadMoreVideos}"
+                    disabled="#{!videoLibraryBean.canLoadMoreVideos}"
+                    update=":video-grid @this"
+                    styleClass="ui-button-secondary"
+            />
         </div>
     </ui:define>
 

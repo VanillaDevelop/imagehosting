@@ -99,6 +99,6 @@ public abstract class Utils {
      * Generates a timestamped filename.
      */
     private static String generateTimestampedFilename() {
-        return LocalDateTime.now().toString().replaceAll(":. ", "-");
+        return LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy-HHmmss"));
     }
 }

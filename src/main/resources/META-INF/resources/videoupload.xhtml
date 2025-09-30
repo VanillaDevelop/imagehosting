@@ -3,7 +3,8 @@
         xmlns="http://www.w3.org/1999/xhtml"
         xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
         xmlns:p="http://primefaces.org/ui"
-        xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:h="http://xmlns.jcp.org/jsf/html"
+        xmlns:f="http://xmlns.jcp.org/jsf/core"
 >
 <ui:composition template="/templates/template.xhtml">
     <ui:define name="title">Nya.GG - Video Upload</ui:define>
@@ -21,6 +22,35 @@
                           styleClass="ui-button ui-button-secondary no-underline">
                 <i class="pi pi-video"/> My Library
             </p:linkButton>
+        </div>
+
+        <div class="settings-container">
+            <button type="button" class="btn-settings-toggle" onclick="toggleSettings()">
+                <i class="pi pi-cog" />
+                Settings
+                <i class="pi pi-chevron-down" id="settings-chevron" />
+            </button>
+
+            <div class="settings-panel" id="settings-panel" style="display: none;">
+                <h:form id="upload-mode-form" styleClass="upload-mode-form">
+                    <input type="hidden" name="_csrf" value="${_csrf.token}" />
+                    <div>
+                        <div class="flex-row flex-align-center mb-2">
+                            <p:outputLabel for="upload-mode" styleClass="form-label inline-block m-0" value="URL Generator Strategy" />
+                            <i id="strategy-help" class="pi pi-info-circle" title="Determines how video URLs are generated. Timestamps are based on upload time. Random character strings provide shorter, less secure blobs than UUIDs." />
+                        </div>
+                        <div class="flex-row">
+                            <p:selectOneMenu id="upload-mode" styleClass="form-input input-upload-mode" value="#{videoUploadBean.videoUploadUser.videoUploadMode}">
+                                <f:selectItems value="#{videoUploadBean.availableUploadModes}" var="mode"
+                                               itemLabel="#{mode.description}"
+                                               itemValue="#{mode}" />
+                            </p:selectOneMenu>
+                            <p:commandButton value="Update" styleClass="ui-button ui-button-primary"
+                                             action="#{videoUploadBean.updateUploadType}" update="upload-mode-form" />
+                        </div>
+                    </div>
+                </h:form>
+            </div>
         </div>
 
         <!-- File input to select local video -->
@@ -89,13 +119,7 @@
 
         <h:outputScript name="/assets/js/fileinput.js"/>
         <h:outputScript name="/assets/js/trimmer.js"/>
-
-        <div class="library-container" hidden="hidden">
-            <h2>Library</h2>
-            <p:selectOneMenu>
-                <f:selectItem itemLabel="#{videoUploadBean.currentUploadMode.toString()}" itemValue="#{videoUploadBean.currentUploadMode}" />
-            </p:selectOneMenu>
-        </div>
+        <h:outputScript name="/assets/js/settings.js"/>
     </ui:define>
 
 </ui:composition>

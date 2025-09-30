@@ -1,0 +1,43 @@
+.video-status-container {
+    text-align: center;
+    margin: 2rem auto;
+}
+
+.video-status-container h1 {
+    margin-bottom: 1rem;
+}
+
+.video-player-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 1200px;
+    margin: 2rem auto;
+}
+
+.video-player-container h1 {
+    color: #333;
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 0;
+}
+
+.video-player-container p {
+    margin-top: 0.4rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+.video-player {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: #000;
+}
+
+@media (max-width: 600px) {
+    .video-player-container h1 {
+        font-size: 1.5rem;
+    }
+}

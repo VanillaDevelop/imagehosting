@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:h="http://xmlns.jcp.org/jsf/html"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+>
+<ui:composition template="/templates/template.xhtml">
+    <ui:define name="title">Nya. GG - #{videoPlayerBean.videoTitle}</ui:define>
+    <ui:define name="head">
+        <h:outputStylesheet name="assets/css/style.css" />
+        <h:outputStylesheet name="/assets/css/videodisplay.css"/>
+        <meta name="twitter:card" content="player" />
+        <meta name="twitter:url" content="#{videoPlayerBean.playerUrl}" />
+        <meta name="twitter:title" content="#{videoPlayerBean.videoTitle} - Uploaded to Nya.GG by #{videoPlayerBean.username}" />
+        <meta name="twitter:image" content="#{videoPlayerBean.thumbnailUrl}" />
+        <meta name="twitter:player" content="#{videoPlayerBean.videoUrl}" />
+        <meta name="twitter:site" content="#{videoPlayerBean.username}" />
+    </ui:define>
+    <ui:define name="header" />
+    <ui:define name="content">
+        <!-- Case: Video Upload Failed -->
+        <h:panelGroup rendered="#{videoPlayerBean.videoStatus == 'FAILED'}" styleClass="video-status-container">
+            <h1>Video Upload Failed :(</h1>
+            <p>This video upload unfortunately failed. Please try again.</p>
+        </h:panelGroup>
+
+        <!-- Case: Video Upload Pending -->
+        <h:panelGroup rendered="#{videoPlayerBean.videoStatus == 'PROCESSING'}" styleClass="video-status-container">
+            <h1>Your Video Is Processing</h1>
+            <p>Your video is currently being processed. Please check back later.</p>
+        </h:panelGroup>
+
+        <!-- Case: Video Upload Successful -->
+        <h:panelGroup rendered="#{videoPlayerBean.videoStatus == 'COMPLETED'}" styleClass="video-player-container">
+            <h1><h:outputText value="#{videoPlayerBean.videoTitle}" /></h1>
+            <p>Uploaded by <h:outputText value="#{videoPlayerBean.username}"/> on <h:outputText value="#{videoPlayerBean.timestamp}"/> </p>
+            <video controls="controls" class="video-player">
+                <source src="#{videoPlayerBean.videoUrl}" type="video/mp4"/>
+                Your browser does not support the video tag.
+            </video>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>
+</html>
