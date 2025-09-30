@@ -283,6 +283,17 @@ public class VideoHostingService {
     }
 
     /**
+     * Fetches up to 'limit' abandoned videos that are still in processing state after 1 hour.
+     * @param limit The maximum number of abandoned videos to fetch.
+     * @return A list of abandoned video files.
+     */
+    public List<VideoUploadUserFile> getAbandonedVideos(int limit) {
+        log.debug("getAbandonedVideos, fetching abandoned videos with limit {}", limit);
+        PageRequest request = PageRequest.of(0, limit);
+        return videoUploadUserFileRepository.findAllByUploadStatusAndCreatedAtBefore(VideoUploadStatus.PROCESSING, LocalDateTime.now().minusHours(12), request).getContent();
+    }
+
+    /**
      * Fetches video metadata for the given user and filename.
      * @param username The username of the user.
      * @param filename The filename of the video.
