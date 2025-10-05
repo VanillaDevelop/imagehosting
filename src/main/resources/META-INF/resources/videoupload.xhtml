@@ -28,7 +28,7 @@
             <button type="button" class="btn-settings-toggle" onclick="toggleSettings()">
                 <i class="pi pi-cog" />
                 Settings
-                <i class="pi pi-chevron-down" id="settings-chevron" />
+                <i class="pi pi-chevron-down" id="settings-icon" />
             </button>
 
             <div class="settings-panel" id="settings-panel" style="display: none;">
@@ -55,7 +55,7 @@
 
         <!-- File input to select local video -->
         <form id="video-upload-form" action="${pageContext.request.contextPath}/v/" method="post" enctype="multipart/form-data">
-            <div class="video-drop-zone" onclick="document.getElementById('video-input').click()">
+            <div class="video-drop-zone">
                 <i class="pi pi-cloud-upload upload-icon" />
                 <div class="upload-text">Drop your video here</div>
                 <div class="upload-hint">or click to browse files</div>
@@ -117,9 +117,9 @@
             </form>
         </div>
 
-        <h:outputScript name="/assets/js/fileinput.js"/>
-        <h:outputScript name="/assets/js/trimmer.js"/>
-        <h:outputScript name="/assets/js/settings.js"/>
+        <h:outputScript name="/assets/js/videofileinput.js"/>
+        <h:outputScript name="/assets/js/videotrimmer.js"/>
+        <h:outputScript name="/assets/js/videosettings.js"/>
     </ui:define>
 
 </ui:composition>
