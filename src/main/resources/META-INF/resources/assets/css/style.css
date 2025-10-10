@@ -139,12 +139,6 @@ h1, h2, h3 {
     padding-block: 2em !important;
 }
 
-.no-underline,
-.no-underline a,
-.no-underline span {
-    text-decoration: none !important;
-}
-
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -196,6 +190,11 @@ h1, h2, h3 {
 
 .ui-button-secondary:hover {
     background-color: #dde8ff !important;
+}
+
+.ui-button a {
+    color: inherit !important;
+    text-decoration: none !important;
 }
 
 /* Label styling */
