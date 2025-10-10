@@ -14,7 +14,7 @@
     </ui:define>
     <ui:define name="content">
         <!-- Navigation Buttons -->
-        <div class="my-3 flex-row flex-justify-space-between">
+        <div class="mb-5 flex-row flex-justify-space-between">
             <p:linkButton outcome="/home.xhtml"
                           styleClass="ui-button-secondary">
                 <i class="pi pi-arrow-left"/> Back to Home
@@ -27,7 +27,7 @@
 
         <div id="video-selection">
             <!-- Settings Accordion -->
-            <p:accordionPanel activeIndex="null" styleClass="mt-5">
+            <p:accordionPanel activeIndex="null">
                 <p:tab title="Settings">
                     <h:form id="upload-mode-form" styleClass="form-small">
                         <input type="hidden" name="_csrf" value="${_csrf.token}" />
@@ -69,7 +69,7 @@
         </div>
 
         <!-- Video Trimmer -->
-        <div id="trimmer-container" class="trimmer-container mt-5" style="display: none;">
+        <div id="trimmer-container" class="trimmer-container" style="display: none;">
             <div class="video-player-wrapper">
                 <video id="video-player" class="video-player" preload="auto">
                     <source id="video-source" src="" type="" />
