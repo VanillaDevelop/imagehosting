@@ -16,7 +16,7 @@
 <composite:implementation>
     <h:outputStylesheet name="/assets/css/components/clickablecard.css"/>
 
-    <p:link outcome="${cc.attrs.outcome}" disabled="#{not userDataBean.hasRole(cc.attrs.role)}" styleClass="no-underline">
+    <p:link outcome="${cc.attrs.outcome}" disabled="#{not userDataBean.hasRole(cc.attrs.role)}">
         <p:card styleClass="clickable-card">
             <f:facet name="title">
                 <h3>${cc.attrs.title}</h3>

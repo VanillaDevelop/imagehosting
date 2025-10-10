@@ -16,64 +16,60 @@
         <!-- Navigation Buttons -->
         <div class="my-3 flex-row flex-justify-space-between">
             <p:linkButton outcome="/home.xhtml"
-                          styleClass="ui-button ui-button-secondary">
+                          styleClass="ui-button-secondary">
                 <i class="pi pi-arrow-left"/> Back to Home
             </p:linkButton>
             <p:linkButton outcome="/videolibrary.xhtml"
-                          styleClass="ui-button ui-button-secondary">
+                          styleClass="ui-button-secondary">
                 <i class="pi pi-video"/> My Library
             </p:linkButton>
         </div>
 
-        <!-- Settings Panel (Hidden By Default) -->
-        <div class="settings-container">
-            <button type="button" class="btn-settings-toggle" onclick="toggleSettings()">
-                <i class="pi pi-cog" />
-                Settings
-                <i class="pi pi-chevron-down" id="settings-icon" />
-            </button>
-
-            <p:card id="settings-panel" styleClass="my-3 slide-down" style="display: none;">
-                <h:form id="upload-mode-form" styleClass="form-small">
-                    <input type="hidden" name="_csrf" value="${_csrf.token}" />
-                    <div>
-                        <div class="flex-row flex-align-center mb-2">
-                            <p:outputLabel for="upload-mode" styleClass="form-label inline-block m-0" value="URL Generator Strategy" />
-                            <i class="pi pi-info-circle" title="Determines how video URLs are generated. Timestamps are based on upload time. Random character strings provide shorter, less secure blobs than UUIDs." />
+        <div id="video-selection">
+            <!-- Settings Accordion -->
+            <p:accordionPanel activeIndex="null" styleClass="mt-5">
+                <p:tab title="Settings">
+                    <h:form id="upload-mode-form" styleClass="form-small">
+                        <input type="hidden" name="_csrf" value="${_csrf.token}" />
+                        <div>
+                            <div class="flex-row flex-align-center mb-2">
+                                <p:outputLabel for="upload-mode" styleClass="inline-block m-0" value="URL Generator Strategy" />
+                                <i class="pi pi-info-circle" title="Determines how video URLs are generated. Timestamps are based on upload time. Random character strings provide shorter, less secure blobs than UUIDs." />
+                            </div>
+                            <div class="flex-row">
+                                <p:selectOneMenu id="upload-mode" value="#{videoUploadBean.videoUploadUser.videoUploadMode}">
+                                    <f:selectItems value="#{videoUploadBean.availableUploadModes}" var="mode"
+                                                   itemLabel="#{mode.description}"
+                                                   itemValue="#{mode}" />
+                                </p:selectOneMenu>
+                                <p:commandButton value="Update"
+                                                 action="#{videoUploadBean.updateUploadType}" update="upload-mode-form" />
+                            </div>
                         </div>
-                        <div class="flex-row">
-                            <p:selectOneMenu id="upload-mode" styleClass="w-300" value="#{videoUploadBean.videoUploadUser.videoUploadMode}">
-                                <f:selectItems value="#{videoUploadBean.availableUploadModes}" var="mode"
-                                               itemLabel="#{mode.description}"
-                                               itemValue="#{mode}" />
-                            </p:selectOneMenu>
-                            <p:commandButton value="Update" styleClass="ui-button ui-button-primary"
-                                             action="#{videoUploadBean.updateUploadType}" update="upload-mode-form" />
-                        </div>
-                    </div>
-                </h:form>
+                    </h:form>
+                </p:tab>
+            </p:accordionPanel>
 
-            </p:card>
+            <!-- File input to select local video -->
+            <form id="video-upload-form" action="${pageContext.request.contextPath}/v/" method="post" enctype="multipart/form-data">
+                <div class="video-drop-zone text-center my-3">
+                    <i class="pi pi-cloud-upload upload-icon mb-2" />
+                    <div class="upload-text mb-1"><strong>Drop your video here</strong></div>
+                    <div class="upload-hint mb-4"><small>or click to browse files</small></div>
+                    <p:commandButton type="button" value="Choose Video" />
+                </div>
+
+                <!-- Hidden form for submitting to the /v/ endpoint -->
+                <input type="file" id="video-input" name="videoInput" accept="video/*" hidden="hidden" />
+                <input type="hidden" id="start-time-seconds" name="startTimeSeconds" />
+                <input type="hidden" id="end-time-seconds" name="endTimeSeconds" />
+                <input type="hidden" id="video-title" name="videoTitle" />
+                <input type="hidden" name="_csrf" value="${_csrf.token}" />
+            </form>
         </div>
 
-        <!-- File input to select local video -->
-        <form id="video-upload-form" action="${pageContext.request.contextPath}/v/" method="post" enctype="multipart/form-data">
-            <div class="video-drop-zone">
-                <i class="pi pi-cloud-upload upload-icon" />
-                <div class="upload-text">Drop your video here</div>
-                <div class="upload-hint">or click to browse files</div>
-                <p:commandButton styleClass="ui-button ui-button-primary no-underline" type="button" ajax="false" value="Choose Video" />
-            </div>
-
-            <!-- Hidden form for submitting to the /v/ endpoint -->
-            <input type="file" id="video-input" name="videoInput" accept="video/*" hidden="hidden" />
-            <input type="hidden" id="start-time-seconds" name="startTimeSeconds" />
-            <input type="hidden" id="end-time-seconds" name="endTimeSeconds" />
-            <input type="hidden" id="video-title" name="videoTitle" />
-            <input type="hidden" name="_csrf" value="${_csrf.token}" />
-        </form>
-
-        <div id="trimmer-container" class="trimmer-container" style="display: none">
+        <!-- Video Trimmer -->
+        <div id="trimmer-container" class="trimmer-container mt-5" style="display: none;">
             <div class="video-player-wrapper">
                 <video id="video-player" class="video-player" preload="auto">
                     <source id="video-source" src="" type="" />
@@ -84,13 +80,11 @@
                 </div>
             </div>
 
-            <div class="trimmer-bar" id="trimmer-bar">
-                <div class="timeline">
-                    <div class="timeline-markers" id="timelineMarkers">
-                        <ui:repeat value="#{[0,1,2,3,4,5,6,7,8,9]}" var="i">
-                            <div class="marker"><!-- --></div>
-                        </ui:repeat>
-                    </div>
+            <div class="trimmer-bar my-2" id="trimmer-bar">
+                <div class="timeline-markers flex-row flex-justify-space-between">
+                    <ui:repeat value="#{[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]}" var="i">
+                        <div class="marker"><!-- --></div>
+                    </ui:repeat>
                 </div>
                 <div class="progress-bar" id="progress-bar"><!-- --></div>
                 <div class="trimmer-handle handle-left" id="left-handle"><!-- --></div>
@@ -98,29 +92,21 @@
                 <div class="position-indicator" id="position-indicator"><!-- --></div>
             </div>
 
-            <div class="time-display">
-                <div>Start: <span id="start-time">0:00</span></div>
-                <div><strong>Selected Duration: <span id="selected-duration">1:00</span></strong></div>
-                <div>End: <span id="end-time">1:00</span></div>
+            <div class="flex-row flex-justify-space-between text-light">
+                <div>Start: <span id="start-time">00:00</span></div>
+                <div><strong>Selected Duration: <span id="selected-duration">01:00</span></strong></div>
+                <div>End: <span id="end-time">01:00</span></div>
             </div>
 
-            <form class="video-form">
-                <div class="form-group">
-                    <label for="video-title-input" class="form-label">Video Title</label>
-                    <input type="text" id="video-title-input" name="videoTitleInput"
-                           class="form-input" placeholder="Enter video title" required="required" />
-                </div>
-                <div class="form-actions">
-                    <button id="trim-button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-button-primary-form no-underline">
-                        <span class="ui-button-text">Trim And Upload</span>
-                    </button>
-                </div>
+            <form class="video-form form-dark">
+                <p:outputLabel for="video-title-input" value="Video Title "/>
+                <p:inputText id="video-title-input" maxlength="100" placeholder="Enter video title" required="required" />
+                <p:commandButton id="trim-button" value="Trim and Upload"/>
             </form>
         </div>
 
         <h:outputScript name="/assets/js/videofileinput.js"/>
         <h:outputScript name="/assets/js/videotrimmer.js"/>
-        <h:outputScript name="/assets/js/videosettings.js"/>
     </ui:define>
 
 </ui:composition>

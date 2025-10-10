@@ -41,6 +41,9 @@ h1, h2, h3 {
     justify-content: space-between;
 }
 
+.text-light {
+    color: #ccc !important;
+}
 
 .text-center {
     text-align: center;
@@ -168,19 +171,31 @@ h1, h2, h3 {
     box-shadow: 0 0 3px #A3C2ED !important;
 }
 
+.form-dark .ui-inputtext, .form-dark .ui-inputfield {
+    border: 1px solid #555 !important;
+    color: #fff;
+    background: #2a2a2a;
+}
+
 /* Button styling */
 .ui-button {
     border: none !important;
     transition: background-color 0.2s !important;
-}
-
-.ui-button-primary {
     color: #FFFFFF !important;
     background-color: #8AB1E9 !important;
 }
 
-.ui-button-primary:hover {
+.ui-button:hover {
     background-color: #6B9BE0 !important;
+}
+
+.form-dark .ui-button {
+    background-color: #6c757d !important;
+    color: white !important;
+}
+
+.form-dark .ui-button:hover {
+    background-color: #5a6268 !important;
 }
 
 .ui-button-secondary {
@@ -197,13 +212,30 @@ h1, h2, h3 {
     text-decoration: none !important;
 }
 
+/* Link Styling */
+.ui-link {
+    color: #1A4FA3 !important;
+    text-decoration: none !important;
+}
+
 /* Label styling */
 .ui-outputlabel {
     color: #1A4FA3 !important;
+}
+
+.form-dark .ui-outputlabel {
+    color: #ccc !important;
 }
 
 /* Panel styling */
 .ui-panelgrid-cell {
     padding: 0.5em !important;
     background-color: transparent !important;
+}
+
+/* Accordion styling */
+.ui-accordion .ui-accordion-header {
+    background-color: #A3C2ED !important;
+    color: white !important;
+    border: none !important;
 }

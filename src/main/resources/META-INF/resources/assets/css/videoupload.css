@@ -2,40 +2,119 @@
 .video-drop-zone {
     border: 2px dashed #95B8E7;
     border-radius: 10px;
-    padding: 40px;
-    text-align: center;
-    background: linear-gradient(135deg, #E8F2FF 0%, #D1E0F2 100%);
+    padding: 3em;
+    background: #E8F2FF;
     transition: all 0.3s ease;
-    margin: 20px 0;
     cursor: pointer;
 }
 
 .video-drop-zone:hover,
 .video-drop-zone.dragover {
     border-color: #6B9BE0;
-    background: linear-gradient(135deg, #D1E0F2 0%, #C4D7F0 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(26, 79, 163, 0.15);
+    background: #D1E0F2;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px #1A4FA326;
 }
 
 .video-drop-zone .upload-icon {
     font-size: 48px;
     color: #8AB1E9;
-    margin-bottom: 15px;
-    display: block;
 }
 
 .video-drop-zone .upload-text {
     color: #1A4FA3;
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 8px;
 }
 
 .video-drop-zone .upload-hint {
     color: #5A7BAD;
-    font-size: 14px;
-    margin-bottom: 20px;
+}
+
+/** Trimmer */
+.trimmer-container {
+    background: #2a2a2a;
+    padding: 3em;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.trimmer-bar {
+    position: relative;
+    height: 60px;
+    background: #666;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.timeline-markers {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.marker {
+    width: 1px;
+    height: 100%;
+    background: rgba(255,255,255,0.2);
+}
+
+.progress-bar {
+    position: absolute;
+    height: 100%;
+    width:50%;
+    background: #007bff;
+    opacity: 0.3;
+}
+
+.trimmer-handle {
+    position: absolute;
+    width: 12px;
+    height: 100%;
+    background: #007bff;
+    cursor: ew-resize;
+    transition: background-color 0.2s ease;
+}
+
+.trimmer-handle:hover {
+    background: #0056b3;
+}
+
+.trimmer-handle.active {
+    background: #0056b3;
+    box-shadow: 0 0 15px rgba(0,123,255,0.8);
+}
+
+.trimmer-handle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 20px;
+    background: white;
+    transform: translate(-50%, -50%);
+    border-radius: 2px;
+}
+
+.position-indicator {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    background: #ff5722;
+    transform: translateX(-50%);
+}
+
+.handle-left {
+    left: 0;
+    border-radius: 6px 2px 2px 6px;
+}
+
+.handle-right {
+    left: 100%;
+    transform: translateX(-100%);
+    border-radius: 2px 6px 6px 2px;
 }
 
 /* Video player overlay styling */
@@ -102,104 +181,6 @@
     }
 }
 
-/** Trimmer */
-.trimmer-container {
-    max-width: 1200px;
-    background: #2a2a2a;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-.trimmer-bar {
-    position: relative;
-    height: 60px;
-    background: #444;
-    border-radius: 6px;
-    margin: 20px 0;
-    overflow: hidden;
-    background: linear-gradient(90deg, #666 0%, #888 50%, #666 100%);
-}
-
-.timeline-markers {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    display: flex;
-    justify-content: space-between;
-}
-
-.marker {
-    width: 1px;
-    height: 100%;
-    background: rgba(255,255,255,0.2);
-}
-
-.progress-bar {
-    position: absolute;
-    height: 100%;
-    background: #007bff;
-    opacity: 0.3;
-}
-
-.trimmer-handle {
-    position: absolute;
-    width: 12px;
-    height: 100%;
-    background: #007bff;
-    cursor: ew-resize;
-    transition: background-color 0.2s ease;
-}
-
-.trimmer-handle:hover {
-    background: #0056b3;
-}
-
-.trimmer-handle.active {
-    background: #0056b3;
-    box-shadow: 0 0 15px rgba(0,123,255,0.8);
-}
-
-.trimmer-handle::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 4px;
-    height: 20px;
-    background: white;
-    transform: translate(-50%, -50%);
-    border-radius: 2px;
-}
-
-.position-indicator {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 2px;
-    height: 100%;
-    background: #ff5722;
-    transform: translateX(-50%);
-}
-
-.handle-left {
-    left: 0;
-    border-radius: 6px 2px 2px 6px;
-}
-
-.handle-right {
-    left: 100%;
-    transform: translateX(-100%);
-    border-radius: 2px 6px 6px 2px;
-}
-
-.time-display {
-    display: flex;
-    justify-content: space-between;
-    margin: 10px 0;
-    color: #ccc;
-}
 
 /* Video form styling */
 .video-form {
@@ -208,86 +189,7 @@
     border-radius: 8px;
     margin-top: 20px;
     border: 1px solid #444;
-}
-
-.form-label {
-    display: block;
-    color: #ccc;
-    font-size: 14px;
-    margin-bottom: 8px;
-}
-
-.form-input {
-    padding: 12px 16px;
-    background: #2a2a2a;
-    border: 1px solid #555;
-    border-radius: 6px;
-    color: #fff;
-    font-size: 14px;
-    transition: all 0.2s ease;
-    box-sizing: border-box;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-
-.form-input::placeholder {
-    color: #888;
-}
-
-.form-actions {
     display: flex;
-    gap: 12px;
-    justify-content: flex-start;
+    flex-direction: column;
+    gap: 0.75em;
 }
-
-.ui-button-primary-form {
-    background-color: #6c757d !important;
-    color: white !important;
-}
-
-.ui-button-primary-form:hover {
-    background-color: #5a6268 !important;
-}
-
-/* Settings Panel Styling */
-.settings-container {
-    margin: 20px 0;
-}
-
-.btn-settings-toggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    color: #495057;
-    padding: 8px 16px;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-}
-
-.btn-settings-toggle:hover {
-    background: #e9ecef;
-    border-color: #adb5bd;
-}
-
-/* Settings panel animation */
-.slide-down {
-    animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-

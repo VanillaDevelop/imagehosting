@@ -8,6 +8,8 @@
 
 // Element for the drag-and-drop zone
 const dropZone = document.querySelector('.video-drop-zone');
+// Element for the first part of the selection (settings + drop zone)
+const videoSelection = document.getElementById('video-selection');
 // File input element
 const fileInput = document.getElementById('video-input');
 // Container for the video trimmer interface
@@ -48,7 +50,7 @@ function handleFileSelect(file) {
         videoPlayer.play();
 
         // Hide the drop zone and show the trimmer interface
-        dropZone.style.display = 'none';
+        videoSelection.style.display = 'none';
         trimmerContainer.style.display = 'block';
 
     } else if (file) {
