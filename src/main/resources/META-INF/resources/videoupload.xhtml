@@ -13,7 +13,8 @@
         <h:outputStylesheet name="/assets/css/videoupload.css"/>
     </ui:define>
     <ui:define name="content">
-        <div class="my-3 flex-header">
+        <!-- Navigation Buttons -->
+        <div class="my-3 flex-row flex-justify-space-between">
             <p:linkButton outcome="/home.xhtml"
                           styleClass="ui-button ui-button-secondary no-underline">
                 <i class="pi pi-arrow-left"/> Back to Home
@@ -24,6 +25,7 @@
             </p:linkButton>
         </div>
 
+        <!-- Settings Panel (Hidden By Default) -->
         <div class="settings-container">
             <button type="button" class="btn-settings-toggle" onclick="toggleSettings()">
                 <i class="pi pi-cog" />
@@ -31,16 +33,16 @@
                 <i class="pi pi-chevron-down" id="settings-icon" />
             </button>
 
-            <div class="settings-panel" id="settings-panel" style="display: none;">
-                <h:form id="upload-mode-form" styleClass="upload-mode-form">
+            <p:card id="settings-panel" styleClass="my-3 slide-down" style="display: none;">
+                <h:form id="upload-mode-form" styleClass="form-small">
                     <input type="hidden" name="_csrf" value="${_csrf.token}" />
                     <div>
                         <div class="flex-row flex-align-center mb-2">
                             <p:outputLabel for="upload-mode" styleClass="form-label inline-block m-0" value="URL Generator Strategy" />
-                            <i id="strategy-help" class="pi pi-info-circle" title="Determines how video URLs are generated. Timestamps are based on upload time. Random character strings provide shorter, less secure blobs than UUIDs." />
+                            <i class="pi pi-info-circle" title="Determines how video URLs are generated. Timestamps are based on upload time. Random character strings provide shorter, less secure blobs than UUIDs." />
                         </div>
                         <div class="flex-row">
-                            <p:selectOneMenu id="upload-mode" styleClass="form-input input-upload-mode" value="#{videoUploadBean.videoUploadUser.videoUploadMode}">
+                            <p:selectOneMenu id="upload-mode" styleClass="w-300" value="#{videoUploadBean.videoUploadUser.videoUploadMode}">
                                 <f:selectItems value="#{videoUploadBean.availableUploadModes}" var="mode"
                                                itemLabel="#{mode.description}"
                                                itemValue="#{mode}" />
@@ -50,7 +52,8 @@
                         </div>
                     </div>
                 </h:form>
-            </div>
+
+            </p:card>
         </div>
 
         <!-- File input to select local video -->
@@ -59,9 +62,7 @@
                 <i class="pi pi-cloud-upload upload-icon" />
                 <div class="upload-text">Drop your video here</div>
                 <div class="upload-hint">or click to browse files</div>
-                <button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-button-primary no-underline">
-                    <span class="ui-button-text">Choose Video</span>
-                </button>
+                <p:commandButton styleClass="ui-button ui-button-primary no-underline" type="button" ajax="false" value="Choose Video" />
             </div>
 
             <!-- Hidden form for submitting to the /v/ endpoint -->

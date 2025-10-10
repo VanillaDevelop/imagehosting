@@ -12,23 +12,15 @@ hr {
     margin: 2em 0;
 }
 
-.logo {
-    display: block;
-    width: 40%;
-    margin: 0 auto 2em auto;
-}
-
-.logo-small {
-    display: block;
-    width: 20%;
-    margin: 0 auto 2em auto;
-}
-
 h1, h2, h3 {
     color: #1A4FA3;
 }
 
 /* Utility classes */
+.inline-block {
+    display: inline-block !important;
+}
+
 .flex-row {
     display: flex;
     flex-direction: row;
@@ -42,39 +34,109 @@ h1, h2, h3 {
 }
 
 .flex-align-center {
-    display: flex;
     align-items: center;
 }
+
+.flex-justify-space-between {
+    justify-content: space-between;
+}
+
 
 .text-center {
     text-align: center;
 }
 
-.w-full {
+.w-100 {
     width: 100%;
     box-sizing: border-box;
 }
 
+.my-1 {
+    margin-block: 0.25em !important;
+}
+
+.my-2 {
+    margin-block: 0.5em !important;
+}
+
 .my-3 {
-    margin-top: 1em !important;
-    margin-bottom: 1em !important;
+    margin-block: 0.75em !important;
+}
+
+.my-4 {
+    margin-block: 1em !important;
 }
 
 .my-5 {
+    margin-block: 2em !important;
+}
+
+.mt-1 {
+    margin-top: 0.25em !important;
+}
+
+.mt-2 {
+    margin-top: 0.5em !important;
+}
+
+.mt-3 {
+    margin-top: 0.75em !important;
+}
+
+.mt-4 {
+    margin-top: 1em !important;
+}
+
+.mt-5 {
     margin-top: 2em !important;
-    margin-bottom: 2em !important;
+}
+
+.mb-1 {
+    margin-bottom: 0.25em !important;
 }
 
 .mb-2 {
     margin-bottom: 0.5em !important;
 }
 
+.mb-3 {
+    margin-bottom: 0.75em !important;
+}
+
+.mb-4 {
+    margin-bottom: 1em !important;
+}
+
+.mb-5 {
+    margin-bottom: 2em !important;
+}
+
 .m-0 {
     margin: 0 !important;
 }
 
-.inline-block {
-    display: inline-block !important;
+.p-0 {
+    padding: 0 !important;
+}
+
+.py-1 {
+    padding-block: 0.25em !important;
+}
+
+.py-2 {
+    padding-block: 0.5em !important;
+}
+
+.py-3 {
+    padding-block: 0.75em !important;
+}
+
+.py-4 {
+    padding-block: 1em !important;
+}
+
+.py-5 {
+    padding-block: 2em !important;
 }
 
 .no-underline,
@@ -83,65 +145,13 @@ h1, h2, h3 {
     text-decoration: none !important;
 }
 
-
-.error-text {
-    color: red;
-}
-
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2em;
 }
 
-.flex-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1em;
-}
-
-/** Clickable card Component **/
-.clickable-card {
-    border-radius: 8px;
-    padding: 1.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-}
-
-.clickable-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.card-title {
-    color: #333;
-    margin: 0 0 0.5rem 0;
-    text-align: center;
-}
-
-.card-subtitle {
-    color: #666;
-    margin: 0;
-    text-align: center;
-}
-
 /** PRIMEFACES STYLING **/
-/* Form styling */
-.ui-password {
-    width: 100%;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
 /* Panel styling */
 .ui-panel-titlebar {
     background-color: #A3C2ED !important;
@@ -149,10 +159,14 @@ h1, h2, h3 {
     border: none !important;
 }
 
-
 /* Input styling */
-.ui-inputtext, .ui-inputfield {
-    border: 1px solid #95B8E7 !important;
+.ui-inputtext, .ui-inputfield, .ui-inputwrapper {
+    border-color: #95B8E7 !important;
+    width: 100% !important;
+}
+
+.form-small .ui-inputtext, .form-small .ui-inputfield, .form-small .ui-inputwrapper {
+    width: 300px !important;
 }
 
 .ui-inputtext:focus, .ui-inputfield:focus {
@@ -163,11 +177,11 @@ h1, h2, h3 {
 /* Button styling */
 .ui-button {
     border: none !important;
-    color: #FFFFFF !important;
     transition: background-color 0.2s !important;
 }
 
 .ui-button-primary {
+    color: #FFFFFF !important;
     background-color: #8AB1E9 !important;
 }
 
@@ -176,17 +190,12 @@ h1, h2, h3 {
 }
 
 .ui-button-secondary {
-    background-color: #D1E0F2 !important;
+    background-color: #d3e3ff !important;
     color: #1A4FA3 !important;
-    border: 1px solid #95B8E7 !important;
-    transition: all 0.2s ease-in-out !important;
 }
 
 .ui-button-secondary:hover {
-    background-color: #C4D7F0 !important;
-    border-color: #6B9BE0 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(26, 79, 163, 0.2);
+    background-color: #dde8ff !important;
 }
 
 /* Label styling */
@@ -199,13 +208,3 @@ h1, h2, h3 {
     padding: 0.5em !important;
     background-color: transparent !important;
 }
-
-.ui-panelgrid-cell h3 {
-    color: #333 !important;
-}
-
-/* Disabled state styling */
-.ui-state-disabled div {
-    background-color: #DDD;
-}
-
