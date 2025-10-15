@@ -12,13 +12,23 @@ hr {
     margin: 2em 0;
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4 {
     color: #1A4FA3;
 }
+
+a {
+    color: inherit !important;
+    text-decoration: none !important;
+}
+
 
 /* Utility classes */
 .inline-block {
     display: inline-block !important;
+}
+
+.subtitle {
+    color: #666;
 }
 
 .flex-row {
@@ -205,11 +215,6 @@ h1, h2, h3 {
 
 .ui-button-secondary:hover {
     background-color: #dde8ff !important;
-}
-
-.ui-button a {
-    color: inherit !important;
-    text-decoration: none !important;
 }
 
 /* Link Styling */
