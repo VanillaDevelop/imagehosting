@@ -23,7 +23,7 @@
                 <i class="pi pi-upload"/> Upload Video
             </p:linkButton>
         </div>
-        <h:panelGroup id="video-grid" styleClass="video-grid" layout="block">
+        <h:panelGroup styleClass="video-grid" layout="block">
             <ui:repeat value="#{videoLibraryBean.videos}" var="video">
                 <nya:videoPreview
                         thumbnailUrl="#{videoLibraryBean.getThumbnailUrl(video)}"
