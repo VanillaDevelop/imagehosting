@@ -44,13 +44,8 @@ public abstract class RESTUtils {
     public static String fetchURLFromLocation(String scheme, String serverName, int serverPort, String username,
                                               String category, String filename) {
         String port = serverPort == 80 || serverPort == 443 ? "" : ":" + serverPort;
-        String baseUrl = scheme + "://" + username + "." + serverName + port;
-        return baseUrl + "/" + category + "/" + filename;
-    }
-
-    public static String fetchURLWithoutUsername(String scheme, String serverName, int serverPort, String category, String filename) {
-        String port = serverPort == 80 || serverPort == 443 ? "" : ":" + serverPort;
-        String baseUrl = scheme + "://" + serverName + port;
+        String usernameAddition = username == null ? "" : username + ".";
+        String baseUrl = scheme + "://" + usernameAddition + serverName + port;
         return baseUrl + "/" + category + "/" + filename;
     }
 }

@@ -245,20 +245,19 @@ public class VideoHostingService {
 
     /**
      * Sets the user's preferred upload type and persists it to the database.
-     * @param videoUploadUser The video upload user entity.
+     * @param username The username of the user.
      * @param uploadType The preferred upload type to set.
      */
-    public void setUserUploadTypePreference(VideoUploadUser videoUploadUser, HostingMode uploadType)
+    public void setUserUploadTypePreference(String username, HostingMode uploadType)
     {
-        log.debug("setUserUploadTypePreference, setting upload type preference for upload user ID {} to {}", videoUploadUser.getId(), uploadType);
-        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findById(videoUploadUser.getId());
+        log.debug("setUserUploadTypePreference, setting upload type preference for user {} to {}", username, uploadType);
+        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findVideoUploadUserByUsername(username);
         if (videoUploadUserOpt.isEmpty()) {
-            log.error("setUserUploadTypePreference, video upload user with ID {} not found", videoUploadUser.getId());
+            log.error("setUserUploadTypePreference, video upload user for {} not found", username);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Video upload user not found");
         }
         videoUploadUserOpt.get().setVideoUploadMode(uploadType);
         videoUploadUserRepository.save(videoUploadUserOpt.get());
-
     }
 
     /**

@@ -67,7 +67,11 @@ public class VideoUploadBean implements Serializable {
      * Updates the VideoUploadUser's preferred upload type in the database.
      */
     public void updateUploadType() {
-        videoHostingService.setUserUploadTypePreference(this.videoUploadUser, this.videoUploadUser.getVideoUploadMode());
+        log.info("updateUploadType, updating upload type for user {} to {}",
+                authenticationService.getCurrentUsername(),
+                this.videoUploadUser.getVideoUploadMode());
+        videoHostingService.setUserUploadTypePreference(authenticationService.getCurrentUsername(),
+                this.videoUploadUser.getVideoUploadMode());
     }
 
     /**

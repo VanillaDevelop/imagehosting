@@ -28,6 +28,14 @@ public abstract class Utils {
         return subdomain;
     }
 
+    public static String extractFilenameFromUri(String uri) {
+        if (uri == null || !uri.contains("/")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid URI");
+        }
+
+        return uri.substring(uri.lastIndexOf("/") + 1);
+    }
+
     /**
      * Extract the media type from an image file name.
      *
