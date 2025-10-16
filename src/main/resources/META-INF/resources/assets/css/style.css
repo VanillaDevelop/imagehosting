@@ -3,6 +3,8 @@ html, body {
     background-color: #B7D3F2;
     color: #1A4FA3;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    height: 100%;
+    margin: 0;
 }
 
 hr {
@@ -156,6 +158,14 @@ a {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2em;
+    height: 100%;
+}
+
+.center-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 }
 
 /** PRIMEFACES STYLING **/

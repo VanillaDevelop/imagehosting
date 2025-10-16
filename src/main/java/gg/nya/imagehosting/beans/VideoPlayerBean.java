@@ -2,6 +2,7 @@ package gg.nya.imagehosting.beans;
 
 import gg.nya.imagehosting.models.VideoUploadStatus;
 import gg.nya.imagehosting.models.VideoUploadUserFile;
+import gg.nya.imagehosting.services.AuthenticationService;
 import gg.nya.imagehosting.services.VideoHostingService;
 import gg.nya.imagehosting.utils.RESTUtils;
 import gg.nya.imagehosting.utils.Utils;
@@ -25,9 +26,11 @@ public class VideoPlayerBean {
     private final String thumbnailUrl;
     private final String playerUrl;
     private final String videoUrl;
+    private final AuthenticationService authenticationService;
 
     @Autowired
-    public VideoPlayerBean(VideoHostingService videoHostingService, HttpServletRequest request) {
+    public VideoPlayerBean(VideoHostingService videoHostingService, HttpServletRequest request, AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
         String serverName = request.getServerName();
         String username = Utils.extractUsernameFromServerName(serverName);
         //Contains the original URI before forwarding through WebMvcConfig
@@ -65,6 +68,10 @@ public class VideoPlayerBean {
             this.playerUrl = "#";
             this.videoUrl = "#";
         }
+    }
+
+    public boolean isUserLoggedIn() {
+        return authenticationService.isCurrentUserAuthenticated();
     }
 
     public String getVideoTitle() {
