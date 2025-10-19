@@ -393,7 +393,7 @@ public class VideoHostingService {
         log.debug("processVideoAsync, uploading video {} to S3 for user {}", outputFilePath, username);
         try {
             InputStream videoInputStream = new FileInputStream(outputFilePath.toFile());
-            s3Service.uploadVideo(username, filename + ".mp4", videoInputStream);
+            s3Service.uploadFile(username, filename + ".mp4", videoInputStream, Utils.getVideoTypeFromFileName(filename).toString());
         }
         catch (IOException e) {
             log.error("processVideoAsync, failed to store video file {} to S3", outputFilePath, e);

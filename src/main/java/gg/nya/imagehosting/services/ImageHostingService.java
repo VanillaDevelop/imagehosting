@@ -55,7 +55,7 @@ public class ImageHostingService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
         }
         log.debug("retrieveImage, image for user {} with filename {} found in DB, querying cached S3", username, filename);
-        return s3Service.getFile(username, filename);
+        return new ByteArrayInputStream(s3Service.getCacheableFile(username, filename));
     }
 
     /**
@@ -108,7 +108,7 @@ public class ImageHostingService {
         //Generate a file name for the image
         String fileName = tryCreateFileName(user, fileExtension);
         //Upload image to S3
-        s3Service.uploadImage(user.getUser().getUsername(), fileName, fileStream);
+        s3Service.uploadFile(user.getUser().getUsername(), fileName, fileStream, Utils.getImageTypeFromFileName(fileName).toString());
         //Create and persist new image hosting user file
         ImageHostingUserFile imageHostingUserFile = new ImageHostingUserFile();
         imageHostingUserFile.setImageHostingUser(user);
