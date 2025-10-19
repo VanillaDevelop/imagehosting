@@ -59,11 +59,11 @@ want to use a tunneling service to expose your local server to the internet.
 
 Note that this application relies on subdomains for user identification, which may not be compatible with free tunneling services 
 that provide shared subdomains. For example, if you use a free subdomain like `example.tunnelprovider.com`, you are able to define 
-`example.tunnelprovider.com` in `application-dev.properties` under `imagehosting.url` and access the website as expected. However, a user URL would be 
+`example.tunnelprovider.com` in `application-dev.properties` under `app.url` and access the website as expected. However, a user URL would be 
 `username.example.tunnelprovider.com`, and free tunneling service likely will not resolve this subdomain to your local server correctly.
 
 For this reason, while the use of a service like `cloudflared` is recommended, you may need to register 
-a unique domain name rather than relying on the free subdomains provided by such services. Please adjust `imagehosting.url` 
+a unique domain name rather than relying on the free subdomains provided by such services. Please adjust `app.url` 
 in `application-dev.properties` to match the domain you are using for tunneling.
 
 Sample cloudflared config.yml for testing: 

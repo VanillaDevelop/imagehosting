@@ -6,9 +6,16 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * Configuration class for adding URL redirects to specific controllers.
+ */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
+    /**
+     * Adds view controllers to redirect specific URL patterns to designated views.
+     * @param registry the ViewControllerRegistry to which view controllers are added
+     */
     @Override
     public void addViewControllers(@NonNull ViewControllerRegistry registry) {
         registry.addViewController("/").setViewName("forward:/index.xhtml");
