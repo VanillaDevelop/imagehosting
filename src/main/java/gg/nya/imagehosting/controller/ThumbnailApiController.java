@@ -36,8 +36,10 @@ public class ThumbnailApiController {
     /**
      * Retrieves a thumbnail for the given user and filename.
      * If the thumbnail does not exist, it tries to retrieve a static backup thumbnail.
+     * The caller may request the thumbnail with or without the .png extension - this is mainly for compatibility with
+     * metadata extractors that expect file extensions.
      *
-     * @param filename The identifier of the thumbnail (filename without extension).
+     * @param filename The identifier of the thumbnail (filename with or without .png extension).
      * @param request The HTTP request, for extracting the username.
      * @return ResponseEntity containing the thumbnail image as an InputStreamResource
      */

@@ -45,12 +45,14 @@ public class VideoApiController {
 
     /**
      * Retrieve a video file. Supports HTTP Range requests for partial content delivery.
+     * This endpoint only handles requests that end with .mp4 and serves raw video data.
+     * For requests without .mp4, the player embed is served via WebMvcConfig.
      *
      * @param filename The name of the video file to retrieve - must end with .mp4
      * @param request The HTTP request, for extracting username and request headers.
      * @return ResponseEntity containing the video data and appropriate headers.
      */
-    @GetMapping(value = "/v/{filename:.*}.mp4", produces = MediaType.ALL_VALUE)
+    @GetMapping(value = "/v/{filename:.*}.mp4", produces = "video/mp4")
     public ResponseEntity<InputStreamResource> getVideo(@PathVariable String filename, HttpServletRequest request) {
         // Identify file to serve
         String serverName = request.getServerName();
@@ -75,18 +77,18 @@ public class VideoApiController {
             String[] ranges = rangeHeader.substring(6).split("-");
             start = ranges[0].isEmpty() ? 0 : Long.parseLong(ranges[0]);
             if (start >= contentLength) {
-                log.warn("getVideo, invalid range request: start {} >= contentLength {} for user {}, filename {}",
+                log.error("getVideo, invalid range request: start {} >= contentLength {} for user {}, filename {}",
                         start, contentLength, user, filename);
                 throw new ResponseStatusException(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE, "Invalid Range Header");
             }
             end = ranges.length > 1 && !ranges[1].isEmpty() ? Long.parseLong(ranges[1]) : contentLength - 1;
             if(end < start) {
-                log.warn("getVideo, invalid range request: end {} < start {} for user {}, filename {}",
+                log.error("getVideo, invalid range request: end {} < start {} for user {}, filename {}",
                         end, start, user, filename);
                 throw new ResponseStatusException(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE, "Invalid Range Header");
             }
             if(end >= contentLength) {
-                log.warn("getVideo, invalid range request: end {} >= contentLength {} for user {}, filename {}",
+                log.error("getVideo, invalid range request: end {} >= contentLength {} for user {}, filename {}",
                         end, contentLength, user, filename);
                 throw new ResponseStatusException(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE, "Invalid Range Header");
             }
@@ -99,8 +101,6 @@ public class VideoApiController {
         headers.add("Accept-Ranges", "bytes");
         // Tell the client to cache the video for 1 year - the video URL is permanent and immutable
         headers.add("Cache-Control", "public, max-age=31536000");
-        // Content type will always be mp4
-        headers.setContentType(MediaType.parseMediaType("video/mp4"));
         // Content-Range header is set only for partial content responses
         if (rangeHeader != null) {
             headers.add("Content-Range", String.format("bytes %d-%d/%d", start, end, contentLength));
@@ -117,7 +117,7 @@ public class VideoApiController {
     /**
      * Upload a video file as a multipart/form-data POST request.
      *
-     * @param request The HTTP request, for extracting the target user.
+     * @param request The HTTP request, for building the correct video URL in the service.
      * @param videoFile The uploaded video file.
      * @param startTimeSeconds The start time in seconds for trimming the video.
      * @param endTimeSeconds The end time in seconds for trimming the video.
@@ -153,7 +153,7 @@ public class VideoApiController {
             );
             return new RedirectView(generatedUrl);
         } catch (IOException e) {
-            //This error is early enough that no cleanup is necessary
+            //This error occurs early enough that no cleanup is necessary
             log.error("uploadVideo, error obtaining input stream from uploaded file for user {}, original file name {}",
                     username, videoFile.getOriginalFilename(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error processing uploaded file");
