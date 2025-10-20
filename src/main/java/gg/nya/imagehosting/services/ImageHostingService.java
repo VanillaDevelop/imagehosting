@@ -6,13 +6,13 @@ import gg.nya.imagehosting.models.ImageHostingUserFile;
 import gg.nya.imagehosting.models.User;
 import gg.nya.imagehosting.repositories.ImageHostingUserFileRepository;
 import gg.nya.imagehosting.repositories.ImageHostingUserRepository;
-import gg.nya.imagehosting.utils.RESTUtils;
 import gg.nya.imagehosting.utils.Utils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -55,7 +55,7 @@ public class ImageHostingService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
         }
         log.debug("retrieveImage, image for user {} with filename {} found in DB, querying cached S3", username, filename);
-        return s3Service.getFile(username, filename);
+        return new ByteArrayInputStream(s3Service.getCacheableFile(username, filename));
     }
 
     /**
@@ -101,14 +101,14 @@ public class ImageHostingService {
     public ImageApiEntity uploadImageForUser(HttpServletRequest request, String apiKey, InputStream fileStream, String originalFileName) throws IOException {
         log.debug("uploadImageForUser, attempting to upload image for user with API key {}", apiKey);
         ImageHostingUser user = validateApiKey(apiKey);
-        //Just a check to see if we can parse the file type
-        Utils.getImageTypeFromFileName(originalFileName);
+        MediaType mediaType = getMediaType(originalFileName);
         String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+
         log.debug("uploadImageForUser, uploading image for user {} with file type {}", user.getUser().getUsername(), fileExtension);
         //Generate a file name for the image
         String fileName = tryCreateFileName(user, fileExtension);
         //Upload image to S3
-        s3Service.uploadImage(user.getUser().getUsername(), fileName, fileStream);
+        s3Service.uploadFile(user.getUser().getUsername(), fileName, fileStream, mediaType.toString());
         //Create and persist new image hosting user file
         ImageHostingUserFile imageHostingUserFile = new ImageHostingUserFile();
         imageHostingUserFile.setImageHostingUser(user);
@@ -116,11 +116,31 @@ public class ImageHostingService {
         imageHostingUserFile.setFileSize((long) fileStream.available());
         imageHostingUserFile.setCreatedAt(LocalDateTime.now());
         imageHostingUserFileRepository.save(imageHostingUserFile);
+
         //Generate REST response
-        ImageApiEntity response = RESTUtils.createImageApiEntityResponse(request, user.getUser().getUsername(), fileName);
-        log.debug("uploadImageForUser, uploaded image for user {} with filename {}", user.getUser().getUsername(), fileName);
-        return response;
+        ImageApiEntity imageApiEntity = new ImageApiEntity();
+        imageApiEntity.setURL(Utils.createResourceURL(request, user.getUser().getUsername(), "i", fileName));
+        return imageApiEntity;
     }
+
+    /**
+     * Get the media type from the given file name.
+     *
+     * @param filename The file name.
+     * @return The media type.
+     */
+    public MediaType getMediaType(String filename) {
+        String ext = Utils.getFileExtensionFromFilename(filename);
+        return switch (ext) {
+            case "jpg", "jpeg" -> MediaType.IMAGE_JPEG;
+            case "png" -> MediaType.IMAGE_PNG;
+            case "gif" -> MediaType.IMAGE_GIF;
+            case "webp" -> MediaType.valueOf("image/webp");
+            case "svg" -> MediaType.valueOf("image/svg+xml");
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown file type");
+        };
+    }
+
 
     private boolean checkImageExists(String username, String filename) {
         Optional<ImageHostingUser> imageHostingUserOpt = imageHostingUserRepository.findImageHostingUserByUsername(username);

@@ -41,17 +41,17 @@ Then, set the `media.ffmpeg.path` and `media.ffprobe.path` variables in `applica
 The application stores some data directly on the local filesystem. You need to create these directories and ensure the 
 application has read and write access to them, then set the variables in `application-dev.properties` accordingly.
 
-`media.temp.directory` is used to store temporary files during video processing. These files should be deleted automatically 
+`app.localstorage.temp-directory` is used to store temporary files during video processing. These files should be deleted automatically 
 after processing, so it is not important that data in this directory is persistent. However, while the application is running, 
 the contents or access to this directory should not be modified.
 
-`thumbnails.storage.directory` is used to store generated thumbnails. The thumbnails are generally relatively small, but 
+`app.localstorage.thumbnail-directory` is used to store generated thumbnails. The thumbnails are generally relatively small, but 
 must be persisted as they are not stored on the cloud.
 
 
-### 5. Testing Rich Embeds With Tunneling
+### 5. Testing Additional Functionality With Tunneling
 **This section is only relevant if you want to serve the content via the internet from your local machine (e.g. to test rich embeds). 
-Full functionality is available locally without tunneling otherwise.**
+Most functionality is available locally without tunneling otherwise.**
 
 In order to test certain parts of the apps functionality, you might have to tunnel the local development server to the public internet. 
 For example, to test rich embeds on Discord or Twitter, the service needs to be able to access the content. In this case, you 
@@ -59,11 +59,11 @@ want to use a tunneling service to expose your local server to the internet.
 
 Note that this application relies on subdomains for user identification, which may not be compatible with free tunneling services 
 that provide shared subdomains. For example, if you use a free subdomain like `example.tunnelprovider.com`, you are able to define 
-`example.tunnelprovider.com` in `application-dev.properties` under `imagehosting.url` and access the website as expected. However, a user URL would be 
+`example.tunnelprovider.com` in `application-dev.properties` under `app.url` and access the website as expected. However, a user URL would be 
 `username.example.tunnelprovider.com`, and free tunneling service likely will not resolve this subdomain to your local server correctly.
 
 For this reason, while the use of a service like `cloudflared` is recommended, you may need to register 
-a unique domain name rather than relying on the free subdomains provided by such services. Please adjust `imagehosting.url` 
+a unique domain name rather than relying on the free subdomains provided by such services. Please adjust `app.url` 
 in `application-dev.properties` to match the domain you are using for tunneling.
 
 Sample cloudflared config.yml for testing: 
@@ -83,6 +83,16 @@ The relevant command to launch the tunnel after setup is:
 ```bash
 cloudflared tunnel run [UUID/Name]
 ```
+
+#### 5.1 Subdomain-Based Session State
+Another special case that requires additional setup is subdomain-based session state. For example, the video display page will 
+show a "My Library" button if the user is logged in. However, on localhost,  the application will not recognize a session on subdomains,
+so the button will not show. This can be solved by setting the `server.servlet.session.cookie.domain` variable in 
+`application-dev.properties` to a fully qualified domain. It is also possible to spoof a fully qualified domain name through the hosts 
+file, like `localhost.com` - it's not strictly necessary to tunnel a domain to the internet for this purpose.
+
+The app will run fine if this setting is set to `localhost`, but an active session will only be recognized on the main domain. 
+If you try to access the app through a different domain than the setting, sessions (and by proxy, the application) will break.
 
 ### 6. Running the Application
 In development, you can simply directly run a spring boot debugger from your IDE of choice.

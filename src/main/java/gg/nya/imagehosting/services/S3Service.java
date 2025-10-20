@@ -1,15 +1,15 @@
 package gg.nya.imagehosting.services;
 
-import gg.nya.imagehosting.utils.Utils;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
@@ -18,50 +18,56 @@ import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 import java.net.URI;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Service for S3-compatible object storage interactions.
+ */
 @Service
-@Scope("singleton")
 public class S3Service {
-    @Value("${digitalocean.spaces.access-key}")
+    @Value("${app.object-store.access-key}")
     private String accessKey;
     
-    @Value("${digitalocean.spaces.secret-key}")
+    @Value("${app.object-store.secret-key}")
     private String secretKey;
     
-    @Value("${digitalocean.spaces.endpoint:https://fra1.digitaloceanspaces.com}")
+    @Value("${app.object-store.endpoint}")
     private String endpoint;
     
-    @Value("${digitalocean.spaces.bucket:nya.gg}")
+    @Value("${app.object-store.bucket}")
     private String bucketName;
-    
-    private S3Client s3Client;
-    
-    @Value("${spring.profiles.active:prod}")
+
+    @Value("${app.object-store.region}")
+    private String region;
+
+    @Value("${spring.profiles.active:dev}")
     private String env;
-    
-    // Initialize client after properties are loaded
-    private S3Client getS3Client() {
-        if (s3Client == null) {
-            AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
-            S3ClientBuilder clientBuilder = S3Client.builder()
+
+    private S3Client s3Client;
+
+    final private static Logger log = LoggerFactory.getLogger(S3Service.class);
+
+    /**
+     * Initializes the S3 client with the provided configuration.
+     */
+    @PostConstruct
+    private void initS3Client() {
+        AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
+        S3ClientBuilder clientBuilder = S3Client.builder()
                 .endpointOverride(URI.create(endpoint))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
-                .region(Region.US_EAST_1);
+                .region(Region.of(region));
 
-            if(env.equals("dev")) {
-                clientBuilder = clientBuilder.forcePathStyle(true);
-            }
-
-            s3Client = clientBuilder.build();
+        if(env.equals("dev")) {
+            clientBuilder = clientBuilder.forcePathStyle(true);
         }
-        return s3Client;
+
+        s3Client = clientBuilder.build();
     }
 
     /**
@@ -72,8 +78,10 @@ public class S3Service {
      */
     public long getFileSize(String subdomain, String fileName) {
         String key = getKeyName(subdomain, fileName);
+        log.debug("getFileSize, retrieving file size for key {} from bucket {}", key, bucketName);
+
         try {
-            return getS3Client().headObject(builder -> builder
+            return s3Client.headObject(builder -> builder
                     .bucket(bucketName)
                     .key(key)
                     .build()).contentLength();
@@ -83,35 +91,27 @@ public class S3Service {
         }
     }
 
-    final private static Logger log = LoggerFactory.getLogger(S3Service.class);
-
     /**
-     * Get file from S3 bucket. Throws a 404 error if the file could not be retrieved successfully.
+     * Retrieves full file from S3 bucket. Throws a 404 error if the file could not be retrieved successfully.
+     * Caches into memory - not to be used for large files.
      *
      * @param subdomain The subdomain of the file (username).
      * @param fileName  The filename of the file.
-     * @return The file as an InputStream.
+     * @return The file data as a byte array.
      */
     @Cacheable(value = "fileCache", key = "#subdomain + '/' + #fileName")
-    public ByteArrayInputStream getFile(String subdomain, String fileName) {
+    public byte[] getCacheableFile(String subdomain, String fileName) {
         String key = getKeyName(subdomain, fileName);
+        log.debug("getCacheableFile, cache miss - retrieving file with key {} from bucket {}", key, bucketName);
+
         try {
-            log.debug("getFile, cache miss - retrieving file with key {} from bucket {}", key, bucketName);
-            InputStream originalStream = getS3Client().getObject(GetObjectRequest.builder()
+            ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(GetObjectRequest.builder()
                     .bucket(bucketName)
                     .key(key)
                     .build());
-            if (originalStream == null) {
-                log.error("getFile, file with key {} not found in bucket {}", key, bucketName);
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
-            }
-
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            originalStream.transferTo(buffer);
-            return new ByteArrayInputStream(buffer.toByteArray());
-
-        } catch (AwsServiceException | SdkClientException | IOException e) {
-            log.error("getFile, could not retrieve file with key {} from bucket {}", key, bucketName);
+            return objectBytes.asByteArray();
+        } catch (AwsServiceException | SdkClientException e) {
+            log.error("getCacheableFile, could not retrieve file with key {} from bucket {}", key, bucketName);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
         }
     }
@@ -127,19 +127,15 @@ public class S3Service {
      */
     public InputStream getFileStreamRange(String subdomain, String fileName, long start, long end) {
         String key = getKeyName(subdomain, fileName);
+        log.debug("getFileStreamRange, retrieving file with key {} from bucket {} with range bytes={}-{}",
+                key, bucketName, start, end);
+
         try {
-            log.debug("getFileStreamRange, retrieving file with key {} from bucket {} with range bytes={}-{}",
-                    key, bucketName, start, end);
-            InputStream originalStream = getS3Client().getObject(GetObjectRequest.builder()
+            return s3Client.getObject(GetObjectRequest.builder()
                     .bucket(bucketName)
                     .key(key)
                     .range("bytes=" + start + "-" + end)
                     .build());
-            if (originalStream == null) {
-                log.error("getFileStreamRange, file with key {} not found in bucket {}", key, bucketName);
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
-            }
-            return originalStream;
         } catch (AwsServiceException | SdkClientException e) {
             log.error("getFileStreamRange, could not retrieve file with key {} from bucket {}", key, bucketName);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
@@ -147,54 +143,35 @@ public class S3Service {
     }
 
     /**
-     * Upload image to S3 bucket. Throws a 500 error if the image could not be uploaded successfully.
+     * Upload file to S3 bucket. Throws a 500 error if the file could not be uploaded successfully.
      *
      * @param subdomain  The subdomain of the image (username).
      * @param fileName   The filename of the image.
      * @param fileStream The image as an InputStream.
+     * @param contentType The content type of the image.
      */
-    public void uploadImage(String subdomain, String fileName, InputStream fileStream) {
+    public void uploadFile(String subdomain, String fileName, InputStream fileStream, String contentType) {
         String key = getKeyName(subdomain, fileName);
+        log.debug("uploadFile, attempting to upload file with key {} to bucket {}", key, bucketName);
+
         try {
-            log.debug("uploadImage, attempting to upload image with key {} to bucket {}", key, bucketName);
-            getS3Client().putObject(builder -> builder
+            s3Client.putObject(builder -> builder
                     .bucket(bucketName)
                     .key(key)
-                    .contentType(Utils.getImageTypeFromFileName(fileName).toString())
+                    .contentType(contentType)
                     .build(), RequestBody.fromInputStream(fileStream, fileStream.available()));
         } catch (AwsServiceException | SdkClientException | IOException e) {
-            log.error("uploadImage, could not upload image with key {} to bucket {}", key, bucketName);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not upload image");
+            log.error("uploadFile, could not upload file with key {} to bucket {}", key, bucketName);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not upload file");
         }
     }
 
     /**
-     * Upload video to S3 bucket. Throws a 500 error if the video could not be uploaded successfully.
-     * @param subdomain The subdomain of the video (username).
-     * @param fileName The filename of the video.
-     * @param fileStream The video as an InputStream.
-     */
-    public void uploadVideo(String subdomain, String fileName, InputStream fileStream) {
-        String key = getKeyName(subdomain, fileName);
-        try {
-            log.debug("uploadVideo, attempting to upload video with key {} to bucket {}", key, bucketName);
-            getS3Client().putObject(builder -> builder
-                    .bucket(bucketName)
-                    .key(key)
-                    .contentType(Utils.getVideoTypeFromFileName(fileName).toString())
-                    .build(), RequestBody.fromInputStream(fileStream, fileStream.available()));
-        } catch (AwsServiceException | SdkClientException | IOException e) {
-            log.error("uploadVideo, could not upload video with key {} to bucket {}", key, bucketName);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not upload video");
-        }
-    }
-
-    /**
-     * Get the environment-specific name of the key in the S3 bucket.
+     * Get the full name of the key in the S3 bucket.
      *
      * @param subdomain The subdomain of the image (username).
      * @param fileName  The filename of the image.
-     * @return The environment-specific name of the key in the S3 bucket.
+     * @return The full name of the key in the S3 bucket.
      */
     private String getKeyName(String subdomain, String fileName) {
         return String.format("%s/%s", subdomain, fileName);

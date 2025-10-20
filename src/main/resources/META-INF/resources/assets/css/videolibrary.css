@@ -1,44 +1,7 @@
 .video-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, 250px);
-    gap: 20px;
+    gap: 2em 20px;
     justify-content: center;
     margin: 0 auto;
-}
-
-/** Video Preview Component **/
-.video-preview-thumbnail-container {
-    width: 250px;
-    height: 150px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.video-preview-thumbnail-container:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.video-preview-thumbnail-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.video-preview-title {
-    text-align: center;
-    font-size: 16px;
-    font-weight: bold;
-    margin-top: 0.5em;
-    margin-bottom: 0;
-}
-
-.video-preview-timestamp {
-    text-align: center;
-    font-size: 12px;
-    color: #666;
-    margin-top: 0.2em;
 }

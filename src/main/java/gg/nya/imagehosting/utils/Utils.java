@@ -1,68 +1,62 @@
 package gg.nya.imagehosting.utils;
 
 import gg.nya.imagehosting.models.HostingMode;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.web.server.ResponseStatusException;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Static utility class, mainly for module-independent String operations.
+ */
 public abstract class Utils {
+    static final String ALPHANUMERIC_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    static final int ALPHANUMERIC_LENGTH = 8;
+
     private Utils() {
     }
 
     /**
-     * Extract the username from the server name.
+     * Extracts the leading subdomain (up to the first dot) from a URI.
+     * Returns an empty string if no subdomain is found.
      *
-     * @param serverName The server name.
-     * @return The username, based on the subdomain.
+     * @param uri The URI to extract the subdomain from.
+     * @return The extracted subdomain.
      */
-    public static String extractUsernameFromServerName(String serverName) {
-        String subdomain = serverName.substring(0, serverName.indexOf("."));
-
-        if (subdomain.isBlank() || !subdomain.matches("^[a-zA-Z0-9_-]+$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not extract username from request");
-        }
-
-        return subdomain;
+    public static String getLeadingSubdomainFromUri(String uri) {
+        if(uri == null || !uri.contains(".")) return "";
+        return uri.substring(0, uri.indexOf("."));
     }
 
     /**
-     * Extract the media type from an image file name.
+     * Extracts the trailing resource (from the last slash to the end or first query parameter) from a URI.
+     * Returns an empty string if no slash is found.
      *
-     * @param filename The file name.
-     * @return The media type.
+     * @param uri The URI to extract the resource from.
+     * @return The extracted resource.
      */
-    public static MediaType getImageTypeFromFileName(String filename) {
-        if (filename == null || !filename.contains(".")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filename");
+    public static String getTrailingResourceFromUri(String uri) {
+        if(uri == null) return "";
+        if(!uri.contains("/")) return "";
+        if(uri.lastIndexOf("/") + 1 >= uri.length()) return "";
+        String uriAfterLastSlash = uri.substring(uri.lastIndexOf("/") + 1);
+        if(uriAfterLastSlash.contains("?")) {
+            return uriAfterLastSlash.substring(0, uriAfterLastSlash.indexOf("?"));
+        } else {
+            return uriAfterLastSlash;
         }
-
-        String ext = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
-        return switch (ext) {
-            case "jpg", "jpeg" -> MediaType.IMAGE_JPEG;
-            case "png" -> MediaType.IMAGE_PNG;
-            case "gif" -> MediaType.IMAGE_GIF;
-            case "webp" -> MediaType.valueOf("image/webp");
-            case "svg" -> MediaType.valueOf("image/svg+xml");
-            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown file type");
-        };
     }
 
-    public static MediaType getVideoTypeFromFileName(String filename) {
-        if (filename == null || !filename.contains(".")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filename");
-        }
-
-        String ext = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
-        return switch (ext) {
-            case "mp4" -> MediaType.valueOf("video/mp4");
-            case "webm" -> MediaType.valueOf("video/webm");
-            case "avi" -> MediaType.valueOf("video/x-msvideo");
-            case "mov" -> MediaType.valueOf("video/quicktime");
-            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown file type");
-        };
+    /**
+     * Extracts the file extension from a filename.
+     * Returns an empty string if no extension is found.
+     *
+     * @param filename The filename to extract the extension from.
+     * @return The extracted file extension.
+     */
+    public static String getFileExtensionFromFilename(String filename) {
+        if(filename == null || !filename.contains(".")) return "";
+        return filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
     }
 
     /**
@@ -74,23 +68,60 @@ public abstract class Utils {
     public static String generateFilenameFromStrategy(HostingMode strategy) {
         return switch (strategy) {
             case UUID -> UUID.randomUUID().toString();
-            case ALPHANUMERIC -> generateRandomAlphanumericString(8);
+            case ALPHANUMERIC -> generateRandomAlphanumericString();
             case TIMESTAMPED -> generateTimestampedFilename();
         };
     }
 
     /**
+     * Creates a resource URL for an uploaded resource.
+     *
+     * @param request  The original request, to identify the active server URL.
+     * @param username The username of the user.
+     * @param category The category that identifies the resource type.
+     * @param filename The filename of the resource.
+     * @return The URL to retrieve the resource.
+     */
+    public static String createResourceURL(HttpServletRequest request, String username, String category, String filename) {
+        return createResourceURL(
+                request.getScheme(),
+                request.getServerName(),
+                request.getServerPort(),
+                username,
+                category,
+                filename
+        );
+    }
+
+    /**
+     * Creates a resource URL for an uploaded resource.
+     *
+     * @param scheme The scheme of the active server (http or https).
+     * @param serverName The server name of the active server.
+     * @param serverPort The server port of the active server.
+     * @param username The username of the user (can be null to create an URL at the main domain).
+     * @param category The category that identifies the resource type.
+     * @param filename The filename of the resource.
+     * @return The URL to retrieve the resource.
+     */
+    public static String createResourceURL(String scheme, String serverName, int serverPort, String username,
+                                           String category, String filename) {
+        String port = serverPort == 80 || serverPort == 443 ? "" : ":" + serverPort;
+        String usernameAddition = username == null ? "" : username + ".";
+        String baseUrl = scheme + "://" + usernameAddition + serverName + port;
+        return baseUrl + "/" + category + "/" + filename;
+    }
+
+    /**
      * Generates a random alphanumeric string of the provided length.
      *
-     * @param length The length of the string.
      * @return A random alphanumeric string of the provided length.
      */
-    private static String generateRandomAlphanumericString(int length) {
-        String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            int index = (int) (Math.random() * characters.length());
-            sb.append(characters.charAt(index));
+    private static String generateRandomAlphanumericString() {
+        StringBuilder sb = new StringBuilder(ALPHANUMERIC_LENGTH);
+        for (int i = 0; i < ALPHANUMERIC_LENGTH; i++) {
+            int index = (int) (Math.random() * ALPHANUMERIC_CHARACTERS.length());
+            sb.append(ALPHANUMERIC_CHARACTERS.charAt(index));
         }
         return sb.toString();
     }

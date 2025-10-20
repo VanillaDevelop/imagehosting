@@ -13,17 +13,17 @@
         <h:outputStylesheet name="/assets/css/videolibrary.css"/>
     </ui:define>
     <ui:define name="content">
-        <div class="my-3 flex-header">
+        <div class="mb-5 flex-row flex-justify-space-between">
             <p:linkButton outcome="/home.xhtml"
-                          styleClass="ui-button ui-button-secondary no-underline">
+                          styleClass="ui-button-secondary">
                 <i class="pi pi-arrow-left"/> Back to Home
             </p:linkButton>
             <p:linkButton outcome="/videoupload.xhtml"
-                          styleClass="ui-button ui-button-secondary no-underline">
+                          styleClass="ui-button-secondary">
                 <i class="pi pi-upload"/> Upload Video
             </p:linkButton>
         </div>
-        <h:panelGroup id="video-grid" styleClass="video-grid" layout="block">
+        <h:panelGroup styleClass="video-grid" layout="block">
             <ui:repeat value="#{videoLibraryBean.videos}" var="video">
                 <nya:videoPreview
                         thumbnailUrl="#{videoLibraryBean.getThumbnailUrl(video)}"

@@ -36,8 +36,10 @@ public class ThumbnailApiController {
     /**
      * Retrieves a thumbnail for the given user and filename.
      * If the thumbnail does not exist, it tries to retrieve a static backup thumbnail.
+     * The caller may request the thumbnail with or without the .png extension - this is mainly for compatibility with
+     * metadata extractors that expect file extensions.
      *
-     * @param filename The identifier of the thumbnail (filename without extension).
+     * @param filename The identifier of the thumbnail (filename with or without .png extension).
      * @param request The HTTP request, for extracting the username.
      * @return ResponseEntity containing the thumbnail image as an InputStreamResource
      */
@@ -45,10 +47,10 @@ public class ThumbnailApiController {
     public ResponseEntity<InputStreamResource> getThumbnail(@PathVariable String filename, HttpServletRequest request) {
         // Identify file to serve
         String serverName = request.getServerName();
-        String user = Utils.extractUsernameFromServerName(serverName);
+        String user = Utils.getLeadingSubdomainFromUri(serverName);
         log.info("getThumbnail, thumbnail requested for user {}, filename: {}", user, filename);
 
-        InputStreamResource thumbnail = new InputStreamResource(dataStorageService.retrieveThumbnail(user, filename));
+        InputStreamResource thumbnail = new InputStreamResource(dataStorageService.getThumbnail(user, filename));
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)
                 .body(thumbnail);

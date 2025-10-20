@@ -3,6 +3,7 @@
         xmlns="http://www.w3.org/1999/xhtml"
         xmlns:h="http://xmlns.jcp.org/jsf/html"
         xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui"
 >
 <ui:composition template="/templates/template.xhtml">
     <ui:define name="title">Nya. GG - #{videoPlayerBean.videoTitle}</ui:define>
@@ -17,27 +18,63 @@
     </ui:define>
     <ui:define name="header" />
     <ui:define name="content">
-        <!-- Case: Video Upload Failed -->
-        <h:panelGroup rendered="#{videoPlayerBean.videoStatus == 'FAILED'}" styleClass="video-status-container">
-            <h1>Video Upload Failed :(</h1>
-            <p>This video upload unfortunately failed. Please try again.</p>
-        </h:panelGroup>
-
-        <!-- Case: Video Upload Pending -->
-        <h:panelGroup rendered="#{videoPlayerBean.videoStatus == 'PROCESSING'}" styleClass="video-status-container">
-            <h1>Your Video Is Processing</h1>
-            <p>Your video is currently being processed. Please check back later.</p>
+        <!-- Case: Video Upload Failed or Pending -->
+        <h:panelGroup rendered="#{videoPlayerBean.videoStatus != 'COMPLETED'}" styleClass="center-wrapper">
+            <div class="flex-column flex-align-center">
+                <h1 class="m-0">
+                    <h:outputText value="#{videoPlayerBean.videoStatus == 'PROCESSING' ? 'Processing Video' : 'Video Upload Failed'}" />
+                </h1>
+                <a href="${pageContext.request.contextPath}/">
+                    <p:graphicImage value="/assets/images/logo.png" styleClass="logo-inline" />
+                </a>
+                <p class="mt-3 mb-2">
+                    <h:outputText value="#{videoPlayerBean.videoStatus == 'PROCESSING'
+                    ?
+                    'This video is currently being processed. Please check back later.'
+                    :
+                    'The video at this URL failed to process.'}" />
+                </p>
+                <p:linkButton value="Upload New Video" icon="pi pi-upload" outcome="/videoupload.xhtml" styleClass="ui-button-secondary"
+                        rendered="#{videoPlayerBean.userLoggedIn}"
+                />
+            </div>
         </h:panelGroup>
 
         <!-- Case: Video Upload Successful -->
-        <h:panelGroup rendered="#{videoPlayerBean.videoStatus == 'COMPLETED'}" styleClass="video-player-container">
-            <h1><h:outputText value="#{videoPlayerBean.videoTitle}" /></h1>
-            <p>Uploaded by <h:outputText value="#{videoPlayerBean.username}"/> on <h:outputText value="#{videoPlayerBean.timestamp}"/> </p>
-            <video controls="controls" class="video-player">
-                <source src="#{videoPlayerBean.videoUrl}" type="video/mp4"/>
-                Your browser does not support the video tag.
-            </video>
+        <h:panelGroup rendered="#{videoPlayerBean.videoStatus == 'COMPLETED'}" styleClass="center-wrapper">
+            <div class="w-100">
+                <div class="flex-row flex-justify-space-between flex-align-center mb-3">
+                    <div>
+                        <p:linkButton outcome="/videolibrary.xhtml"
+                                      icon="pi pi-video"
+                                      styleClass="ui-button-secondary" rendered="#{videoPlayerBean.userLoggedIn}"> My Library
+                        </p:linkButton>
+                    </div>
+                    <p:button
+                            value="Copy Link"
+                            icon="pi pi-link"
+                            id="copy-link-button"
+                            onclick="return false;"
+                            styleClass="ui-button-secondary"/>
+                </div>
+                <video controls="controls" class="video-player">
+                    <source src="#{videoPlayerBean.videoUrl}" type="video/mp4"/>
+                    Your browser does not support the video tag.
+                </video>
+                <div class="flex-row flex-justify-space-between flex-align-center w-100">
+                    <div class="metadata w-100">
+                        <h1 class="m-0"><h:outputText value="#{videoPlayerBean.videoTitle}" /></h1>
+                        <p class="my-1">Uploaded by <h:outputText value="#{videoPlayerBean.username}"/></p>
+                        <p class="my-1 subtitle"><small><h:outputText value="#{videoPlayerBean.timestamp}"/></small></p>
+                    </div>
+                    <a href="${pageContext.request.contextPath}/" target="_blank" class="no-underline">
+                        <p:graphicImage value="/assets/images/logo.png" styleClass="logo-inline"/>
+                    </a>
+                </div>
+            </div>
         </h:panelGroup>
+
+        <h:outputScript name="/assets/js/videodisplay.js" />
     </ui:define>
 </ui:composition>
 </html>

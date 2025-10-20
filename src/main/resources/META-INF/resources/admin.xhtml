@@ -12,9 +12,9 @@
     <ui:define name="heading">Admin Panel</ui:define>
     <ui:define name="content">
 
-        <div class="my-3">
+        <div class="mb-5">
             <p:linkButton outcome="/home.xhtml"
-                          styleClass="ui-button ui-button-secondary no-underline">
+                          styleClass="ui-button-secondary">
                 <i class="pi pi-arrow-left"/> Back to Home
             </p:linkButton>
         </div>
@@ -38,7 +38,7 @@
                         <p:outputPanel rendered="#{not empty adminBean.getCurrentUserRoles(user)}">
                             <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank ui-fluid">
                                 <p:selectOneMenu value="#{adminBean.selectedRolesToRemove[user]}"
-                                                 styleClass="w-full">
+                                                 styleClass="w-100">
                                     <f:selectItems value="#{adminBean.getCurrentUserRoles(user)}"/>
                                 </p:selectOneMenu>
                                 <p:commandButton
@@ -60,14 +60,13 @@
                         <p:outputPanel
                                 rendered="#{adminBean.getCurrentUserRoles(user).size() != adminBean.roles.size()}">
                             <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank ui-fluid">
-                                <p:selectOneMenu value="#{adminBean.selectedRolesToAdd[user]}" styleClass="w-full">
+                                <p:selectOneMenu value="#{adminBean.selectedRolesToAdd[user]}" styleClass="w-100">
                                     <f:selectItems value="#{adminBean.getAvailableUserRoles(user)}"/>
                                 </p:selectOneMenu>
                                 <p:commandButton
                                         value="Add"
                                         action="#{adminBean.addRole(user)}"
                                         update="@form :messages"
-                                        styleClass="ui-button-primary"
                                 />
                             </p:panelGrid>
                         </p:outputPanel>

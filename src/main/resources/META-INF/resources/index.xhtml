@@ -14,6 +14,9 @@
 <ui:composition template="/templates/template.xhtml">
     <ui:define name="title">Nya.GG - Home</ui:define>
     <ui:define name="header"/>
+    <ui:define name="head">
+        <h:outputStylesheet name="/assets/css/login.css"/>
+    </ui:define>
     <ui:define name="content">
         <div class="text-center">
             <p:graphicImage value="/assets/images/logo.png" styleClass="logo"/>
@@ -31,25 +34,25 @@
                     <p:inputText id="usernameInput"
                                  value="#{loginBean.username}"
                                  autocomplete="username"
-                                 styleClass="w-full"/>
+                                 styleClass="w-100"/>
 
                     <p:outputLabel for="passwordInput" value="Password"/>
                     <p:password id="passwordInput"
                                 value="#{loginBean.password}"
                                 toggleMask="true"
                                 autocomplete="current-password"
-                                styleClass="w-full"/>
+                                styleClass="w-100"/>
 
                     <p:spacer/>
-                    <p:panelGrid columns="2" layout="grid" styleClass="w-full">
+                    <p:panelGrid columns="2" layout="grid" styleClass="w-100">
                         <p:commandButton value="Sign Up"
                                          action="#{loginBean.signUp}"
-                                         styleClass="w-full ui-button-primary"
+                                         styleClass="w-100 ui-button-secondary"
                                          update="loginPanel"/>
                         <p:commandButton id="loginButton"
                                          value="Login"
                                          action="#{loginBean.login}"
-                                         styleClass="w-full ui-button-primary"
+                                         styleClass="w-100"
                                          update="loginPanel"
                         />
                         <p:defaultCommand target="loginButton"/>

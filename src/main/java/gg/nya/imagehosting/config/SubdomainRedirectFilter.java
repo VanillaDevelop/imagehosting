@@ -11,12 +11,19 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 
+/**
+ * Filter component that ensures that most requests are served from the root domain.
+ * This improves usability for the user by ensuring resulting links and redirects do not contain nested subdomains.
+ */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SubdomainRedirectFilter implements Filter {
 
-    @Value("${imagehosting.url:nya.gg}")
-    private String imageHostingUrl;
+    /**
+     * URL of the application
+     */
+    @Value("${app.url:nya.gg}")
+    private String appUrl;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -27,13 +34,17 @@ public class SubdomainRedirectFilter implements Filter {
         String requestURI = httpRequest.getRequestURI();
         String queryString = httpRequest.getQueryString();
 
-        // Skip redirect for API paths and static resources
-        if (requestURI.startsWith("/i/") || requestURI.startsWith("/v/") || requestURI.startsWith("/thumbnails/") || requestURI.startsWith("/jakarta.faces.resource/") || requestURI.startsWith("/javax.faces.resource/")) {
+        // Skip redirect for API paths and static resources - serve these directly
+        if (requestURI.startsWith("/i/") || requestURI.startsWith("/v/") || requestURI.startsWith("/thumbnails/")
+                || requestURI.startsWith("/jakarta.faces.resource/") || requestURI.startsWith("/javax.faces.resource/")) {
             chain.doFilter(request, response);
             return;
         }
 
-        if (serverName.contains(".") && !serverName.startsWith(imageHostingUrl)) {
+        // Recursively strip a subdomain (".") and redirect to the resulting domain
+        // This will keep stripping subdomains until the root domain is reached
+        // localhost will function as expected since it does not contain a "."
+        if (serverName.contains(".") && !serverName.startsWith(appUrl)) {
             String protocol = request.isSecure() ? "https" : "http";
             String serverNameWithoutSubdomain = serverName.substring(serverName.indexOf(".") + 1);
             String port = request.getServerPort() == 80 ? "" : ":" + request.getServerPort();

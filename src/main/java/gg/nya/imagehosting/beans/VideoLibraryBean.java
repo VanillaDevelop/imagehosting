@@ -4,12 +4,13 @@ import gg.nya.imagehosting.config.ApplicationContextProvider;
 import gg.nya.imagehosting.models.VideoUploadUserFile;
 import gg.nya.imagehosting.services.AuthenticationService;
 import gg.nya.imagehosting.services.VideoHostingService;
-import gg.nya.imagehosting.utils.RESTUtils;
+import gg.nya.imagehosting.utils.Utils;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -31,17 +32,20 @@ public class VideoLibraryBean implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private transient VideoHostingService videoHostingService;
-    private transient AuthenticationService authenticationService;
-
-    private static final Logger log = LoggerFactory.getLogger(VideoLibraryBean.class);
-
     private final List<VideoUploadUserFile> videos = new ArrayList<>();
     private boolean canLoadMoreVideos = true;
     private int page = 0;
     private final String requestScheme;
     private final String serverName;
     private final int serverPort;
+
+    @Value("${app.videoupload.page-size:10}")
+    private int pageSize;
+
+    private transient VideoHostingService videoHostingService;
+    private transient AuthenticationService authenticationService;
+
+    private static final Logger log = LoggerFactory.getLogger(VideoLibraryBean.class);
 
     /**
      * Constructor for VideoLibraryBean.
@@ -53,7 +57,8 @@ public class VideoLibraryBean implements Serializable {
      * @param httpServletRequest The HTTP servlet request to extract scheme, server name, and port.
      */
     @Autowired
-    public VideoLibraryBean(VideoHostingService videoHostingService, AuthenticationService authenticationService, HttpServletRequest httpServletRequest) {
+    public VideoLibraryBean(VideoHostingService videoHostingService, AuthenticationService authenticationService,
+                            HttpServletRequest httpServletRequest) {
         this.videoHostingService = videoHostingService;
         this.authenticationService = authenticationService;
         this.requestScheme = httpServletRequest.getScheme();
@@ -77,16 +82,16 @@ public class VideoLibraryBean implements Serializable {
      */
     public void loadMoreVideos() {
         if(!canLoadMoreVideos) {
-            log.warn("loadMoreVideos, cannot load more videos, already reached the end of the list");
+            log.error("loadMoreVideos, cannot load more videos, already reached the end of the list");
             return;
         }
 
         log.info("loadMoreVideos, user {} loading more videos, loading page: {}",
                 authenticationService.getCurrentUsername(), page);
 
-        List<VideoUploadUserFile> newVideos = videoHostingService.getVideos(page, 10,
+        List<VideoUploadUserFile> newVideos = videoHostingService.getVideos(page, pageSize,
                 authenticationService.getCurrentUsername());
-        if (newVideos.isEmpty() || newVideos.size() < 10) {
+        if (newVideos.isEmpty() || newVideos.size() < pageSize) {
             log.debug("loadMoreVideos, no more videos to load for user {}, page: {}, set canLoadMoreVideos=false",
                      authenticationService.getCurrentUserId(), page);
             canLoadMoreVideos = false;
@@ -107,12 +112,12 @@ public class VideoLibraryBean implements Serializable {
     }
 
     /**
-     * Returns the thumbnail URL for a given video. This is a relative URL.
+     * Returns the thumbnail URL for a given video.
      * @param video The video for which to get the thumbnail URL.
      * @return The thumbnail URL as a String.
      */
     public String getThumbnailUrl(VideoUploadUserFile video) {
-        return RESTUtils.fetchURLFromLocation(requestScheme, serverName, serverPort,
+        return Utils.createResourceURL(requestScheme, serverName, serverPort,
                 authenticationService.getCurrentUsername(), "thumbnails", "v-" + video.getFileName());
     }
 
@@ -122,7 +127,7 @@ public class VideoLibraryBean implements Serializable {
      * @return The full video URL as a String.
      */
     public String getVideoUrl(VideoUploadUserFile video) {
-        return RESTUtils.fetchURLFromLocation(requestScheme, serverName, serverPort,
+        return Utils.createResourceURL(requestScheme, serverName, serverPort,
                 authenticationService.getCurrentUsername(), "v", video.getFileName());
     }
 

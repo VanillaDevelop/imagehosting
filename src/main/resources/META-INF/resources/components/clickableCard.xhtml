@@ -14,7 +14,9 @@
 </composite:interface>
 
 <composite:implementation>
-    <p:link outcome="${cc.attrs.outcome}" disabled="#{not userDataBean.hasRole(cc.attrs.role)}" styleClass="no-underline">
+    <h:outputStylesheet name="/assets/css/components/clickablecard.css"/>
+
+    <p:link outcome="${cc.attrs.outcome}" disabled="#{not userDataBean.hasRole(cc.attrs.role)}">
         <p:card styleClass="clickable-card">
             <f:facet name="title">
                 <h3>${cc.attrs.title}</h3>
@@ -22,7 +24,7 @@
             <f:facet name="subtitle" rendered="#{not empty cc.attrs.subtitle}">
                 ${cc.attrs.subtitle}
                 <h:panelGroup layout="block" rendered="#{not userDataBean.hasRole(cc.attrs.role)}"
-                              styleClass="error-text">
+                              styleClass="feature-not-available">
                     You do not have access to this feature.
                 </h:panelGroup>
             </f:facet>

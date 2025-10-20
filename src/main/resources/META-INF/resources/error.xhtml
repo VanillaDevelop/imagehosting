@@ -8,6 +8,9 @@
 <ui:composition template="/templates/template.xhtml">
     <ui:define name="title">Nya.GG - Error</ui:define>
     <ui:define name="header"/>
+    <ui:define name="head">
+        <h:outputStylesheet name="assets/css/error.css" />
+    </ui:define>
     <ui:define name="content">
         <div class="text-center">
             <p:graphicImage value="/assets/images/logo.png" styleClass="logo-small"/>
@@ -20,8 +23,7 @@
             </p>
             <hr/>
             <div class="text-center my-3">
-                <p:button value="Return to Home" outcome="/index" icon="pi pi-home"
-                          styleClass="ui-button-primary"/>
+                <p:button value="Return to Home" outcome="/index" icon="pi pi-home"/>
             </div>
         </p:panel>
     </ui:define>

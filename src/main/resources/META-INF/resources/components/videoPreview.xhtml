@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:composite="http://xmlns.jcp.org/jsf/composite"
-      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
 >
 <composite:interface>
     <composite:attribute name="title" required="true" type="String"/>
@@ -11,17 +11,14 @@
 </composite:interface>
 
 <composite:implementation>
-    <a href="${cc.attrs.videoUrl}" target="_blank" style="text-decoration: none;">
-        <div class="video-preview">
-            <div class="video-preview-thumbnail-container">
-                <img src="${cc.attrs.thumbnailUrl}" alt="Video Thumbnail" class="video-thumbnail"/>
-            </div>
+    <h:outputStylesheet name="/assets/css/components/videopreview.css"/>
 
-            <div class="video-preview-metadata">
-                <h3 class="video-preview-title">${cc.attrs.title}</h3>
-                <p class="video-preview-timestamp">${cc.attrs.createdAt}</p>
-            </div>
+    <a href="${cc.attrs.videoUrl}" target="_blank">
+        <div class="video-preview-thumbnail-container mb-2">
+            <img src="${cc.attrs.thumbnailUrl}" alt="Video Thumbnail"/>
         </div>
+        <h4 class="m-0 text-center">${cc.attrs.title}</h4>
+        <p class="m-0 text-center subtitle"><small>${cc.attrs.createdAt}</small></p>
     </a>
 </composite:implementation>
 </html>

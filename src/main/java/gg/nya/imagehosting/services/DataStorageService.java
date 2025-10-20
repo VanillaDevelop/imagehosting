@@ -19,36 +19,36 @@ import java.nio.file.StandardCopyOption;
 @Service
 public class DataStorageService {
 
-    private static final Logger log = LoggerFactory.getLogger(DataStorageService.class);
-
-    //Directory where thumbnails are stored
-    @Value("${thumbnails.storage.directory}")
+    @Value("${app.localstorage.thumbnail-directory}")
     private String thumbnailDirectory;
-    //Directory where temporary files are stored
-    @Value("${media.temp.directory}")
+    @Value("${app.localstorage.temp-directory}")
     private String tempDirectory;
+
+    private static final Logger log = LoggerFactory.getLogger(DataStorageService.class);
 
     /**
      * Stores a thumbnail image on the local disk at the specified path.
-     * Creates user directory if it doesn't exist.
+     * Creates user subdirectory if it doesn't exist.
      * 
      * @param username The username of the user
-     * @param filename The identifier (filename without extension)
+     * @param fileIdentifier The identifier of the file
      * @param inputStream The input stream containing the thumbnail data
      */
-    public void storeThumbnail(String username, String filename, InputStream inputStream) {
+    public void saveThumbnail(String username, String fileIdentifier, InputStream inputStream) {
+        log.trace("saveThumbnail, storing thumbnail for user {} with filename {}", username, fileIdentifier);
+
         try {
             Path userDir = Path.of(thumbnailDirectory, username);
             Files.createDirectories(userDir);
             
-            Path thumbnailPath = userDir.resolve(filename + ".png");
+            Path thumbnailPath = userDir.resolve(fileIdentifier + ".png");
             Files.copy(inputStream, thumbnailPath, StandardCopyOption.REPLACE_EXISTING);
             
-            log.debug("storeThumbnail, stored thumbnail for user {} with filename {} at path {}", 
-                    username, filename, thumbnailPath);
+            log.debug("saveThumbnail, stored thumbnail for user {} with filename {} at path {}",
+                    username, fileIdentifier, thumbnailPath);
         } catch (IOException e) {
-            log.error("storeThumbnail, failed to store thumbnail for user {} with filename {}", 
-                    username, filename, e);
+            log.error("saveThumbnail, failed to store thumbnail for user {} with filename {}",
+                    username, fileIdentifier, e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to store thumbnail", e);
         }
     }
@@ -57,21 +57,23 @@ public class DataStorageService {
      * Retrieves a thumbnail image from the local disk. If the thumbnail does not exist, retrieves a static backup thumbnail.
      *
      * @param username The username of the user
-     * @param filename The identifier (filename without extension)
+     * @param fileIdentifier The identifier (filename without extension)
      * @return An InputStream of the thumbnail image
      */
-    public InputStream retrieveThumbnail(String username, String filename) {
-        Path thumbnailPath = Path.of(thumbnailDirectory, username, filename + ".png");
+    public InputStream getThumbnail(String username, String fileIdentifier) {
+        log.trace("getThumbnail, retrieving thumbnail for user {} with filename {}", username, fileIdentifier);
+
+        Path thumbnailPath = Path.of(thumbnailDirectory, username, fileIdentifier + ".png");
         if (!Files.exists(thumbnailPath)) {
-            log.trace("retrieveThumbnail, thumbnail not found for user {} with filename {}, serving backup", username, filename);
-            return retrieveBackupThumbnail();
+            log.warn("getThumbnail, thumbnail not found for user {} with filename {}, serving backup", username, fileIdentifier);
+            return getBackupThumbnail();
         }
-        log.debug("retrieveThumbnail, found thumbnail for user {} with filename {}", username, filename);
 
         try {
+            log.trace("getThumbnail, found thumbnail for user {} with filename {}", username, fileIdentifier);
             return Files.newInputStream(thumbnailPath);
         } catch (IOException e) {
-            log.error("retrieveThumbnail, error while reading thumbnail from path {}", thumbnailPath);
+            log.error("getThumbnail, error while reading thumbnail from path {}", thumbnailPath);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error reading thumbnail", e);
         }
     }
@@ -79,56 +81,43 @@ public class DataStorageService {
     /**
      * Store a temporary file in the specified directory.
      * @param inputStream The input stream of the file to be stored.
-     * @param filename The name of the file (with extension).
-     * @return The path to the stored temporary file
-     * @throws RuntimeException if an error occurs while storing the file.
+     * @param filename The full name of the file, including its file extension.
      */
-    public Path storeTempFile(InputStream inputStream, String filename) {
+    public void saveTempFile(InputStream inputStream, String filename) {
         try {
             Path tempDir = Path.of(tempDirectory);
             Path tempInputFile = tempDir.resolve(filename);
             Files.createDirectories(tempDir);
             Files.createFile(tempInputFile);
             Files.copy(inputStream, tempInputFile, StandardCopyOption.REPLACE_EXISTING);
-            log.debug("storeTempFile, created file {}", tempInputFile);
-            return tempInputFile;
+            log.debug("saveTempFile, created file {}", tempInputFile);
         } catch (IOException e) {
-            log.error("storeTempFile, failed to store temporary file {}", filename, e);
-            throw new RuntimeException("Failed to store temporary file", e);
+            log.error("saveTempFile, failed to store temporary file {}", filename, e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to store temporary file", e);
         }
     }
 
     /**
-     * Generates a path for a temporary file in the specified directory.
-     * @param filename The name of the file (with extension).
-     * @return The path to the temporary file
+     * Returns the full path for a temporary file in the specified directory.
+     * @param filename The full name of the file, including its file extension.
+     * @return The path at which the file resides, if it exists with the given filename.
      */
-    public Path generateTempPath(String filename) {
-        try {
-            Path tempDir = Path.of(tempDirectory);
-            Files.createDirectories(tempDir);
-            Path tempInputFile = tempDir.resolve(filename);
-            log.trace("generateTempPath, generated path {}", tempInputFile);
-            return tempInputFile;
-        }
-        catch (IOException e) {
-            log.error("generateTempPath, failed to generate temporary path for file {}", filename, e);
-            throw new RuntimeException("Failed to generate temporary path", e);
-        }
+    public Path getTempFilePath(String filename) {
+        Path tempDir = Path.of(tempDirectory);
+        return tempDir.resolve(filename);
     }
 
     /**
-     * Removes a temporary file from the specified directory.
+     * Attempts to delete a temporary file from the specified directory.
      * @param filename The name of the file to be removed (with extension).
      */
-    public void removeTempFile(String filename) {
+    public void deleteTempFile(String filename) {
         try {
             Path tempFile = Path.of(tempDirectory, filename);
             Files.deleteIfExists(tempFile);
-            log.debug("removeTempFile, deleted temporary file {}", tempFile);
+            log.debug("deleteTempFile, deleted temporary file {}", tempFile);
         } catch (IOException e) {
-            log.error("removeTempFile, failed to delete temporary file {}", filename, e);
-            //Don't throw here, worst case we leave a temp file behind
+            log.warn("deleteTempFile, failed to delete temporary file {}", filename, e);
         }
     }
 
@@ -137,13 +126,7 @@ public class DataStorageService {
      *
      * @return An InputStream of the backup thumbnail image
      */
-    private InputStream retrieveBackupThumbnail() {
-        InputStream backupStream = getClass().getResourceAsStream("/META-INF/resources/assets/images/backup.png");
-        if (backupStream == null) {
-            log.error("retrieveBackupThumbnail, backup thumbnail not found in resources");
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Missing server resource");
-        }
-        log.trace("retrieveBackupThumbnail, retrieved backup thumbnail from resources");
-        return backupStream;
+    private InputStream getBackupThumbnail() {
+        return getClass().getResourceAsStream("/META-INF/resources/assets/images/backup.png");
     }
 }
