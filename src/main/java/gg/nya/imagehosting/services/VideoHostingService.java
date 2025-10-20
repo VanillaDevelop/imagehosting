@@ -130,7 +130,7 @@ public class VideoHostingService {
             String videoTitle) {
         log.debug("saveVideo, attempting to upload video {} for user {}", originalFileName, username);
 
-        Optional<VideoUploadUser> videoUserOpt = videoUploadUserRepository.findVideoUploadUserByUsername(username);
+        Optional<VideoUploadUser> videoUserOpt = videoUploadUserRepository.findByUsername(username);
         if(videoUserOpt.isEmpty()) {
             log.error("saveVideo, video upload user for username {} not found", username);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find video upload user");
@@ -172,7 +172,7 @@ public class VideoHostingService {
     public VideoUploadUser getOrCreateVideoUploadUser(String username) {
         log.debug("getOrCreateVideoUploadUser, getting or creating video upload user for user {}", username);
 
-        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findVideoUploadUserByUsername(username);
+        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findByUsername(username);
         if (videoUploadUserOpt.isPresent()) {
             log.trace("getOrCreateVideoUploadUser, video upload user for user {} found", username);
             return videoUploadUserOpt.get();
@@ -214,7 +214,7 @@ public class VideoHostingService {
     public void setUserUploadTypePreference(String username, HostingMode uploadType)
     {
         log.debug("setUserUploadTypePreference, setting upload type preference for user {} to {}", username, uploadType);
-        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findVideoUploadUserByUsername(username);
+        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findByUsername(username);
         if (videoUploadUserOpt.isEmpty()) {
             log.error("setUserUploadTypePreference, video upload user for {} not found", username);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Video upload user not found");
@@ -235,7 +235,7 @@ public class VideoHostingService {
      */
     public List<VideoUploadUserFile> getVideos(int page, int size, String username) {
         log.debug("getVideos, fetching videos for user {} with page {} and size {}", username, page, size);
-        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findVideoUploadUserByUsername(username);
+        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findByUsername(username);
         if (videoUploadUserOpt.isEmpty()) {
             log.error("getVideos, video upload user for user {} not found", username);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find video upload user");
@@ -268,7 +268,7 @@ public class VideoHostingService {
      */
     public Optional<VideoUploadUserFile> getVideoMetadata(String username, String filename) {
         log.debug("getVideoMetadata, fetching video data for user {} with filename {}", username, filename);
-        return videoUploadUserFileRepository.getVideoUploadUserFileByUploadUsernameAndFileName(username, filename);
+        return videoUploadUserFileRepository.findByUsernameAndFileName(username, filename);
     }
 
     /**
@@ -392,7 +392,7 @@ public class VideoHostingService {
     private boolean isPublicVideoUnavailable(String username, String filename) {
         log.trace("isPublicVideoUnavailable, checking if video upload user for {} exists", username);
 
-        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findVideoUploadUserByUsername(username);
+        Optional<VideoUploadUser> videoUploadUserOpt = videoUploadUserRepository.findByUsername(username);
         if (videoUploadUserOpt.isEmpty()) {
             log.trace("checkVideoExists, video upload user for user {} not found", username);
             return true;
@@ -525,7 +525,7 @@ public class VideoHostingService {
         log.trace("updateDatabaseStatus, updating database status for file {} for user {} to {}",
                 fileName, username, status);
 
-        Optional<VideoUploadUserFile> videoFileOpt = videoUploadUserFileRepository.getVideoUploadUserFileByUploadUsernameAndFileName(username, fileName);
+        Optional<VideoUploadUserFile> videoFileOpt = videoUploadUserFileRepository.findByUsernameAndFileName(username, fileName);
         if (videoFileOpt.isPresent()) {
             VideoUploadUserFile videoFile = videoFileOpt.get();
             videoFile.setUploadStatus(status);
