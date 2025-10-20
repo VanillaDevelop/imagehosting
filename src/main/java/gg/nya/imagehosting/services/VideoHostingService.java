@@ -41,8 +41,6 @@ public class VideoHostingService {
     private String ffmpegPath;
     @Value("${media.ffprobe.path}")
     private String ffprobePath;
-    @Value("${app.videoupload.max-processing-hours}")
-    private int maxVideoProcessingHours;
     @Value("${app.videoupload.max-identifier-generation-attempts}")
     private int maxIdentifierGenerationAttempts;
 
@@ -252,13 +250,14 @@ public class VideoHostingService {
     /**
      * Fetches up to 'limit' abandoned videos that are still in processing state after a specified duration.
      * @param limit The maximum number of abandoned videos to fetch.
+     * @param thresholdHours The number of hours after which a processing video is considered abandoned.
      * @return A list of abandoned video files.
      */
-    public List<VideoUploadUserFile> getAbandonedVideos(int limit) {
+    public List<VideoUploadUserFile> getAbandonedVideos(int limit, int thresholdHours) {
         log.debug("getAbandonedVideos, fetching abandoned videos with limit {}", limit);
         PageRequest request = PageRequest.of(0, limit);
         return videoUploadUserFileRepository.findAllByUploadStatusAndCreatedAtBefore(VideoUploadStatus.PROCESSING,
-                LocalDateTime.now().minusHours(maxVideoProcessingHours), request).getContent();
+                LocalDateTime.now().minusHours(thresholdHours), request).getContent();
     }
 
     /**
