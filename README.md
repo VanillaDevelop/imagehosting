@@ -41,11 +41,11 @@ Then, set the `media.ffmpeg.path` and `media.ffprobe.path` variables in `applica
 The application stores some data directly on the local filesystem. You need to create these directories and ensure the 
 application has read and write access to them, then set the variables in `application-dev.properties` accordingly.
 
-`media.temp.directory` is used to store temporary files during video processing. These files should be deleted automatically 
+`app.localstorage.temp-directory` is used to store temporary files during video processing. These files should be deleted automatically 
 after processing, so it is not important that data in this directory is persistent. However, while the application is running, 
 the contents or access to this directory should not be modified.
 
-`thumbnails.storage.directory` is used to store generated thumbnails. The thumbnails are generally relatively small, but 
+`app.localstorage.thumbnail-directory` is used to store generated thumbnails. The thumbnails are generally relatively small, but 
 must be persisted as they are not stored on the cloud.
 
 

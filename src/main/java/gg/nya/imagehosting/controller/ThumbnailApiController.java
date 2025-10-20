@@ -50,7 +50,7 @@ public class ThumbnailApiController {
         String user = Utils.getLeadingSubdomainFromUri(serverName);
         log.info("getThumbnail, thumbnail requested for user {}, filename: {}", user, filename);
 
-        InputStreamResource thumbnail = new InputStreamResource(dataStorageService.retrieveThumbnail(user, filename));
+        InputStreamResource thumbnail = new InputStreamResource(dataStorageService.getThumbnail(user, filename));
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)
                 .body(thumbnail);

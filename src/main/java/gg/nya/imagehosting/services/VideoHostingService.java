@@ -149,7 +149,7 @@ public class VideoHostingService {
         String originalFileType = fileType.getSubtype(); //e.g. "mp4"
         String inputFile = username + "_" + newIdentifier + "_input." + originalFileType; //e.g. "myusername_abcd1234_input.mp4"
         log.debug("saveVideo, storing temporary input video file for user {} with file name {}", username, inputFile);
-        dataStorageService.storeTempFile(videoInputStream, inputFile);
+        dataStorageService.saveTempFile(videoInputStream, inputFile);
 
         // Save the video file to the repository as processing
         persistToDatabase(username, videoTitle, newIdentifier, videoUser, fileSize);
@@ -285,7 +285,7 @@ public class VideoHostingService {
         for(Path tempFile : tempFiles) {
             try {
                 log.trace("cleanUpUpload, deleting temporary file {} for user {}", tempFile, username);
-                dataStorageService.removeTempFile(tempFile.toString());
+                dataStorageService.deleteTempFile(tempFile.toString());
             } catch (Exception e) {
                 log.error("cleanUpUpload, failed to delete temporary file {} for user {}", tempFile, username, e);
             }
@@ -414,9 +414,9 @@ public class VideoHostingService {
     @Async
     protected void processVideoAsync(String fileIdentifier, MediaType originalFileType, String username,
                                      double startTimeSeconds, double endTimeSeconds) {
-        Path inputFilePath = dataStorageService.generateTempPath(username + "_" + fileIdentifier + "_input." + originalFileType.getSubtype());
-        Path outputFilePath = dataStorageService.generateTempPath(username + "_" + fileIdentifier + ".mp4");
-        Path thumbnailPath = dataStorageService.generateTempPath("thumbnail_" + username + "_" + fileIdentifier + ".png");
+        Path inputFilePath = dataStorageService.getTempFilePath(username + "_" + fileIdentifier + "_input." + originalFileType.getSubtype());
+        Path outputFilePath = dataStorageService.getTempFilePath(username + "_" + fileIdentifier + ".mp4");
+        Path thumbnailPath = dataStorageService.getTempFilePath("thumbnail_" + username + "_" + fileIdentifier + ".png");
 
         log.debug("processVideoAsync, converting video file: {} -> {}", inputFilePath, outputFilePath);
         convertToMp4(inputFilePath, outputFilePath, startTimeSeconds, endTimeSeconds);
@@ -428,7 +428,7 @@ public class VideoHostingService {
         log.debug("processVideoAsync, copying thumbnail: {} ->  {}", thumbnailPath, thumbnailIdentifier);
         try {
             InputStream thumbnailInputStream = new FileInputStream(thumbnailPath.toFile());
-            dataStorageService.storeThumbnail(username, thumbnailIdentifier, thumbnailInputStream);
+            dataStorageService.saveThumbnail(username, thumbnailIdentifier, thumbnailInputStream);
             thumbnailInputStream.close();
         }
         catch(IOException e) {

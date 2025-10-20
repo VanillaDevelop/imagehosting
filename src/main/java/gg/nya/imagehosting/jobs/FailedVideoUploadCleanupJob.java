@@ -61,8 +61,8 @@ public class FailedVideoUploadCleanupJob {
                     username,
                     filename,
                     List.of(
-                        dataStorageService.generateTempPath(username + "_" + filename + ".mp4"),
-                        dataStorageService.generateTempPath("thumbnail_" + username + "_" + filename + ".png")
+                        dataStorageService.getTempFilePath(username + "_" + filename + ".mp4"),
+                        dataStorageService.getTempFilePath("thumbnail_" + username + "_" + filename + ".png")
                     ),
                     VideoUploadStatus.FAILED
             );
