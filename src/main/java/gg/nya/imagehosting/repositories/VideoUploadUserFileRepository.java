@@ -16,6 +16,7 @@ import java.util.Optional;
 @Repository
 public interface VideoUploadUserFileRepository extends PagingAndSortingRepository<VideoUploadUserFile, Long>,
         CrudRepository<VideoUploadUserFile, Long> {
+    boolean existsByVideoUploadUserAndFileName(VideoUploadUser videoUploadUser, String fileName);
     boolean existsByVideoUploadUserAndFileNameAndUploadStatus(VideoUploadUser videoUploadUser, String fileName, VideoUploadStatus uploadStatus);
 
     @Query("SELECT vuf FROM video_upload_user_files vuf WHERE vuf.videoUploadUser.user.username = ?1 AND vuf.fileName = ?2")

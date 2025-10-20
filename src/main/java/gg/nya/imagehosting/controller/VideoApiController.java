@@ -2,6 +2,7 @@ package gg.nya.imagehosting.controller;
 
 import gg.nya.imagehosting.services.AuthenticationService;
 import gg.nya.imagehosting.services.VideoHostingService;
+import gg.nya.imagehosting.utils.RESTUtils;
 import gg.nya.imagehosting.utils.Utils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -61,7 +62,7 @@ public class VideoApiController {
 
         // Check if file exists via content length check
         // Will throw 404 if the video does not exist on the database or S3
-        final long contentLength = videoHostingService.getVideoLength(user, filename);
+        final long contentLength = videoHostingService.getVideoFileSize(user, filename);
 
         //Check if request contains Range header
         String rangeHeader = request.getHeader("Range");
@@ -108,7 +109,7 @@ public class VideoApiController {
         // Content-Length is always set to the length of the response body
         headers.setContentLength(rangeLength);
         HttpStatus status = rangeHeader != null ? HttpStatus.PARTIAL_CONTENT : HttpStatus.OK;
-        InputStream in = videoHostingService.retrieveVideo(user, filename, start, end);
+        InputStream in = videoHostingService.getVideo(user, filename, start, end);
 
         // Synchronous IO streaming because otherwise Weld complains - should be fine for low to medium traffic levels
         return ResponseEntity.status(status).headers(headers).body(new InputStreamResource(in));
@@ -142,8 +143,7 @@ public class VideoApiController {
             InputStream videoInputStream = videoFile.getInputStream();
 
             // Delegate to service to handle the upload
-            String generatedUrl = videoHostingService.uploadVideoForUser(
-                    request,
+            String generatedIdentifier = videoHostingService.saveVideo(
                     username,
                     videoInputStream,
                     videoFile.getOriginalFilename(),
@@ -151,7 +151,7 @@ public class VideoApiController {
                     endTimeSeconds,
                     videoTitle
             );
-            return new RedirectView(generatedUrl);
+            return new RedirectView(RESTUtils.fetchURLFromRequest(request, username, "v", generatedIdentifier));
         } catch (IOException e) {
             //This error occurs early enough that no cleanup is necessary
             log.error("uploadVideo, error obtaining input stream from uploaded file for user {}, original file name {}",

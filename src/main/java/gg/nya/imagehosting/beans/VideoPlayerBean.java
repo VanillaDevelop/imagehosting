@@ -60,7 +60,7 @@ public class VideoPlayerBean implements Serializable {
         String originalUri = (String) request.getAttribute("jakarta.servlet.forward.request_uri");
         String filename = Utils.extractFilenameFromUri(originalUri != null ? originalUri : request.getRequestURI());
 
-        Optional<VideoUploadUserFile> videoOpt = videoHostingService.getVideoData(username, filename);
+        Optional<VideoUploadUserFile> videoOpt = videoHostingService.getVideoMetadata(username, filename);
         if(videoOpt.isEmpty()) {
             log.warn("Unknown video {} for user {} requested, redirecting", filename, username);
             FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(
