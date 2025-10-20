@@ -2,7 +2,6 @@ package gg.nya.imagehosting.controller;
 
 import gg.nya.imagehosting.services.AuthenticationService;
 import gg.nya.imagehosting.services.VideoHostingService;
-import gg.nya.imagehosting.utils.RESTUtils;
 import gg.nya.imagehosting.utils.Utils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -57,7 +56,7 @@ public class VideoApiController {
     public ResponseEntity<InputStreamResource> getVideo(@PathVariable String filename, HttpServletRequest request) {
         // Identify file to serve
         String serverName = request.getServerName();
-        String user = Utils.extractUsernameFromServerName(serverName);
+        String user = Utils.getLeadingSubdomainFromUri(serverName);
         log.info("getVideo, video file requested for user {}, filename: {}", user, filename);
 
         // Check if file exists via content length check
@@ -151,7 +150,7 @@ public class VideoApiController {
                     endTimeSeconds,
                     videoTitle
             );
-            return new RedirectView(RESTUtils.fetchURLFromRequest(request, username, "v", generatedIdentifier));
+            return new RedirectView(Utils.createResourceURL(request, username, "v", generatedIdentifier));
         } catch (IOException e) {
             //This error occurs early enough that no cleanup is necessary
             log.error("uploadVideo, error obtaining input stream from uploaded file for user {}, original file name {}",

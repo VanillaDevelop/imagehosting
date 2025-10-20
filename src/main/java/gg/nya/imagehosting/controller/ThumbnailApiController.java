@@ -47,7 +47,7 @@ public class ThumbnailApiController {
     public ResponseEntity<InputStreamResource> getThumbnail(@PathVariable String filename, HttpServletRequest request) {
         // Identify file to serve
         String serverName = request.getServerName();
-        String user = Utils.extractUsernameFromServerName(serverName);
+        String user = Utils.getLeadingSubdomainFromUri(serverName);
         log.info("getThumbnail, thumbnail requested for user {}, filename: {}", user, filename);
 
         InputStreamResource thumbnail = new InputStreamResource(dataStorageService.retrieveThumbnail(user, filename));

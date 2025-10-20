@@ -4,7 +4,6 @@ import gg.nya.imagehosting.models.VideoUploadStatus;
 import gg.nya.imagehosting.models.VideoUploadUserFile;
 import gg.nya.imagehosting.services.AuthenticationService;
 import gg.nya.imagehosting.services.VideoHostingService;
-import gg.nya.imagehosting.utils.RESTUtils;
 import gg.nya.imagehosting.utils.Utils;
 import jakarta.faces.context.FacesContext;
 import org.slf4j.Logger;
@@ -55,10 +54,10 @@ public class VideoPlayerBean implements Serializable {
 
         // Extract data for display
         String serverName = request.getServerName();
-        String username = Utils.extractUsernameFromServerName(serverName);
+        String username = Utils.getLeadingSubdomainFromUri(serverName);
         //Contains the original URI before forwarding through WebMvcConfig
         String originalUri = (String) request.getAttribute("jakarta.servlet.forward.request_uri");
-        String filename = Utils.extractFilenameFromUri(originalUri != null ? originalUri : request.getRequestURI());
+        String filename = Utils.getTrailingResourceFromUri(originalUri != null ? originalUri : request.getRequestURI());
 
         Optional<VideoUploadUserFile> videoOpt = videoHostingService.getVideoMetadata(username, filename);
         if(videoOpt.isEmpty()) {
@@ -76,19 +75,19 @@ public class VideoPlayerBean implements Serializable {
         // We do this query because the display name that the user used to register might have different capitalization from the subdomain
         this.username = video.getVideoUploadUser().getUser().getDisplayName();
         // Construct URLs - we do not need to append the username as the request is already made to a subdomain
-        this.thumbnailUrl = RESTUtils.fetchURLFromRequest(
+        this.thumbnailUrl = Utils.createResourceURL(
                 request,
                 null,
                 "thumbnails",
                 "v-" + video.getFileName() + ".png"
         );
-        this.playerUrl = RESTUtils.fetchURLFromRequest(
+        this.playerUrl = Utils.createResourceURL(
                 request,
                 null,
                 "v",
                 video.getFileName()
         );
-        this.videoUrl = RESTUtils.fetchURLFromRequest(
+        this.videoUrl = Utils.createResourceURL(
                 request,
                 null,
                 "v",

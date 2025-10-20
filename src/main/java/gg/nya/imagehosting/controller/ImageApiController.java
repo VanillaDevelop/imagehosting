@@ -30,11 +30,11 @@ public class ImageApiController {
     @GetMapping(value = "/i/{filename}", produces = MediaType.ALL_VALUE)
     public ResponseEntity<InputStreamResource> getImage(@PathVariable String filename, HttpServletRequest request) {
         String serverName = request.getServerName();
-        String user = Utils.extractUsernameFromServerName(serverName);
+        String user = Utils.getLeadingSubdomainFromUri(serverName);
         log.info("getImage, image requested for user {}, filename: {}", user, filename);
         ByteArrayInputStream imageStream = imageHostingService.retrieveImage(user, filename);
         imageStream.reset();
-        MediaType contentType = Utils.getImageTypeFromFileName(filename);
+        MediaType contentType = imageHostingService.getMediaType(filename);
 
         return ResponseEntity.ok()
                 .contentType(contentType)

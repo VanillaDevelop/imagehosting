@@ -141,7 +141,7 @@ public class VideoHostingService {
 
         // Get file size and file type - performs several input validation steps that throw errors if invalid
         long fileSize = getFileSizeIfValid(videoInputStream, originalFileName, startTimeSeconds, endTimeSeconds, videoTitle);
-        MediaType fileType = Utils.getVideoTypeFromFileName(originalFileName);
+        MediaType fileType = getMediaType(originalFileName);
         log.debug("saveVideo, uploading video for user {} with file type {} and {} bytes", username, fileType, fileSize);
 
         //Create new file identifier
@@ -158,7 +158,7 @@ public class VideoHostingService {
 
         //Process video upload asynchronously - call via proxy for async to work
         applicationContext.getBean(VideoHostingService.class).processVideoAsync(
-                newIdentifier, originalFileType, username, startTimeSeconds, endTimeSeconds);
+                newIdentifier, fileType, username, startTimeSeconds, endTimeSeconds);
 
         // Return the URL of the uploaded video
         return newIdentifier;
@@ -297,6 +297,23 @@ public class VideoHostingService {
     }
 
     /**
+     * Get the media type from the given file name.
+     *
+     * @param filename The file name.
+     * @return The media type.
+     */
+    public MediaType getMediaType(String filename) {
+        String ext = Utils.getFileExtensionFromFilename(filename);
+        return switch (ext) {
+            case "mp4" -> MediaType.valueOf("video/mp4");
+            case "webm" -> MediaType.valueOf("video/webm");
+            case "avi" -> MediaType.valueOf("video/x-msvideo");
+            case "mov" -> MediaType.valueOf("video/quicktime");
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown file type");
+        };
+    }
+
+    /**
      * Validates the input parameters for saving a video and returns the size of the input stream.
      *
      * @param videoInputStream The InputStream of the video to be uploaded.
@@ -390,15 +407,15 @@ public class VideoHostingService {
      * Asynchronously processes the video and uploads the result to S3.
      *
      * @param fileIdentifier   The base identifier (without extension) for the processed video.
-     * @param originalFileType The original file extension of the uploaded video (e.g. "mp4")
+     * @param originalFileType The original file type of the uploaded video.
      * @param username         The username of the user who uploaded the video - to determine S3 bucket path.
      * @param startTimeSeconds The start time in seconds for the video segment to process.
      * @param endTimeSeconds   The end time in seconds for the video segment to process.
      */
     @Async
-    protected void processVideoAsync(String fileIdentifier, String originalFileType, String username,
+    protected void processVideoAsync(String fileIdentifier, MediaType originalFileType, String username,
                                      double startTimeSeconds, double endTimeSeconds) {
-        Path inputFilePath = dataStorageService.generateTempPath(username + "_" + fileIdentifier + "_input." + originalFileType);
+        Path inputFilePath = dataStorageService.generateTempPath(username + "_" + fileIdentifier + "_input." + originalFileType.getSubtype());
         Path outputFilePath = dataStorageService.generateTempPath(username + "_" + fileIdentifier + ".mp4");
         Path thumbnailPath = dataStorageService.generateTempPath("thumbnail_" + username + "_" + fileIdentifier + ".png");
 
@@ -424,7 +441,7 @@ public class VideoHostingService {
         log.debug("processVideoAsync, uploading video {} to S3 for user {}", outputFilePath, username);
         try {
             InputStream videoInputStream = new FileInputStream(outputFilePath.toFile());
-            s3Service.uploadFile(username, fileIdentifier + ".mp4", videoInputStream, Utils.getVideoTypeFromFileName(fileIdentifier).toString());
+            s3Service.uploadFile(username, fileIdentifier + ".mp4", videoInputStream, originalFileType.toString());
         }
         catch (IOException e) {
             log.error("processVideoAsync, failed to store video file {} to S3", outputFilePath, e);

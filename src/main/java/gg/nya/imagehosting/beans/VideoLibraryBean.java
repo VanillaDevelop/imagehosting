@@ -4,7 +4,7 @@ import gg.nya.imagehosting.config.ApplicationContextProvider;
 import gg.nya.imagehosting.models.VideoUploadUserFile;
 import gg.nya.imagehosting.services.AuthenticationService;
 import gg.nya.imagehosting.services.VideoHostingService;
-import gg.nya.imagehosting.utils.RESTUtils;
+import gg.nya.imagehosting.utils.Utils;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -117,7 +117,7 @@ public class VideoLibraryBean implements Serializable {
      * @return The thumbnail URL as a String.
      */
     public String getThumbnailUrl(VideoUploadUserFile video) {
-        return RESTUtils.fetchURLFromLocation(requestScheme, serverName, serverPort,
+        return Utils.createResourceURL(requestScheme, serverName, serverPort,
                 authenticationService.getCurrentUsername(), "thumbnails", "v-" + video.getFileName());
     }
 
@@ -127,7 +127,7 @@ public class VideoLibraryBean implements Serializable {
      * @return The full video URL as a String.
      */
     public String getVideoUrl(VideoUploadUserFile video) {
-        return RESTUtils.fetchURLFromLocation(requestScheme, serverName, serverPort,
+        return Utils.createResourceURL(requestScheme, serverName, serverPort,
                 authenticationService.getCurrentUsername(), "v", video.getFileName());
     }
 
