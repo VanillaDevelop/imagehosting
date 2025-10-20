@@ -47,7 +47,7 @@ public class FailedVideoUploadCleanupJob {
         log.trace("cleanupFailedUploads, starting job at {}", LocalDateTime.now());
 
         // Retrieve a batch of abandoned video uploads
-        List<VideoUploadUserFile> abandonedVideos = videoHostingService.getAbandonedVideos(thresholdHours, batchSize);
+        List<VideoUploadUserFile> abandonedVideos = videoHostingService.getAbandonedVideos(batchSize, thresholdHours);
         log.trace("cleanupFailedUploads, found {} abandoned uploads to clean up", abandonedVideos.size());
 
         for(VideoUploadUserFile video : abandonedVideos) {

@@ -24,7 +24,7 @@ public abstract class Utils {
      * @return The extracted subdomain.
      */
     public static String getLeadingSubdomainFromUri(String uri) {
-        if(!uri.contains(".")) return "";
+        if(uri == null || !uri.contains(".")) return "";
         return uri.substring(0, uri.indexOf("."));
     }
 
@@ -36,6 +36,7 @@ public abstract class Utils {
      * @return The extracted resource.
      */
     public static String getTrailingResourceFromUri(String uri) {
+        if(uri == null) return "";
         if(!uri.contains("/")) return "";
         if(uri.lastIndexOf("/") + 1 >= uri.length()) return "";
         String uriAfterLastSlash = uri.substring(uri.lastIndexOf("/") + 1);
@@ -54,7 +55,7 @@ public abstract class Utils {
      * @return The extracted file extension.
      */
     public static String getFileExtensionFromFilename(String filename) {
-        if(!filename.contains(".")) return "";
+        if(filename == null || !filename.contains(".")) return "";
         return filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
     }
 
