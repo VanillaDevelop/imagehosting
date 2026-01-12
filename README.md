@@ -143,3 +143,60 @@ The following features are currently not implemented, and **may** be added in th
 - Changing video title
 - Video privacy settings (public/unlisted/private)
 - Mass import of existing videos
+
+## Image Hosting Module
+A user with the `IMAGE_UPLOAD` role can upload images via API for public access. This role can be granted via the user management page.
+On first access to the image hosting page, an `ImageHostingUser` entity is created for the user, which stores their preferred upload settings and
+generates a unique API key for authentication.
+
+### Uploading Images
+Images are uploaded via REST API using the following endpoint:
+
+**Endpoint**: `POST /i/`
+**Content-Type**: `multipart/form-data`
+**Authentication**: `X-API-Key` header with your unique API key
+
+Example using curl:
+```bash
+curl -X POST https://username.nya.gg/i/ \
+  -H "X-API-Key: your-api-key-here" \
+  -F "file=@image.png"
+```
+
+On success, the API returns a JSON response with the generated URL:
+```json
+{
+  "URL": "https://username.nya.gg/i/a3f0bk3s.png"
+}
+```
+
+### Accessing Images
+Images can be accessed directly via their generated URL:
+```
+https://username.nya.gg/i/{filename}
+```
+
+The username is derived from the subdomain, allowing each user to have their own namespace for image hosting.
+
+### Supported Image Formats
+- **JPEG/JPG** - `image/jpeg`
+- **PNG** - `image/png`
+- **GIF** - `image/gif`
+- **WebP** - `image/webp`
+- **SVG** - `image/svg+xml`
+
+### Filename Generation Modes
+Users can configure how their uploaded filenames are generated through the hosting settings:
+
+| Mode | Example | Description |
+|------|---------|-------------|
+| **UUID** | `123e4567-e89b-12d3-a456-426614174000.png` | Random UUID format, guaranteed unique |
+| **ALPHANUMERIC** (default) | `a3f0bk3s.png` | Random 8-character alphanumeric string |
+| **TIMESTAMPED** | `01012024-120000.png` | Timestamp-based naming (ddMMYYYY-HHmmss) |
+
+### Error Responses
+| HTTP Status | Scenario |
+|-------------|----------|
+| 200 OK | Successful upload or retrieval |
+| 400 Bad Request | Unsupported file type |
+| 404 Not Found | Invalid API key or image doesn't exist |
